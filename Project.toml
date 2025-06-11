@@ -2,3 +2,4 @@ name = "OrbitAl"
 uuid = "b53d2297-9141-4d9f-81f1-04787862c2db"
 authors = ["Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>"]
 version = "0.1.0"
+license = "MIT"
