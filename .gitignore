@@ -1,0 +1,29 @@
+# Ignore Julia build artifacts and environments
+*.ji
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+
+# Ignore Manifest (not needed for packages)
+Manifest.toml
+
+# Ignore compiled packages and environments
+compiled/
+deps/
+logs/
+scratch/
+.julia/
+
+# Ignore editor and system files
+.DS_Store
+*.swp
+*.swo
+*.bak
+*~
+
+# VSCode and Jupyter
+.vscode/
+.ipynb_checkpoints/
+
+# Unit test output or coverage
+coverage/
