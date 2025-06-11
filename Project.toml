@@ -1,5 +1,11 @@
 name = "OrbitAl"
 uuid = "b53d2297-9141-4d9f-81f1-04787862c2db"
+license = "MIT"
 authors = ["Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>"]
 version = "0.1.0"
-license = "MIT"
+
+[deps]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+Test = "1.11.0"
