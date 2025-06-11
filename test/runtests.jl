@@ -1,3 +1,21 @@
+using OrbitAl.bfsdfs
+
+##  a tree
+nodes = [Node(i, []) for i in 1:7]
+for (i,k) in pairs([3,4,4,5,6,6,6])
+  i == k || push!(nodes[k].next, nodes[i])
+end
+root = nodes[6]
+
+##  a visitor
+pr(x) = print(x.id, ", ")
+
+DFS(root, pr)
+println()
+BFS(root, pr)
+println()
+tree_print(root)
+
 using OrbitAl.permutation
 
 a = Perm([3, 8, 7, 2, 1, 4, 6, 9, 5])

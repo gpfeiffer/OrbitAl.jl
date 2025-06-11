@@ -8,6 +8,7 @@ export permuted, transposition, transpositions, shuffle!
 include("orbits.jl")
 using .orbits
 
+include("bfsdfs.jl")
 include("syt.jl")
 
 end # module OrbitAl
