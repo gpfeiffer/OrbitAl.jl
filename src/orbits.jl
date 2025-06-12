@@ -14,64 +14,32 @@ import Base: in, isless, size, ==
 export Orbit
 export orbit, orbitx, onPoints, onRight, onWords, onPairs, onSets
 export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
-export orbit_with_edges, orbit_with_images
+export orbit_with_tree, orbit_with_edges, orbit_with_images
 
 ## orbit
+"""
+    orbit(aaa, x, under)
+
+Compute the orbit of a point `x` under the set of operators `aaa`
+using the action function `under(y, a)`, which defines how elements of
+the domain are acted upon.
+
+Returns the list of points reachable from `x` by repeatedly applying
+the elements of `aaa`.
+"""
 function orbit(aaa, x, under::Function)
     list = [x]
     for y in list
         for a in aaa
             z = under(y, a)
-            z in list || push!(list, z)
+            z ∈ list || push!(list, z)
         end
     end
     return list
 end
 
-## on points
-onPoints(x, a) = x^a
-
-## on right
-onRight(x, a) = x * a
-
-## on pairs
-onPairs(pair::Pair, a::Perm) = Pair(pair.first^a, pair.second^a)
-
-## on sets
-onSets(set::Set, a ::Perm) = Set([x^a for x in set])
-
-##  Orbit data type
-struct Orbit
-    group
-    elts # assume sorted!
-end
-
-## size
-size(o::Orbit) = length(o.elts)
-
-## membership, equality, comparison
-in(x, o::Orbit) = x in o.elts
-==(o::Orbit, other::Orbit) = o.elts[1] == other.elts[1]
-isless(o::Orbit, other::Orbit) = o.elts[1] < other.elts[1]
-
-## orbit with words
-onWords(word, s) = vcat(word, s)
-
-function orbit_with_words(aaa, x, under)
-    list = [x]
-    words = Array{Int}[[]]
-    for (i, y) in enumerate(list)
-        for (k, a) in enumerate(aaa)
-            z = under(y, a)
-            w = onWords(words[i], k)
-            z in list || (push!(list, z), push!(words, w))
-        end
-    end
-    return (list = list, words = words)
-end
-
-## orbitx
-function orbitx(aaa, xxx, under)
+## orbitx: multiple starting points
+function orbitx(aaa, xxx, under::Function)
     list = copy(xxx)
     for y in list
         for a in aaa
@@ -82,14 +50,93 @@ function orbitx(aaa, xxx, under)
     return list
 end
 
-## orbit with transversal
-function orbit_with_transversal(aaa, x, under)
+## common actions (to be used as action function `under`):
+
+# on points
+onPoints(x, a::Perm) = x^a
+
+# on right
+onRight(x, a::Perm) = x * a
+
+# on pairs
+onPairs(pair::Pair, a::Perm) = pair.first^a => pair.second^a
+
+# on sets
+onSets(set::Set, a ::Perm) = Set([x^a for x in set])
+
+# on words
+onWords(word::Vector, s) = [word; s]
+
+## orbit with words
+"""
+    orbit_with_words(aaa, x, under)
+
+Compute the orbit of `x` under the action of the generators `aaa`,
+using the action function `under` and recording the sequence
+of generator indices that led to each orbit element.
+
+Returns a named tuple:
+- `list`: orbit elements
+- `words`: list of index sequences tracing how each was reached
+"""
+function orbit_with_words(aaa, x, under::Function)
     list = [x]
-    reps = [aaa[1]^0]
+    words = Array{Int}[[]]  # word[i] gives path to list[i]
+    for (i, y) in enumerate(list)
+        for (k, a) in enumerate(aaa)
+            z = under(y, a)
+            w = onWords(words[i], k)
+            z ∈ list || (push!(list, z), push!(words, w))
+        end
+    end
+    return (list = list, tree = tree)
+end
+
+## orbit with Schreier tree
+"""
+    orbit_with_tree(aaa, x, under)
+
+Compute the Schreier tree of the orbit of `x` under the generators `aaa`
+using the action function `under`.
+
+Returns:
+- `orbit`: a list of orbit elements
+- `tree`: a `Dict` mapping each non-root node `z` to `(k => y)`, where:
+    - `k` is the generator index used to reach `z`
+    - `y` is the parent node so that `z = under(y, aaa[k])`
+"""
+function orbit_with_tree(aaa, x, under::Function)
+    list = [x]
+    tree = Dict()
+    for (i, y) in enumerate(list)
+        for (k, a) in enumerate(aaa)
+            z = under(y, a)
+            if z ∉ list
+                push!(list, z)
+                tree[z] = k => y  # combined label and parent
+            end
+        end
+    end
+    return (list = list, tree = tree)
+end
+
+## orbit with transversal
+"""
+    orbit_with_transversal(aaa, x, under)
+
+Compute the orbit of `x` under the action of `aaa`, along with
+coset representatives (as permutations). Returns a named tuple
+with fields:
+- `list`: the orbit of `x`
+- `reps`: corresponding permutations mapping `x` to each orbit element.
+"""
+function orbit_with_transversal(aaa, x, under::Function)
+    list = [x]
+    reps = [one(aaa[1])]  # identity permutation
     for (i, y) in enumerate(list)
         for a in aaa
             z = under(y, a)
-            t = reps[i] * a
+            t = onRight(reps[i], a)
             z in list || (push!(list, z), push!(reps, t))
         end
     end
@@ -97,20 +144,31 @@ function orbit_with_transversal(aaa, x, under)
 end
 
 ## orbit with stabilizer
-function orbit_with_stabilizer(aaa, x, under)
+"""
+    orbit_with_stabilizer(aaa, x, under)
+
+Compute the orbit of `x` under generators `aaa`, recording:
+- `list`: the orbit elements,
+- `reps`: permutations mapping `x` to each orbit element,
+- `stab`: generators of the stabilizer of `x` (via Schreier's Lemma).
+
+Returns a named tuple `(list, reps, stab)`.
+"""
+function orbit_with_stabilizer(aaa, x, under::Function)
     list = [x]
-    reps = [aaa[1]^0]
-    stab = []
+    reps = [one(aaa[1])]  # identity permutation
+    stab = Perm[]
     for (i, y) in enumerate(list)
         for a in aaa
             z = under(y, a)
-            t = reps[i] * a
+            t = onRight(reps[i], a)
             l = findfirst(==(z), list)
             if isnothing(l)
                 push!(list, z)
                 push!(reps, t)
             else   # x^(reps[i] * a) = x^reps[l]
-                push!(stab, t / reps[l])
+                u = t / reps[l]
+                isidentity(u) || push!(stab, u)
             end
         end
     end
@@ -118,39 +176,58 @@ function orbit_with_stabilizer(aaa, x, under)
 end
 
 ## orbit with edges
-function orbit_with_edges(aaa, x, under)
+"""
+    orbit_with_edges(aaa, x, under)
+
+Compute the orbit of `x` under the generators `aaa` and return:
+- `list`: the list of orbit elements
+- `edges`: a list of undirected edges (as sorted index pairs)
+"""
+function orbit_with_edges(aaa, x, under::Function)
     list = [x]
-    edges = []
+    index = Dict(x => 1)
+    edges = Set()
     for (i, y) in enumerate(list)
         for a in aaa
             z = under(y, a)
-            l = findfirst(==(z), list)
-            if isnothing(l)
+            l = get!(index, z) do
                 push!(list, z)
-                l = length(list)
+                length(list)
             end
-            push!(edges, (i, l))
+            i == l || push!(edges, Tuple(sort([i, l])))
         end
     end
-    return (list = list, edges = edges)
+    return (list = list, edges = collect(edges))
 end
 
 ## orbit with images
-function orbit_with_images(aaa, x, under)
+function orbit_with_images(aaa, x, under::Function)
     list = [x]
+    index = Dict(x => 1)
     images = [Int[] for a in aaa]
     for (i, y) in enumerate(list)
         for (k, a) in enumerate(aaa)
             z = under(y, a)
-            l = findfirst(==(z), list)
-            if l == nothing
-                push!(list, z);
-                l = length(list);
+            l = get!(index, z) do
+                push!(list, z)
+                length(list)
             end
             push!(images[k], l)
         end
     end
     return (list = list, images = images)
 end
+
+##  Orbit data type
+struct Orbit
+    group
+    elts # assume sorted!
+end
+
+## size, membership, equality, comparison
+size(o::Orbit) = length(o.elts)
+in(x, o::Orbit) = x in o.elts
+==(o::Orbit, other::Orbit) = o.elts[1] == other.elts[1]
+isless(o::Orbit, other::Orbit) = o.elts[1] < other.elts[1]
 
 end # module
