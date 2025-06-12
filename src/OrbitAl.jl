@@ -9,6 +9,7 @@ include("orbits.jl")
 using .orbits
 
 include("bfsdfs.jl")
+include("plotting.jl")
 include("syt.jl")
 
 end # module OrbitAl

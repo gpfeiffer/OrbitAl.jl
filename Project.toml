@@ -5,7 +5,19 @@ authors = ["Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>"]
 version = "0.1.0"
 
 [deps]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+GraphPlot = "a2cc645c-3eea-5389-862e-a155d0052231"
+Graphs = "86223c79-3864-5bf0-83f7-82e725a168b6"
 
 [compat]
+Documenter = "1.12.0"
+GraphPlot = "0.6.1"
+Graphs = "1.13.0"
 Test = "1.11.0"
+
+[extras]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+docs = ["Documenter"]
+test = ["Test"]
