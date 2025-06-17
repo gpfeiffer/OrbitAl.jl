@@ -16,5 +16,8 @@ export sizeOfGroup, randomGroupElement, memberOfGroup
 include("bfsdfs.jl")
 include("plotting.jl")
 include("syt.jl")
+include("presentations.jl")
+include("variants.jl")
+include("enumerator.jl")
 
 end # module OrbitAl
