@@ -14,7 +14,7 @@ import Base: in, isless, size, ==
 export Orbit
 export orbit, orbitx, onPoints, onRight, onWords, onPairs, onSets
 export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
-export orbit_with_tree, orbit_with_edges, orbit_with_images
+export orbit_with_dist, orbit_with_tree, orbit_with_edges, orbit_with_images
 
 ## orbit
 """
@@ -32,7 +32,7 @@ function orbit(aaa, x, under::Function)
     for y in list
         for a in aaa
             z = under(y, a)
-            z ∈ list || push!(list, z)
+            z in list || push!(list, z)
         end
     end
     return list
@@ -40,7 +40,7 @@ end
 
 ## orbitx: multiple starting points
 function orbitx(aaa, xxx, under::Function)
-    list = copy(xxx)
+    list = xxx
     for y in list
         for a in aaa
             z = under(y, a)
@@ -86,10 +86,23 @@ function orbit_with_words(aaa, x, under::Function)
         for (k, a) in enumerate(aaa)
             z = under(y, a)
             w = onWords(words[i], k)
-            z ∈ list || (push!(list, z), push!(words, w))
+            z in list || (push!(list, z), push!(words, w))
         end
     end
     return (list = list, tree = tree)
+end
+
+## orbit with distance (= word length)
+function orbit_with_dist(aaa, x, under::Function)
+    list = [x]
+    dist = [0]
+    for (i, y) in enumerate(list)
+        for (k, a) in enumerate(aaa)
+            z = under(y, a)
+            z in list || (push!(list, z), push!(dist, dist[i]+1))
+        end
+    end
+    return (list = list, dist = dist)
 end
 
 ## orbit with Schreier tree
@@ -216,6 +229,13 @@ function orbit_with_images(aaa, x, under::Function)
         end
     end
     return (list = list, images = images)
+end
+
+## edges from images
+function edges_from_images(images)
+    return [
+      (i, j, k) for (k,img) in enumerate(images) for (i,j) in enumerate(img)
+    ]
 end
 
 ##  Orbit data type
