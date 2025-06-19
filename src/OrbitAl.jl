@@ -16,6 +16,7 @@ export sizeOfGroup, randomGroupElement, memberOfGroup
 include("bfsdfs.jl")
 include("plotting.jl")
 include("syt.jl")
+include("coxeter.jl")
 include("presentations.jl")
 include("variants.jl")
 include("enumerator.jl")
