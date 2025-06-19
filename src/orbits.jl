@@ -53,16 +53,16 @@ end
 ## common actions (to be used as action function `under`):
 
 # on points
-onPoints(x, a::Perm) = x^a
+onPoints(x, a) = x^a
 
 # on right
-onRight(x, a::Perm) = x * a
+onRight(x, a) = x * a
 
 # on pairs
-onPairs(pair::Pair, a::Perm) = pair.first^a => pair.second^a
+onPairs(pair::Pair, a) = pair.first^a => pair.second^a
 
 # on sets
-onSets(set::Set, a ::Perm) = Set([x^a for x in set])
+onSets(set::Set, a) = Set([x^a for x in set])
 
 # on words
 onWords(word::Vector, s) = [word; s]
