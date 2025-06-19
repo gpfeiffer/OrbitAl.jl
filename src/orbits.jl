@@ -86,10 +86,12 @@ function orbit_with_words(aaa, x, under::Function)
         for (k, a) in enumerate(aaa)
             z = under(y, a)
             w = onWords(words[i], k)
-            z in list || (push!(list, z), push!(words, w))
+            z in list || begin
+                push!(list, z); push!(words, w)
+            end
         end
     end
-    return (list = list, tree = tree)
+    return (list = list, words = words)
 end
 
 ## orbit with distance (= word length)
@@ -99,7 +101,9 @@ function orbit_with_dist(aaa, x, under::Function)
     for (i, y) in enumerate(list)
         for (k, a) in enumerate(aaa)
             z = under(y, a)
-            z in list || (push!(list, z), push!(dist, dist[i]+1))
+            z in list || begin
+                push!(list, z); push!(dist, dist[i]+1)
+            end
         end
     end
     return (list = list, dist = dist)
@@ -124,7 +128,7 @@ function orbit_with_tree(aaa, x, under::Function)
     for (i, y) in enumerate(list)
         for (k, a) in enumerate(aaa)
             z = under(y, a)
-            if z ∉ list
+            z in list || begin
                 push!(list, z)
                 tree[z] = k => y  # combined label and parent
             end
@@ -150,7 +154,9 @@ function orbit_with_transversal(aaa, x, under::Function)
         for a in aaa
             z = under(y, a)
             t = onRight(reps[i], a)
-            z in list || (push!(list, z), push!(reps, t))
+            z in list || begin
+                push!(list, z); push!(reps, t)
+            end
         end
     end
     return (list = list, reps = reps)
@@ -169,20 +175,19 @@ Returns a named tuple `(list, reps, stab)`.
 """
 function orbit_with_stabilizer(aaa, x, under::Function)
     list = [x]
+    index = Dict(x => 1)
     reps = [one(aaa[1])]  # identity permutation
     stab = Perm[]
     for (i, y) in enumerate(list)
         for a in aaa
             z = under(y, a)
             t = onRight(reps[i], a)
-            l = findfirst(==(z), list)
-            if isnothing(l)
+            l = get!(index, z) do
                 push!(list, z)
                 push!(reps, t)
-            else   # x^(reps[i] * a) = x^reps[l]
-                u = t / reps[l]
-                isidentity(u) || push!(stab, u)
-            end
+                length(list)
+            end   # x^(reps[i] * a) = x^reps[l]
+            t == reps[l] || push!(stab, t / reps[l])
         end
     end
     return (list = list, reps = reps, stab = stab)
