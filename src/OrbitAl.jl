@@ -17,6 +17,10 @@ include("bfsdfs.jl")
 include("plotting.jl")
 include("syt.jl")
 include("coxeter.jl")
+using .coxeter
+
+include("shifts.jl")
+
 include("presentations.jl")
 include("variants.jl")
 include("enumerator.jl")

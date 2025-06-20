@@ -1,5 +1,10 @@
 #############################################################################
 ##
+#A  coxeter.jl                                                        OrbitAl
+#B    by Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>
+##
+#C  Constructing finite Coxeter groups and related orbits.
+##
 module coxeter
 
 # using LinearAlgebra
