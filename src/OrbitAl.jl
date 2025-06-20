@@ -20,6 +20,7 @@ include("coxeter.jl")
 using .coxeter
 
 include("shifts.jl")
+include("involution.jl")
 
 include("presentations.jl")
 include("variants.jl")
