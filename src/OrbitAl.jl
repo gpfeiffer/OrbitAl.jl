@@ -16,6 +16,8 @@ export sizeOfGroup, randomGroupElement, memberOfGroup
 include("bfsdfs.jl")
 include("plotting.jl")
 include("syt.jl")
+include("simsgroup.jl")
+
 include("coxeter.jl")
 using .coxeter
 
