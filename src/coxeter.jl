@@ -15,7 +15,7 @@ import ..permgroup: PermGp
 
 export coxeterGraph, cartanMat, CoxeterGp, coxeterConjugacyClasses
 export coxeterLength, coxeterWord, reflections
-export shapes
+export size, shapes
 
 function coxeterGraph(series::String, rank::Int)
     edges = [(j-1,j) for j in 2:rank]     # type A: chain
