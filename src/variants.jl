@@ -1,6 +1,9 @@
 #############################################################################
 ##
-##  Variants of Relations  (Lists Version.)
+#A  variants.jl                                                       OrbitAl
+#B    by Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>
+##
+#C  Variants of Relations  (Lists Version.)
 ##
 module variants
 

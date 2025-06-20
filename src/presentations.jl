@@ -1,3 +1,10 @@
+#############################################################################
+##
+#A  presentations.jl                                                  OrbitAl
+#B    by Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>
+##
+#C  Example presentations of some groups of interest
+##
 module presentations
 
 A2 = (
