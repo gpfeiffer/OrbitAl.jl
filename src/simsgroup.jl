@@ -8,6 +8,8 @@
 module simsgroup
 
 import Base: in, size, rand
+
+using ..orbits
 import ..permutation: Perm, isidentity, last_moved
 
 export SimsGp, orbit_sims
@@ -39,20 +41,20 @@ end
 
 function orbit_sims(aaa, x, under=^)
     list = [x]
+    index = Dict(x => 1)
     reps = [aaa[1]^0]
     stab = SimsGp([], aaa[1]^0)
     i = 0
-    while i < length(list)
-        i += 1
+    for (i, y) in enumerate(list)
         for a in aaa
-            z = under(list[i], a)
-            l = findfirst(==(z), list)
-            if l == nothing
+            z = under(y, a)
+            t = onRight(reps[i], a)
+            l = get!(index, z) do
                 push!(list, z)
-                push!(reps, reps[i] * a)
-            else   # x^(reps[i] * a) = x^reps[l]
-                stab = closure(stab, reps[i] * a / reps[l])
-            end
+                push!(reps, t)
+                length(list)
+            end   # x^(reps[i] * a) = x^reps[l]
+            t == reps[l] || (stab = closure(stab, t / reps[l]))
         end
     end
     return (list = list, reps = reps, stab = stab)
