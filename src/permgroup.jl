@@ -49,7 +49,7 @@ subgpClass(gp::PermGp, subgp::PermGp) = orbit(gp.gens, subgp, onPoints)
 onClasses(x, a) = (x.elts[1] * a)^(x.group)
 
 function conjClasses(gp::PermGp)
-    orbit(orbitx(gp.gens, gp.gens, onPoints), gp.one^gp, onClasses)
+    orbit(orbitx(gp.gens, copy(gp.gens), onPoints), gp.one^gp, onClasses)
 end
 
 onSubgpClasses(x, a) = onGroups(x.elts[1], a)^(x.group)

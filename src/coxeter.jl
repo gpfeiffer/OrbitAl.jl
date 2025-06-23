@@ -19,6 +19,7 @@ import ..permgroup: PermGp
 export coxeterGraph, cartanMat, CoxeterGp, coxeterConjugacyClasses
 export coxeterLength, coxeterWord, permCoxeterWord, reflections
 export size, prefixes, prefixes_with_edges, shapes
+export longestElt, parabolicTransversal
 
 function coxeterGraph(series::String, rank::Int)
     edges = [(j-1,j) for j in 2:rank]     # type A: chain
@@ -107,10 +108,8 @@ end
 
 reducedWord(W, word) = coxeterWord(W, permCoxeterWord(W, word))
 
-function longestElement(W, J)
-    wJ = W.one
-    N = data(W)[:N]
-    J = collect(J)
+function longestElt(W, J)
+    wJ = W.one;  N = data(W)[:N]
     while true
         i = findfirst(s -> s^wJ <= N, J)
         isnothing(i) && return wJ
@@ -128,9 +127,9 @@ function prefixes_with_edges(W, w)
     orbit_with_edges(1:data(W)[:rank], w, weak_quo)
 end
 
-longestCosetElement(W, J, L) = longestElement(W, J) * longestElement(W, L)
+longestCosetElt(W, J, L) = longestElt(W, J) * longestElt(W, L)
 
-parabolicTransversal(W, J) = prefixes(W, longestCosetElement(W, J, 1:data(W)[:rank]))
+parabolicTransversal(W, J) = prefixes(W, longestCosetElt(W, J, 1:data(W)[:rank]))
 
 tackOn(x, s) = sort(union(x, s))
 
@@ -140,7 +139,7 @@ onSortedTuples(tup, a) = sort([x^a for x in tup])
 
 function shape(W, J)
     function onParabolics(K, s)
-        return onSortedTuples(K, longestCosetElement(W, K, tackOn(K, s)))
+        return onSortedTuples(K, longestCosetElt(W, K, tackOn(K, s)))
     end
     sort(orbit(1:data(W)[:rank], J, onParabolics))
 end
@@ -153,7 +152,7 @@ end
 
 function shape_with_edges(W, J)
     function onParabolics(K, s)
-        onSortedTuples(K, longestCosetElement(W, K, tackOn(K, s)))
+        onSortedTuples(K, longestCosetElt(W, K, tackOn(K, s)))
     end
     orbit_with_edges(1:data(W)[:rank], J, onParabolics)
 end
@@ -165,7 +164,7 @@ function shape_with_transversal(W, J)
     reps = [W.one]
     for (i, K) in enumerate(list)
         for s in setdiff(S, K)
-            a = longestCosetElement(W, K, tackOn(K, s))
+            a = longestCosetElt(W, K, tackOn(K, s))
             L = onSortedTuples(K, a)
             get!(index, L) do
                 push!(list, L);
@@ -185,7 +184,7 @@ function parabolicComplement(W, J)
     gens = (ears = Set(Perm[]), eyes = Set(Perm[]))
     for (i, K) in enumerate(list)
         for s in setdiff(S, K)
-            a = longestCosetElement(W, K, tackOn(K, s))
+            a = longestCosetElt(W, K, tackOn(K, s))
             L = onSortedTuples(K, a)
             t = onRight(reps[i], a)
             j = get!(index, L) do
