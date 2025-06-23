@@ -30,7 +30,7 @@ elements(group::PermGp) = sort(orbit(group.gens, group.one, onRight))
 isless(group::PermGp, other::PermGp) = elements(group) < elements(other)
 
 ##  closure
-closure(group::PermGp, a::Perm) = PermGp(union(group.gens, a), group.one)
+closure(group::PermGp, a::Perm) = PermGp(union(group.gens, [a]), group.one)
 onGroups(x, a) = closure(x, a)
 
 ##  subgroups

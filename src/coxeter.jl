@@ -7,20 +7,18 @@
 ##
 module coxeter
 
-# using LinearAlgebra
-
 using ..permutation
 using ..orbits
 using ..permgroup
 
-import Base: ^
+import Base: ^, size
 import ..permutation: Perm
 import ..permutation: isidentity, last_moved
 import ..permgroup: PermGp
 
 export coxeterGraph, cartanMat, CoxeterGp, coxeterConjugacyClasses
-export coxeterLength, coxeterWord, reflections
-export size, shapes
+export coxeterLength, coxeterWord, permCoxeterWord, reflections
+export size, prefixes, prefixes_with_edges, shapes
 
 function coxeterGraph(series::String, rank::Int)
     edges = [(j-1,j) for j in 2:rank]     # type A: chain
@@ -43,42 +41,6 @@ end
 absRoot(r) = sum(r) < 0 ? -r : r
 onRoots(x, a) = absRoot(onRight(x, a))
 
-function orbitx_with_words(aaa, xxx, under::Function)
-    list = xxx
-    words = [[i] for i in eachindex(xxx)]
-    index = Dict(x => i for (i, x) in enumerate(xxx))
-    for (i, y) in enumerate(list)
-        for (k, a) in enumerate(aaa)
-            z = under(y, a)
-            w = onWords(words[i], k)
-            get!(index, z) do
-                push!(list, z)
-                push!(words, w)
-                length(list)
-            end
-        end
-    end
-    return (list = list, words = words)
-end
-
-function orbits_with_words_and_edges(aaa, xxx, under)
-    words = Array{Int}[[i] for i in eachindex(xxx)]
-    list = copy(xxx)
-    edges = []
-    for (i, y) in enumerate(list)
-        for (k, a) in enumerate(aaa)
-            z = under(y, a)
-            l = findfirst(==(z), list)
-            if isnothing(l)
-                push!(list, z)
-                push!(words, onWords(words[i], k))
-                l = length(list)
-            end
-            push!(edges, (i, l))
-        end
-    end
-    return (list = list, edges = edges, words = words)
-end
 
 Perm(a, xxx, under) = Perm(indexin([under(x, a) for x in xxx], xxx))
 
@@ -86,7 +48,6 @@ struct CoxeterGp
     gens::Vector{Perm}
     one::Perm
     data::Dict{Symbol, Any}
-#    CoxeterGp(gens, one) = new(gens, one, Dict())
 end
 
 function reflection(C::Matrix{Int}, s::Int)
@@ -95,16 +56,16 @@ function reflection(C::Matrix{Int}, s::Int)
     return mat
 end
 
-function CoxeterGp(C)
-    m1 = C^0
-    S = axes(C,1)
+function CoxeterGp(C::Matrix{Int})
+    one = C^0
+    S = axes(C, 1)
     mats = [reflection(C, s) for s in S]
-    roots = orbitx_with_words(mats, [m1[i:i,:] for i in S], onRoots)
+    roots = orbitx_with_words(mats, [one[i:i,:] for i in S], onRoots)
     data = Dict(:mats => mats, :roots => roots, :rank => length(S))
-    data[:N] = length(roots.list)
+    data[:C] = C;  data[:N] = length(roots.list)
     data[:phi] = [roots.list; -roots.list]
-    data[:perms] = [Perm(m, data[:phi], onRight) for m in mats]
-    return CoxeterGp(data[:perms], data[:perms][1]^0, data)
+    perms = [Perm(m, data[:phi], onRight) for m in mats]
+    return CoxeterGp(perms, perms[1]^0, data)
 end
 
 PermGp(group::CoxeterGp) = PermGp(group.gens, group.one)
@@ -122,7 +83,7 @@ end
 
 function coxeterLength(W, w)
     N = data(W)[:N]
-    count(i^w > N for i in 1:N)
+    return count(i^w > N for i in 1:N)
 end
 
 permCoxeterWord(W, word) = prod(W.gens[word]; init = W.one)
@@ -158,13 +119,13 @@ function longestElement(W, J)
 end
 
 function prefixes(W, w)
-    onRightDescents(w, s) = isLeftDescent(W, w^-1, s) ? w * W.gens[s] : w
-    return orbit(1:data(W)[:rank], w, onRightDescents)
+    weak_quo(w, s) = isLeftDescent(W, w^-1, s) ? w * W.gens[s] : w
+    return orbit(1:data(W)[:rank], w, weak_quo)
 end
 
 function prefixes_with_edges(W, w)
-    onRightDescents(w, s) = isLeftDescent(W, w^-1, s) ? w * W.gens[s] : w
-    orbit_with_edges(1:data(W)[:rank], w, onRightDescents)
+    weak_quo(w, s) = isLeftDescent(W, w^-1, s) ? w * W.gens[s] : w
+    orbit_with_edges(1:data(W)[:rank], w, weak_quo)
 end
 
 longestCosetElement(W, J, L) = longestElement(W, J) * longestElement(W, L)

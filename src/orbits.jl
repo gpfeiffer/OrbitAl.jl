@@ -12,9 +12,10 @@ using ..permutation
 import Base: in, isless, size, ==
 
 export Orbit
-export orbit, orbitx, onPoints, onRight, onWords, onPairs, onSets
+export orbit, onPoints, onRight, onWords, onPairs, onSets
 export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
 export orbit_with_dist, orbit_with_tree, orbit_with_edges, orbit_with_images
+export orbitx, orbitx_with_words, orbitx_with_edges
 
 ## orbit
 """
@@ -48,6 +49,42 @@ function orbitx(aaa, xxx, under::Function)
         end
     end
     return list
+end
+
+## ... with words
+function orbitx_with_words(aaa, xxx, under::Function)
+    list = xxx
+    words = [[i] for i in eachindex(xxx)]
+    index = Dict(x => i for (i, x) in enumerate(xxx))
+    for (i, y) in enumerate(list)
+        for (k, a) in enumerate(aaa)
+            z = under(y, a)
+            w = onWords(words[i], k)
+            get!(index, z) do
+                push!(list, z)
+                push!(words, w)
+                length(list)
+            end
+        end
+    end
+    return (list = list, words = words)
+end
+
+## ... with edges
+function orbitx_with_edges(aaa, xxx, under::Function)
+    list = xxx
+    edges = []
+    for (i, y) in enumerate(list)
+        for (k, a) in enumerate(aaa)
+            z = under(y, a)
+            l = get!(index, z) do
+                push!(list, z)
+                length(list)
+            end
+            push!(edges, (i, l))
+        end
+    end
+    return (list = list, edges = edges)
 end
 
 ## common actions (to be used as action function `under`):
@@ -99,7 +136,7 @@ function orbit_with_dist(aaa, x, under::Function)
     list = [x]
     dist = [0]
     for (i, y) in enumerate(list)
-        for (k, a) in enumerate(aaa)
+        for k in aaa
             z = under(y, a)
             z in list || begin
                 push!(list, z); push!(dist, dist[i]+1)
