@@ -73,7 +73,7 @@ end
 ## ... with edges
 function orbitx_with_edges(aaa, xxx, under::Function)
     list = xxx
-    edges = []
+    edges = Set()
     for (i, y) in enumerate(list)
         for (k, a) in enumerate(aaa)
             z = under(y, a)
@@ -81,10 +81,10 @@ function orbitx_with_edges(aaa, xxx, under::Function)
                 push!(list, z)
                 length(list)
             end
-            push!(edges, (i, l))
+            i == l || push!(edges, (i, l))
         end
     end
-    return (list = list, edges = edges)
+    return (list = list, edges = collect(edges))
 end
 
 ## common actions (to be used as action function `under`):
@@ -249,7 +249,7 @@ function orbit_with_edges(aaa, x, under::Function)
                 push!(list, z)
                 length(list)
             end
-            i == l || push!(edges, Tuple(sort([i, l])))
+            i == l || push!(edges, (i, l))
         end
     end
     return (list = list, edges = collect(edges))

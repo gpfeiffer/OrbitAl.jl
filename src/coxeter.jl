@@ -18,7 +18,7 @@ import ..permgroup: PermGp
 
 export coxeterGraph, cartanMat, CoxeterGp, coxeterConjugacyClasses
 export coxeterLength, coxeterWord, permCoxeterWord, reflections
-export size, prefixes, prefixes_with_edges, shapes
+export size, prefixes, prefixes_with_edges, shape, shapes
 export longestElt, parabolicTransversal
 
 function coxeterGraph(series::String, rank::Int)
@@ -131,9 +131,9 @@ longestCosetElt(W, J, L) = longestElt(W, J) * longestElt(W, L)
 
 parabolicTransversal(W, J) = prefixes(W, longestCosetElt(W, J, 1:data(W)[:rank]))
 
-tackOn(x, s) = sort(union(x, s))
+tackOn(x, s) = sort(union(x, [s]))
 
-takeAway(x, s) = sort(setdiff(x, s))
+takeAway(x, s) = sort(setdiff(x, [s]))
 
 onSortedTuples(tup, a) = sort([x^a for x in tup])
 
