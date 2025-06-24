@@ -74,7 +74,7 @@ size(group::CoxeterGp) = sizeOfGroup(PermGp(group))
 
 ^(a::Perm, group::CoxeterGp) = a^PermGp(group)
 
-function reflections(W::CoxeterGp)
+function reflections(W)
     refl(w) = W.gens[w[1]]^prod(W.gens[w[2:end]]; init=W.one)
     refl.(W.data[:roots].words)
 end
