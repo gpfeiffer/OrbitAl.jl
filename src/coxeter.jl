@@ -42,7 +42,6 @@ end
 absRoot(r) = sum(r) < 0 ? -r : r
 onRoots(x, a) = absRoot(onRight(x, a))
 
-
 Perm(a, xxx, under) = Perm(indexin([under(x, a) for x in xxx], xxx))
 
 struct CoxeterGp
@@ -75,24 +74,22 @@ size(group::CoxeterGp) = sizeOfGroup(PermGp(group))
 
 ^(a::Perm, group::CoxeterGp) = a^PermGp(group)
 
-data(group::CoxeterGp) = group.data
-
 function reflections(W::CoxeterGp)
     refl(w) = W.gens[w[1]]^prod(W.gens[w[2:end]]; init=W.one)
-    refl.(data(W)[:roots].words)
+    refl.(W.data[:roots].words)
 end
 
 function coxeterLength(W, w)
-    N = data(W)[:N]
+    N = W.data[:N]
     return count(i^w > N for i in 1:N)
 end
 
 permCoxeterWord(W, word) = prod(W.gens[word]; init = W.one)
 
-isLeftDescent(W, w, s) = s^w > data(W)[:N]
+isLeftDescent(W, w, s) = s^w > W.data[:N]
 
 function firstDescent(W, w)
-    n, N = data(W)[:rank], data(W)[:N]
+    n, N = W.data[:rank], W.data[:N]
     return findfirst(s -> s^w > N, 1:n)
 end
 
@@ -109,7 +106,7 @@ end
 reducedWord(W, word) = coxeterWord(W, permCoxeterWord(W, word))
 
 function longestElt(W, J)
-    wJ = W.one;  N = data(W)[:N]
+    wJ = W.one;  N = W.data[:N]
     while true
         i = findfirst(s -> s^wJ <= N, J)
         isnothing(i) && return wJ
@@ -119,17 +116,17 @@ end
 
 function prefixes(W, w)
     weak_quo(w, s) = isLeftDescent(W, w^-1, s) ? w * W.gens[s] : w
-    return orbit(1:data(W)[:rank], w, weak_quo)
+    return orbit(1:W.data[:rank], w, weak_quo)
 end
 
 function prefixes_with_edges(W, w)
     weak_quo(w, s) = isLeftDescent(W, w^-1, s) ? w * W.gens[s] : w
-    orbit_with_edges(1:data(W)[:rank], w, weak_quo)
+    orbit_with_edges(1:W.data[:rank], w, weak_quo)
 end
 
 longestCosetElt(W, J, L) = longestElt(W, J) * longestElt(W, L)
 
-parabolicTransversal(W, J) = prefixes(W, longestCosetElt(W, J, 1:data(W)[:rank]))
+parabolicTransversal(W, J) = prefixes(W, longestCosetElt(W, J, 1:W.data[:rank]))
 
 tackOn(x, s) = sort(union(x, [s]))
 
@@ -141,12 +138,12 @@ function shape(W, J)
     function onParabolics(K, s)
         return onSortedTuples(K, longestCosetElt(W, K, tackOn(K, s)))
     end
-    sort(orbit(1:data(W)[:rank], J, onParabolics))
+    sort(orbit(1:W.data[:rank], J, onParabolics))
 end
 
 function shapes(W)
     onShapes(x, s) = shape(W, takeAway(x[1], s))
-    S = 1:data(W)[:rank]
+    S = 1:W.data[:rank]
     orbit(S, shape(W, collect(S)), onShapes)
 end
 
@@ -154,11 +151,11 @@ function shape_with_edges(W, J)
     function onParabolics(K, s)
         onSortedTuples(K, longestCosetElt(W, K, tackOn(K, s)))
     end
-    orbit_with_edges(1:data(W)[:rank], J, onParabolics)
+    orbit_with_edges(1:W.data[:rank], J, onParabolics)
 end
 
 function shape_with_transversal(W, J)
-    S = 1:data(W)[:rank]
+    S = 1:W.data[:rank]
     list = [J]
     index = Dict(J => 1)
     reps = [W.one]
@@ -177,7 +174,7 @@ function shape_with_transversal(W, J)
 end
 
 function parabolicComplement(W, J)
-    S = 1:data(W)[:rank]
+    S = 1:W.data[:rank]
     list = [J]
     index = Dict(J => 1)
     reps = [W.one]
@@ -187,13 +184,13 @@ function parabolicComplement(W, J)
             a = longestCosetElt(W, K, tackOn(K, s))
             L = onSortedTuples(K, a)
             t = onRight(reps[i], a)
-            j = get!(index, L) do
+            l = get!(index, L) do
                 push!(list, L)
                 push!(reps, t)
                 length(list)
             end
-            if t != reps[j]
-                push!(i == j ? gens.ears : gens.eyes, t /reps[j])
+            if t != reps[l]
+                push!(i == l ? gens.ears : gens.eyes, t / reps[l])
             end
         end
     end

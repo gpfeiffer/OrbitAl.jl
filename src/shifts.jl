@@ -9,9 +9,9 @@ module shifts
 
 export cyclic_shifts, cyclic_shifts_with_edges
 
-using ..orbits, ..coxeter
+using ..orbits
 
-function cyclic_shifts(W::CoxeterGp, w)
+function cyclic_shifts(W, w)
     function byCyclicShift(x, s)
         y = x^s
         coxeterLength(W, x) == coxeterLength(W, y) ?  y : x
@@ -19,7 +19,7 @@ function cyclic_shifts(W::CoxeterGp, w)
     orbit(W.gens, w, byCyclicShift)
 end
 
-function cyclic_shifts_with_edges(W::CoxeterGp, w)
+function cyclic_shifts_with_edges(W, w)
     function byCyclicShift(x, s)
         y = x^s
         coxeterLength(W, x) == coxeterLength(W, y) ?  y : x
