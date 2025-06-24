@@ -10,6 +10,7 @@ module shifts
 export cyclic_shifts, cyclic_shifts_with_edges
 
 using ..orbits
+import ..coxeter.coxeterLength
 
 function cyclic_shifts(W, w)
     function byCyclicShift(x, s)
