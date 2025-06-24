@@ -8,7 +8,7 @@
 module involution
 
 using ..orbits
-import ..coxeter: reflections, ^
+import ..coxeter: reflections
 
 export involutions, involutionClasses
 
