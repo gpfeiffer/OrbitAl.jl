@@ -106,7 +106,7 @@ function trace(node::Node, word::Vector{Int})
 end
 
 # To find x.s, try all variants of the relations, create x.s if that fails.
-function process(node::Node, s::Int)
+function finalize(node::Node, s::Int)
     for variant in node.data[:variants][s]
         if is_active(node)
             next = nodeUnderWordPartial(node, variant)
@@ -115,9 +115,8 @@ function process(node::Node, s::Int)
     end
     if is_active(node) && isnothing(node.next[s])
         return sprout(node, s)
-    else
-        return flat(node).next[s]  # assuming that flat(node).next is done
     end
+    return flat(node).next[s]  # assuming that flat(node).next is done
 end
 
 # carefully update the edge x.s = y in both directions
@@ -156,7 +155,7 @@ function coset_table(genrel, sbgp)
     )
     data[:variants] = variantsRelations(genrel)
     node = trivialCoset(data, sbgp)
-    return orbitx(data[:gens], data[:list], process)
+    return orbitx(data[:gens], data[:list], finalize)
 end
 
 # drop redundant nodes and relabel.

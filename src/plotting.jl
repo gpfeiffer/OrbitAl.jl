@@ -7,7 +7,7 @@
 ##
 module plotting
 
-export plot_edges, write_d3_edges
+export plot_edges, write_d3_edges, write_d3_col_edges
 
 using Graphs, GraphPlot
 
@@ -16,6 +16,9 @@ function plot_edges(edges)
     gplot(graph, nodelabel=vertices(graph))
 end
 
+# using Compose, Cairo
+# p = plot_edges(orb.edges)
+# draw(PDF("graph.pdf",  600px, 400px), p)
 
 using JSON
 
@@ -127,7 +130,7 @@ function html_d3_col_force_graph(graph_json::String)
     <div id="d3graph"></div>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
-    const width = 600, height = 400;
+    const width = 1200, height = 800;
 
     const graph = $graph_json;
 
@@ -139,8 +142,8 @@ function html_d3_col_force_graph(graph_json::String)
         .attr("height", height);
 
     const simulation = d3.forceSimulation(graph.nodes)
-        .force("link", d3.forceLink(graph.links).id(d => d.id).distance(50))
-        .force("charge", d3.forceManyBody().strength(-200))
+        .force("link", d3.forceLink(graph.links).id(d => d.id).distance(5))
+        .force("charge", d3.forceManyBody().strength(-40))
         .force("center", d3.forceCenter(width / 2, height / 2));
 
     const link = svg.append("g")
@@ -150,7 +153,7 @@ function html_d3_col_force_graph(graph_json::String)
         .enter().append("line")
         .attr("class", "link")
         .attr("stroke", d => color(d.label))
-        .attr("stroke-width", 2);
+        .attr("stroke-width", 1);
 
     const node = svg.append("g")
         .attr("stroke", "#fff")
@@ -158,7 +161,7 @@ function html_d3_col_force_graph(graph_json::String)
         .selectAll("circle")
         .data(graph.nodes)
         .join("circle")
-        .attr("r", 8)
+        .attr("r", 5)
         .attr("fill", "steelblue")
         .call(drag(simulation));
 
