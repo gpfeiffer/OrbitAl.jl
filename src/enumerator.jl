@@ -125,7 +125,7 @@ function updateEdge(node::Node, s::Int, next::Node)
     setImage(next, node.data[:invr][s], node)
 end
 
-# Carefully set x.s to y making deductions and stacking coincidences
+# carefully set x.s to y making deductions and stacking coincidences
 function setImage(node::Node, s::Int, next::Node)
     if isnothing(node.next[s])
         node.next[s] = next           # deduction!

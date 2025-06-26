@@ -276,7 +276,8 @@ end
 ## edges from images
 function edges_from_images(images)
     return [
-      (i, j, k) for (k,img) in enumerate(images) for (i,j) in enumerate(img)
+        (i, j, k) for (k,img) in enumerate(images)
+        for (i,j) in enumerate(img) if i != j
     ]
 end
 
