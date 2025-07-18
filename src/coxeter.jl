@@ -193,36 +193,27 @@ function parabolicComplement(W, J)
     return gens
 end
 
-function minConjugates(W, x)
+function minLenCons(W, x)
     list = [x]
     lx = coxeterLength(W, x)
-    i = 0
-    while i < length(list)
-        i += 1;
-        y = list[i]
+    for (i, y) in enumerate(list)
         for s in W.gens
             z = y^s
             lz = coxeterLength(W, z)
-            if lz == lx
-                z in list || push!(list, z)
-            elseif lz < lx  # reset list
-                list = [z]
-                lx = lz
-                i = 0
-                break
-            end
+            lz < lx && return minLenCons(W, z) # recurse!
+            lz > lx && continue
+            z in list || push!(list, z)
         end
     end
     return list
 end
 
-
 function coxeterMinRep(W, w)
-    v = first(minConjugates(W, w))
+    v = first(minLenCons(W, w))
     K = unique(coxeterWord(W, v))
     shape = shape_with_transversal(W, K)
     (L, j) = findmin(shape.list)
-    return minimum(minConjugates(W, v^shape.reps[j]))
+    return minimum(minLenCons(W, v^shape.reps[j]))
 end
 
 function coxeterConjugacyClasses(W)
