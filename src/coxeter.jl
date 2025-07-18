@@ -44,7 +44,9 @@ onRoots(x, a) = absRoot(onRight(x, a))
 
 Perm(a, xxx, under) = Perm(indexin([under(x, a) for x in xxx], xxx))
 
-struct CoxeterGp
+abstract type ACoxeterGp <: APermGp end
+
+struct CoxeterGp <: ACoxeterGp
     gens::Vector{Perm}
     one::Perm
     data::Dict{Symbol, Any}
@@ -67,12 +69,6 @@ function CoxeterGp(C::Matrix{Int})
     perms = [Perm(m, data[:phi], onRight) for m in mats]
     return CoxeterGp(perms, perms[1]^0, data)
 end
-
-PermGp(group::CoxeterGp) = PermGp(group.gens, group.one)
-
-size(group::CoxeterGp) = sizeOfGroup(PermGp(group))
-
-^(a::Perm, group::CoxeterGp) = a^PermGp(group)
 
 function reflections(W)
     refl(w) = W.gens[w[1]]^prod(W.gens[w[2:end]]; init=W.one)
@@ -220,8 +216,6 @@ function minConjugates(W, x)
     return list
 end
 
-is_trivial(group::CoxeterGp) = all(isidentity, group.gens)
-last_moved(group::CoxeterGp) = max(last_moved.(group.gens)...)
 
 function coxeterMinRep(W, w)
     v = first(minConjugates(W, w))
