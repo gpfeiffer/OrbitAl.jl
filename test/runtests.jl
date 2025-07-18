@@ -1,6 +1,7 @@
 using Test
 using OrbitAl
 
+using OrbitAl.permutation
 @testset "Permutation Basics" begin
     p = Perm([2, 3, 1])
     q = p^2
