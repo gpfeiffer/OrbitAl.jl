@@ -15,7 +15,7 @@ export Orbit
 export orbit, onPoints, onRight, onWords, onPairs, onSets
 export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
 export orbit_with_dist, orbit_with_tree, orbit_with_edges, orbit_with_images
-export orbitx, orbitx_with_words, orbitx_with_edges
+export orbitl, orbitx, orbitx_with_words, orbitx_with_edges
 
 ## orbit
 """
@@ -39,53 +39,21 @@ function orbit(aaa, x, under::Function)
     return list
 end
 
-## orbitx: multiple starting points
-function orbitx(aaa, xxx, under::Function)
-    list = xxx
+## orbitl: with breadcrumbs ...
+function orbitl(aaa, x, under::Function)
+    list = [x]
     for y in list
         for a in aaa
             z = under(y, a)
-            z in list || push!(list, z)
+            z in list || begin
+                push!(list, z)
+                print(".")
+            end
         end
     end
     return list
 end
 
-## ... with words
-function orbitx_with_words(aaa, xxx, under::Function)
-    list = xxx
-    words = [[i] for i in eachindex(xxx)]
-    index = Dict(x => i for (i, x) in enumerate(xxx))
-    for (i, y) in enumerate(list)
-        for (k, a) in enumerate(aaa)
-            z = under(y, a)
-            w = onWords(words[i], k)
-            get!(index, z) do
-                push!(list, z)
-                push!(words, w)
-                length(list)
-            end
-        end
-    end
-    return (list = list, words = words)
-end
-
-## ... with edges
-function orbitx_with_edges(aaa, xxx, under::Function)
-    list = xxx
-    edges = Set()
-    for (i, y) in enumerate(list)
-        for (k, a) in enumerate(aaa)
-            z = under(y, a)
-            l = get!(index, z) do
-                push!(list, z)
-                length(list)
-            end
-            i == l || push!(edges, (i, l))
-        end
-    end
-    return (list = list, edges = collect(edges))
-end
 
 ## common actions (to be used as action function `under`):
 
@@ -118,13 +86,14 @@ Returns a named tuple:
 """
 function orbit_with_words(aaa, x, under::Function)
     list = [x]
-    words = Array{Int}[[]]  # word[i] gives path to list[i]
+    words = [Int[]] # empty word Int[] maps x to x
     for (i, y) in enumerate(list)
         for (k, a) in enumerate(aaa)
             z = under(y, a)
             w = onWords(words[i], k)
             z in list || begin
-                push!(list, z); push!(words, w)
+                push!(list, z)
+                push!(words, w)
             end
         end
     end
@@ -139,7 +108,8 @@ function orbit_with_dist(aaa, x, under::Function)
         for k in aaa
             z = under(y, a)
             z in list || begin
-                push!(list, z); push!(dist, dist[i]+1)
+                push!(list, z)
+                push!(dist, dist[i]+1)
             end
         end
     end
@@ -186,13 +156,14 @@ with fields:
 """
 function orbit_with_transversal(aaa, x, under::Function)
     list = [x]
-    reps = [one(aaa[1])]  # identity permutation
+    reps = [aaa[1]^0] # identity maps x to x
     for (i, y) in enumerate(list)
         for a in aaa
             z = under(y, a)
             t = onRight(reps[i], a)
             z in list || begin
-                push!(list, z); push!(reps, t)
+                push!(list, z)
+                push!(reps, t)
             end
         end
     end
@@ -213,7 +184,7 @@ Returns a named tuple `(list, reps, stab)`.
 function orbit_with_stabilizer(aaa, x, under::Function)
     list = [x]
     index = Dict(x => 1)
-    reps = [one(aaa[1])]  # identity permutation
+    reps = [aaa[1]^0]  # identity maps x to x
     stab = Perm[]
     for (i, y) in enumerate(list)
         for a in aaa
@@ -280,6 +251,55 @@ function edges_from_images(images)
         for (i,j) in enumerate(img) if i != j
     ]
 end
+
+## orbitx: multiple starting points
+function orbitx(aaa, xxx, under::Function)
+    list = xxx
+    for y in list
+        for a in aaa
+            z = under(y, a)
+            z in list || push!(list, z)
+        end
+    end
+    return list
+end
+
+## ... with words
+function orbitx_with_words(aaa, xxx, under::Function)
+    list = xxx
+    words = [[i] for i in eachindex(xxx)]
+    index = Dict(x => i for (i, x) in enumerate(xxx))
+    for (i, y) in enumerate(list)
+        for (k, a) in enumerate(aaa)
+            z = under(y, a)
+            w = onWords(words[i], k)
+            get!(index, z) do
+                push!(list, z)
+                push!(words, w)
+                length(list)
+            end
+        end
+    end
+    return (list = list, words = words)
+end
+
+## ... with edges
+function orbitx_with_edges(aaa, xxx, under::Function)
+    list = xxx
+    edges = Set()
+    for (i, y) in enumerate(list)
+        for (k, a) in enumerate(aaa)
+            z = under(y, a)
+            l = get!(index, z) do
+                push!(list, z)
+                length(list)
+            end
+            i == l || push!(edges, (i, l))
+        end
+    end
+    return (list = list, edges = collect(edges))
+end
+
 
 ##  Orbit data type
 struct Orbit
