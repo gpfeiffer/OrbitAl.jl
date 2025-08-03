@@ -6,7 +6,6 @@ makedocs(
     modules = [OrbitAl],
     format = Documenter.HTML(),
     repo = "github.com/gpfeiffer/OrbitAl.jl",
-    devbranch = "main",
     pages = [
         "Home" => "index.md",
         "Permutations" => "permutations.md",
