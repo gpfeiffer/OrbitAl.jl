@@ -27,3 +27,7 @@ scratch/
 
 # Unit test output or coverage
 coverage/
+
+# docs
+docs/build/
+docs/Manifest.toml

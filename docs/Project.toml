@@ -1,0 +1,9 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+OrbitAl = "b53d2297-9141-4d9f-81f1-04787862c2db"
+
+[extras]
+OrbitAl = "00000000-0000-0000-0000-000000000000"
+
+[targets]
+docs = ["Documenter", "OrbitAl"]

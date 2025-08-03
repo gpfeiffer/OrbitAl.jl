@@ -1,8 +1,8 @@
 name = "OrbitAl"
 uuid = "b53d2297-9141-4d9f-81f1-04787862c2db"
 license = "MIT"
-authors = ["Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>"]
 version = "0.1.0"
+authors = ["Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>"]
 
 [deps]
 Base64 = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
