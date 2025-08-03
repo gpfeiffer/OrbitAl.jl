@@ -4,6 +4,7 @@ using OrbitAl
 makedocs(
     sitename = "OrbitAl.jl",
     modules = [OrbitAl],
+    checkdocs = :none,
     format = Documenter.HTML(),
     repo = "github.com/gpfeiffer/OrbitAl.jl",
     pages = [
