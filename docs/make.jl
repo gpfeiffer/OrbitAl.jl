@@ -8,7 +8,7 @@ makedocs(
     repo = "github.com/gpfeiffer/OrbitAl.jl",
     pages = [
         "Home" => "index.md",
-        "Permutations" => "permutations.md",
+        "Permutations" => "permutation.md",
         "Orbits" => "orbits.md",
     ],
     authors = "Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>",
