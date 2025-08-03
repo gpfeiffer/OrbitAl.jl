@@ -12,8 +12,6 @@ IJulia = "7073ff75-c697-5162-941a-fcdaad2a7d2a"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 
 [compat]
-Base64 = "1.11.0"
-Documenter = "1.12.0"
 GraphPlot = "0.6.1"
 Graphs = "1.13.0"
 IJulia = "1.28.1"
@@ -21,9 +19,7 @@ JSON = "0.21.4"
 Test = "1.11.0"
 
 [extras]
-Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-docs = ["Documenter"]
 test = ["Test"]
