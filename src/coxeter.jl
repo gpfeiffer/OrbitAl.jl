@@ -13,7 +13,7 @@ using ..permgroup
 
 import Base: ^, size
 import ..permutation: Perm
-import ..permutation: isidentity, last_moved
+import ..permutation: isidentity, last_moved, shape
 import ..permgroup: PermGp
 
 export coxeterGraph, cartanMat, CoxeterGp, coxeterConjugacyClasses
