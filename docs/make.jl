@@ -6,7 +6,7 @@ makedocs(
     modules = [OrbitAl],
     checkdocs = :none,
     format = Documenter.HTML(),
-    repo = "github.com/gpfeiffer/OrbitAl.jl",
+    repo = Remotes.GitHub("gpfeiffer", "OrbitAl.jl"),
     pages = [
         "Home" => "index.md",
         "Permutations" => "permutation.md",

@@ -7,7 +7,7 @@ This module defines the core `Perm` type and basic operations on permutations in
 ## 📦 Data Type: `Perm`
 
 ```@docs
-# OrbitAl.permutation.Perm
+OrbitAl.permutation.Perm
 ```
 
 ---
@@ -15,11 +15,10 @@ This module defines the core `Perm` type and basic operations on permutations in
 ## 🏗 Constructors
 
 ```@docs
-# OrbitAl.permutation.Perm
-# OrbitAl.permutation.one
-# OrbitAl.permutation.transposition
-# OrbitAl.permutation.transpositions
-# OrbitAl.permutation.shuffle!
+OrbitAl.permutation.one
+OrbitAl.permutation.transpositions
+OrbitAl.permutation.shuffle!
+OrbitAl.permutation.rand
 ```
 
 ---
@@ -27,13 +26,14 @@ This module defines the core `Perm` type and basic operations on permutations in
 ## 📏 Attributes and Properties
 
 ```@docs
-# OrbitAl.permutation.degree
-# OrbitAl.permutation.domain
-# OrbitAl.permutation.shape
-# OrbitAl.permutation.order
-# OrbitAl.permutation.sign
-# OrbitAl.permutation.last_moved
-# OrbitAl.permutation.isidentity
+OrbitAl.permutation.degree
+OrbitAl.permutation.domain
+OrbitAl.permutation.shape
+OrbitAl.permutation.order
+OrbitAl.permutation.sign
+OrbitAl.permutation.last_moved
+OrbitAl.permutation.isidentity
+OrbitAl.permutation.cycles
 ```
 
 ---
@@ -41,13 +41,13 @@ This module defines the core `Perm` type and basic operations on permutations in
 ## 🔄 Group Operations
 
 ```@docs
-# Base.==
-# Base.hash
-# Base.isless
-# Base.inv
-# Base.*
-# Base./
-# Base.^
+==(::OrbitAl.permutation.Perm, ::OrbitAl.permutation.Perm)
+hash(::OrbitAl.permutation.Perm, ::UInt)
+isless(::OrbitAl.permutation.Perm, ::OrbitAl.permutation.Perm)
+inv(::OrbitAl.permutation.Perm)
+*(::OrbitAl.permutation.Perm, ::OrbitAl.permutation.Perm)
+/(::OrbitAl.permutation.Perm, ::OrbitAl.permutation.Perm)
+^(::OrbitAl.permutation.Perm, ::Int)
 ```
 
 ---
@@ -55,14 +55,6 @@ This module defines the core `Perm` type and basic operations on permutations in
 ## 🎯 Actions
 
 ```@docs
-# OrbitAl.permutation.^
-# OrbitAl.permutation.permuted
-```
-
----
-
-## 🔁 Cycles
-
-```@docs
-# OrbitAl.permutation.cycles
+^(::Int, ::OrbitAl.permutation.Perm)
+OrbitAl.permutation.permuted
 ```
