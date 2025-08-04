@@ -5,6 +5,7 @@ makedocs(
     sitename = "OrbitAl.jl",
     modules = [OrbitAl],
     checkdocs = :none,
+    doctest = true,
     format = Documenter.HTML(),
     repo = Remotes.GitHub("gpfeiffer", "OrbitAl.jl"),
     pages = [

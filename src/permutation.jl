@@ -20,6 +20,23 @@ A permutation represented by a list of integers.
 The entry at index `i` indicates the image of `i` under the permutation.
 
 Use `Perm(n)` for the identity permutation of size `n`, or `Perm(n, cycles)` to construct from cycle notation.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> p = Perm([6, 4, 7, 2, 5, 9, 8, 3, 1])
+Perm([6, 4, 7, 2, 5, 9, 8, 3, 1])
+
+julia> p == Perm(9, [[1, 6, 9], [2, 4], [3, 7, 8]])
+true
+
+julia> id9 = Perm(9)
+Perm([1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+julia> p == id9
+false
+```
 """
 struct Perm
     list::Vector{Int}
