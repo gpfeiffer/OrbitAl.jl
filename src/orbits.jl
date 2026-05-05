@@ -124,7 +124,7 @@ Compute the Schreier tree of the orbit of `x` under the generators `aaa`
 using the action function `under`.
 
 Returns:
-- `orbit`: a list of orbit elements
+- `list`: a list of orbit elements
 - `tree`: a `Dict` mapping each non-root node `z` to `(k => y)`, where:
     - `k` is the generator index used to reach `z`
     - `y` is the parent node so that `z = under(y, aaa[k])`
