@@ -38,7 +38,7 @@ end
 end
 
 @testset "Transposition and Moved Point" begin
-    p = transposition(5, 2, 4)
+    p = Perm(5, [[2, 4]])
     @test p.list[2] == 4
     @test p.list[4] == 2
     @test last_moved(p) == 4
@@ -88,3 +88,14 @@ set, composition = [4, 5, 7], [1,1,1,3,2,1]
 @assert subsetComposition(9, composition) == set
 
 @assert length(partitions(6)) == 11
+
+
+using OrbitAl.orbits
+
+@testset "Orbit Basics" begin
+    aaa = transpositions(3)
+    o = orbit(aaa, 1, ^)
+    @test length(o) == 3
+    o = orbit(aaa, aaa[1], *)
+    @test length(o) == 6
+end
