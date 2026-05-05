@@ -57,19 +57,39 @@ end
 
 ## common actions (to be used as action function `under`):
 
-# on points
+"""
+    onPoints(x, a)
+
+Act on a point `x` by a permutation `a`, returning `x^a`.
+"""
 onPoints(x, a) = x^a
 
-# on right
+"""
+    onRight(x, a)
+
+Act on an element `x` by right-multiplying by `a`, returning `x * a`.
+"""
 onRight(x, a) = x * a
 
-# on pairs
+"""
+    onPairs(pair, a)
+
+Act on a `Pair` by applying `a` to both components: `first^a => second^a`.
+"""
 onPairs(pair::Pair, a) = pair.first^a => pair.second^a
 
-# on sets
+"""
+    onSets(set, a)
+
+Act on a `Set` by applying `a` to each element: `{x^a : x in set}`.
+"""
 onSets(set::Set, a) = Set([x^a for x in set])
 
-# on words
+"""
+    onWords(word, s)
+
+Extend a word (index sequence) by appending generator index `s`.
+"""
 onWords(word::Vector, s) = [word; s]
 
 ## orbit with words

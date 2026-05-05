@@ -18,11 +18,11 @@ OrbitAl.orbits.orbit
 Action functions passed as the `under` argument to orbit functions:
 
 ```@docs
-# OrbitAl.orbits.onPoints
-# OrbitAl.orbits.onRight
-# OrbitAl.orbits.onPairs
-# OrbitAl.orbits.onSets
-# OrbitAl.orbits.onWords
+OrbitAl.orbits.onPoints
+OrbitAl.orbits.onRight
+OrbitAl.orbits.onPairs
+OrbitAl.orbits.onSets
+OrbitAl.orbits.onWords
 ```
 
 ---
