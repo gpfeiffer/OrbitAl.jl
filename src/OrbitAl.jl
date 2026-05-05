@@ -7,6 +7,11 @@ export permuted, transpositions, shuffle!
 
 include("orbits.jl")
 using .orbits
+export Orbit
+export orbit, orbitl, onPoints, onRight, onWords, onPairs, onSets
+export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
+export orbit_with_dist, orbit_with_tree, orbit_with_edges, orbit_with_images
+export orbitx, orbitx_with_words, orbitx_with_edges
 
 include("permgroup.jl")
 using .permgroup
@@ -20,6 +25,9 @@ include("simsgroup.jl")
 
 include("coxeter.jl")
 using .coxeter
+export coxeterGraph, coxeterMat, cartanMat, CoxeterGp, coxeterConjugacyClasses
+export coxeterLength, coxeterWord, permCoxeterWord, reflections
+export prefixes, prefixes_with_edges, shapes, longestElt, parabolicTransversal
 
 include("shifts.jl")
 include("involution.jl")
