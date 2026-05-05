@@ -47,12 +47,14 @@ Returns the list of orbit elements.
 """
 function orbitl(aaa, x, under::Function)
     list = [x]
+    index = Dict(x => 1)
     for y in list
         for a in aaa
             z = under(y, a)
-            z in list || begin
+            get!(index, z) do
                 push!(list, z)
                 print(".")
+                length(list)
             end
         end
     end
