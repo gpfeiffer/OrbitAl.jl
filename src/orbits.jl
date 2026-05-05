@@ -39,7 +39,12 @@ function orbit(aaa, x, under::Function)
     return list
 end
 
-## orbitl: with breadcrumbs ...
+"""
+    orbitl(aaa, x, under)
+
+Like `orbit`, but prints a dot for each new element discovered.
+Returns the list of orbit elements.
+"""
 function orbitl(aaa, x, under::Function)
     list = [x]
     for y in list
@@ -120,7 +125,14 @@ function orbit_with_words(aaa, x, under::Function)
     return (list = list, words = words)
 end
 
-## orbit with distance (= word length)
+"""
+    orbit_with_dist(aaa, x, under)
+
+Compute the orbit of `x` under the generators `aaa` and record the
+BFS distance from `x` to each orbit element. Returns a named tuple:
+- `list`: the orbit elements
+- `dist`: the corresponding distances (word lengths) from `x`
+"""
 function orbit_with_dist(aaa, x, under::Function)
     list = [x]
     dist = [0]
@@ -246,7 +258,15 @@ function orbit_with_edges(aaa, x, under::Function)
     return (list = list, edges = collect(edges))
 end
 
-## orbit with images
+"""
+    orbit_with_images(aaa, x, under)
+
+Compute the orbit of `x` under the generators `aaa` and record, for
+each generator, the list of image indices. Returns a named tuple:
+- `list`: the orbit elements
+- `images`: a vector of index lists, one per generator, where `images[k][i]`
+  is the index of `under(list[i], aaa[k])` in `list`
+"""
 function orbit_with_images(aaa, x, under::Function)
     list = [x]
     index = Dict(x => 1)
@@ -272,7 +292,12 @@ function edges_from_images(images)
     ]
 end
 
-## orbitx: multiple starting points
+"""
+    orbitx(aaa, xxx, under)
+
+Like `orbit`, but starts from a set of points `xxx` rather than a single
+point. Returns the list of all elements reachable from any element of `xxx`.
+"""
 function orbitx(aaa, xxx, under::Function)
     list = xxx
     for y in list
@@ -284,7 +309,15 @@ function orbitx(aaa, xxx, under::Function)
     return list
 end
 
-## ... with words
+"""
+    orbitx_with_words(aaa, xxx, under)
+
+Like `orbit_with_words`, but starts from a set of points `xxx`. Each
+starting point `xxx[i]` is assigned the initial word `[i]`. Returns a
+named tuple:
+- `list`: all reachable elements
+- `words`: the index sequence tracing how each was reached
+"""
 function orbitx_with_words(aaa, xxx, under::Function)
     list = xxx
     words = [[i] for i in eachindex(xxx)]
@@ -303,7 +336,14 @@ function orbitx_with_words(aaa, xxx, under::Function)
     return (list = list, words = words)
 end
 
-## ... with edges
+"""
+    orbitx_with_edges(aaa, xxx, under)
+
+Like `orbit_with_edges`, but starts from a set of points `xxx`. Returns
+a named tuple:
+- `list`: all reachable elements
+- `edges`: undirected edges as sorted index pairs
+"""
 function orbitx_with_edges(aaa, xxx, under::Function)
     list = xxx
     index = Dict(x => i for (i, x) in enumerate(xxx))
@@ -322,7 +362,15 @@ function orbitx_with_edges(aaa, xxx, under::Function)
 end
 
 
-##  Orbit data type
+"""
+    Orbit
+
+Represents the orbit of an element under a group action. Fields:
+- `group`: the group acting
+- `elts`: a sorted list of orbit elements
+
+Supports `in`, `==`, `isless` (by first element), and `size`.
+"""
 struct Orbit
     group
     elts # assume sorted!
