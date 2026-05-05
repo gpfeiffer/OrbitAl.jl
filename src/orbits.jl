@@ -105,7 +105,7 @@ function orbit_with_dist(aaa, x, under::Function)
     list = [x]
     dist = [0]
     for (i, y) in enumerate(list)
-        for k in aaa
+        for a in aaa
             z = under(y, a)
             z in list || begin
                 push!(list, z)
@@ -286,6 +286,7 @@ end
 ## ... with edges
 function orbitx_with_edges(aaa, xxx, under::Function)
     list = xxx
+    index = Dict(x => i for (i, x) in enumerate(xxx))
     edges = Set()
     for (i, y) in enumerate(list)
         for (k, a) in enumerate(aaa)
