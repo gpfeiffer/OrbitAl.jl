@@ -4,16 +4,16 @@ This module provides orbit computation algorithms and standard group actions, wi
 
 ---
 
-## 🧠 Basic Orbit Computation
+## Basic Orbit Computation
 
 ```@docs
 OrbitAl.orbits.orbit
-# OrbitAl.orbits.orbitl
+OrbitAl.orbits.orbitl
 ```
 
 ---
 
-## 🧰 Actions
+## Actions
 
 Action functions passed as the `under` argument to orbit functions:
 
@@ -27,55 +27,44 @@ OrbitAl.orbits.onWords
 
 ---
 
-## 🚀 Orbit Variants
+## Orbit Variants
 
 These return richer data structures tracking more information about the orbit:
 
 ```@docs
 OrbitAl.orbits.orbit_with_words
-# OrbitAl.orbits.orbit_with_dist
+OrbitAl.orbits.orbit_with_dist
 OrbitAl.orbits.orbit_with_tree
 OrbitAl.orbits.orbit_with_transversal
 OrbitAl.orbits.orbit_with_stabilizer
 OrbitAl.orbits.orbit_with_edges
-# OrbitAl.orbits.orbit_with_images
+OrbitAl.orbits.orbit_with_images
 ```
 
 ---
 
-## 🔁 Multiple Starting Points
+## Multiple Starting Points
 
 For cases where orbit computation begins from a set of starting points:
 
 ```@docs
-# OrbitAl.orbits.orbitx
-# OrbitAl.orbits.orbitx_with_words
-# OrbitAl.orbits.orbitx_with_edges
+OrbitAl.orbits.orbitx
+OrbitAl.orbits.orbitx_with_words
+OrbitAl.orbits.orbitx_with_edges
 ```
 
 ---
 
-## 🧩 Helper Utilities
+## Utility
 
 ```@docs
-# OrbitAl.orbits.edges_from_images
+OrbitAl.orbits.edges_from_images
 ```
 
 ---
 
-## 📦 Data Type: `Orbit`
+## Data Type: `Orbit`
 
 ```@docs
-# OrbitAl.orbits.Orbit
-```
-
----
-
-## 🔧 Overloaded Base Functions
-
-```@docs
-# Base.in
-# Base.==
-# Base.isless
-# Base.size
+OrbitAl.orbits.Orbit
 ```

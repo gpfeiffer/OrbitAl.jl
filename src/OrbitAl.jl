@@ -12,6 +12,7 @@ export orbit, orbitl, onPoints, onRight, onWords, onPairs, onSets
 export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
 export orbit_with_dist, orbit_with_tree, orbit_with_edges, orbit_with_images
 export orbitx, orbitx_with_words, orbitx_with_edges
+export edges_from_images
 
 include("permgroup.jl")
 using .permgroup

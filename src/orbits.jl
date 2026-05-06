@@ -16,6 +16,7 @@ export orbit, onPoints, onRight, onWords, onPairs, onSets
 export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
 export orbit_with_dist, orbit_with_tree, orbit_with_edges, orbit_with_images
 export orbitl, orbitx, orbitx_with_words, orbitx_with_edges
+export edges_from_images
 
 ## orbit
 """
@@ -27,6 +28,19 @@ the domain are acted upon.
 
 Returns the list of points reachable from `x` by repeatedly applying
 the elements of `aaa`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> orbit([s, t], 1, onPoints)
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+```
 """
 function orbit(aaa, x, under::Function)
     list = [x]
@@ -42,8 +56,19 @@ end
 """
     orbitl(aaa, x, under)
 
-Like `orbit`, but prints a dot for each new element discovered.
+Like `orbit`, but uses a `Dict` for O(1) membership testing instead of
+linear search. Prints a dot to stdout for each new element discovered.
 Returns the list of orbit elements.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> orbitl([Perm([2,1])], 1, onPoints)
+.2-element Vector{Int64}:
+ 1
+ 2
+```
 """
 function orbitl(aaa, x, under::Function)
     list = [x]
@@ -68,6 +93,14 @@ end
     onPoints(x, a)
 
 Act on a point `x` by a permutation `a`, returning `x^a`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> onPoints(2, Perm([2,1,3]))
+1
+```
 """
 onPoints(x, a) = x^a
 
@@ -75,6 +108,16 @@ onPoints(x, a) = x^a
     onRight(x, a)
 
 Act on an element `x` by right-multiplying by `a`, returning `x * a`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> onRight(s, t)
+Perm([3, 1, 2])
+```
 """
 onRight(x, a) = x * a
 
@@ -82,6 +125,14 @@ onRight(x, a) = x * a
     onPairs(pair, a)
 
 Act on a `Pair` by applying `a` to both components: `first^a => second^a`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> onPairs(1 => 2, Perm([2,1,3]))
+2 => 1
+```
 """
 onPairs(pair::Pair, a) = pair.first^a => pair.second^a
 
@@ -89,6 +140,16 @@ onPairs(pair::Pair, a) = pair.first^a => pair.second^a
     onSets(set, a)
 
 Act on a `Set` by applying `a` to each element: `{x^a : x in set}`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> sort(collect(onSets(Set([1, 3]), Perm([2, 1, 3]))))
+2-element Vector{Int64}:
+ 2
+ 3
+```
 """
 onSets(set::Set, a) = Set([x^a for x in set])
 
@@ -96,6 +157,17 @@ onSets(set::Set, a) = Set([x^a for x in set])
     onWords(word, s)
 
 Extend a word (index sequence) by appending generator index `s`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> onWords([1, 2], 1)
+3-element Vector{Int64}:
+ 1
+ 2
+ 1
+```
 """
 onWords(word::Vector, s) = [word; s]
 
@@ -110,6 +182,27 @@ of generator indices that led to each orbit element.
 Returns a named tuple:
 - `list`: orbit elements
 - `words`: list of index sequences tracing how each was reached
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_with_words([s, t], 1, onPoints);
+
+julia> o.list
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+
+julia> o.words
+3-element Vector{Vector{Int64}}:
+ []
+ [1]
+ [1, 2]
+```
 """
 function orbit_with_words(aaa, x, under::Function)
     list = [x]
@@ -134,6 +227,21 @@ Compute the orbit of `x` under the generators `aaa` and record the
 BFS distance from `x` to each orbit element. Returns a named tuple:
 - `list`: the orbit elements
 - `dist`: the corresponding distances (word lengths) from `x`
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_with_dist([s, t], 1, onPoints);
+
+julia> o.dist
+3-element Vector{Int64}:
+ 0
+ 1
+ 2
+```
 """
 function orbit_with_dist(aaa, x, under::Function)
     list = [x]
@@ -157,11 +265,26 @@ end
 Compute the Schreier tree of the orbit of `x` under the generators `aaa`
 using the action function `under`.
 
-Returns:
+Returns a named tuple:
 - `list`: a list of orbit elements
 - `tree`: a `Dict` mapping each non-root node `z` to `(k => y)`, where:
     - `k` is the generator index used to reach `z`
     - `y` is the parent node so that `z = under(y, aaa[k])`
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_with_tree([s, t], 1, onPoints);
+
+julia> o.tree[2]
+1 => 1
+
+julia> o.tree[3]
+2 => 2
+```
 """
 function orbit_with_tree(aaa, x, under::Function)
     list = [x]
@@ -183,10 +306,24 @@ end
     orbit_with_transversal(aaa, x, under)
 
 Compute the orbit of `x` under the action of `aaa`, along with
-coset representatives (as permutations). Returns a named tuple
-with fields:
+coset representatives. Returns a named tuple:
 - `list`: the orbit of `x`
-- `reps`: corresponding permutations mapping `x` to each orbit element.
+- `reps`: permutations such that `x^reps[i] == list[i]` for each `i`
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_with_transversal([s, t], 1, onPoints);
+
+julia> [1^r for r in o.reps]
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+```
 """
 function orbit_with_transversal(aaa, x, under::Function)
     list = [x]
@@ -208,12 +345,27 @@ end
 """
     orbit_with_stabilizer(aaa, x, under)
 
-Compute the orbit of `x` under generators `aaa`, recording:
-- `list`: the orbit elements,
-- `reps`: permutations mapping `x` to each orbit element,
-- `stab`: generators of the stabilizer of `x` (via Schreier's Lemma).
+Compute the orbit of `x` under generators `aaa` using Schreier's Lemma.
+Returns a named tuple:
+- `list`: the orbit elements
+- `reps`: permutations such that `x^reps[i] == list[i]`
+- `stab`: Schreier generators for the stabilizer of `x` (may contain duplicates)
 
-Returns a named tuple `(list, reps, stab)`.
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_with_stabilizer([s, t], 1, onPoints);
+
+julia> length(o.list)
+3
+
+julia> unique(o.stab)
+1-element Vector{Perm}:
+ Perm([1, 3, 2])
+```
 """
 function orbit_with_stabilizer(aaa, x, under::Function)
     list = [x]
@@ -241,7 +393,25 @@ end
 
 Compute the orbit of `x` under the generators `aaa` and return:
 - `list`: the list of orbit elements
-- `edges`: a list of undirected edges (as sorted index pairs)
+- `edges`: directed edge pairs `(i, j)` (both directions included for each
+  generator application `list[i] -> list[j]` with `i ≠ j`)
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> o = orbit_with_edges([Perm([2,1])], 1, onPoints);
+
+julia> o.list
+2-element Vector{Int64}:
+ 1
+ 2
+
+julia> sort(o.edges)
+2-element Vector{Any}:
+ (1, 2)
+ (2, 1)
+```
 """
 function orbit_with_edges(aaa, x, under::Function)
     list = [x]
@@ -268,6 +438,27 @@ each generator, the list of image indices. Returns a named tuple:
 - `list`: the orbit elements
 - `images`: a vector of index lists, one per generator, where `images[k][i]`
   is the index of `under(list[i], aaa[k])` in `list`
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_with_images([s, t], 1, onPoints);
+
+julia> o.images[1]
+3-element Vector{Int64}:
+ 2
+ 1
+ 3
+
+julia> o.images[2]
+3-element Vector{Int64}:
+ 1
+ 3
+ 2
+```
 """
 function orbit_with_images(aaa, x, under::Function)
     list = [x]
@@ -287,6 +478,33 @@ function orbit_with_images(aaa, x, under::Function)
 end
 
 ## edges from images
+"""
+    edges_from_images(images)
+
+Convert the `images` field from [`orbit_with_images`](@ref) into a list of
+labeled directed edges. Returns a vector of triples `(i, j, k)` where:
+- `i` is the source index
+- `j` is the target index (`images[k][i] == j`)
+- `k` is the generator index
+
+Self-loops (`i == j`) are excluded.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_with_images([s, t], 1, onPoints);
+
+julia> edges_from_images(o.images)
+4-element Vector{Tuple{Int64, Int64, Int64}}:
+ (1, 2, 1)
+ (2, 1, 1)
+ (2, 3, 2)
+ (3, 2, 2)
+```
+"""
 function edges_from_images(images)
     return [
         (i, j, k) for (k,img) in enumerate(images)
@@ -299,6 +517,19 @@ end
 
 Like `orbit`, but starts from a set of points `xxx` rather than a single
 point. Returns the list of all elements reachable from any element of `xxx`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> orbitx([s, t], [1, 2], onPoints)
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+```
 """
 function orbitx(aaa, xxx, under::Function)
     list = xxx
@@ -315,10 +546,32 @@ end
     orbitx_with_words(aaa, xxx, under)
 
 Like `orbit_with_words`, but starts from a set of points `xxx`. Each
-starting point `xxx[i]` is assigned the initial word `[i]`. Returns a
-named tuple:
+starting point `xxx[i]` gets initial word `[i]`, and subsequent
+generator applications are appended. Returns a named tuple:
 - `list`: all reachable elements
-- `words`: the index sequence tracing how each was reached
+- `words`: index sequences where `words[j][1]` is the seed index into `xxx`
+  and `words[j][2:end]` are the generator indices applied to reach `list[j]`
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbitx_with_words([s, t], [1, 2], onPoints);
+
+julia> o.list
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+
+julia> o.words
+3-element Vector{Vector{Int64}}:
+ [1]
+ [2]
+ [2, 2]
+```
 """
 function orbitx_with_words(aaa, xxx, under::Function)
     list = xxx
@@ -344,7 +597,29 @@ end
 Like `orbit_with_edges`, but starts from a set of points `xxx`. Returns
 a named tuple:
 - `list`: all reachable elements
-- `edges`: undirected edges as sorted index pairs
+- `edges`: directed edge pairs `(i, j)` (both directions included)
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbitx_with_edges([s, t], [1, 2], onPoints);
+
+julia> o.list
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+
+julia> sort(o.edges)
+4-element Vector{Any}:
+ (1, 2)
+ (2, 1)
+ (2, 3)
+ (3, 2)
+```
 """
 function orbitx_with_edges(aaa, xxx, under::Function)
     list = xxx
@@ -367,11 +642,32 @@ end
 """
     Orbit
 
-Represents the orbit of an element under a group action. Fields:
-- `group`: the group acting
+Represents the conjugacy class (or similar orbit) of an element under a
+group action. Created by `perm ^ group`, which computes the orbit of `perm`
+under conjugation. Fields:
+- `group`: the acting group
 - `elts`: a sorted list of orbit elements
 
-Supports `in`, `==`, `isless` (by first element), and `size`.
+Supports `in`, `==` (by minimum element), `isless` (by minimum element),
+and `size`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> G = PermGp([s, t], one(s));
+
+julia> cc = conjClasses(G);
+
+julia> length(cc)
+3
+
+julia> cc[1].elts
+1-element Vector{Perm}:
+ Perm([1, 2, 3])
+```
 """
 struct Orbit
     group
