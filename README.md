@@ -9,7 +9,7 @@ A Julia package for working with permutations and orbits in a simple and composa
 - **Standard actions** — `onPoints`, `onRight`, `onSets`, `onPairs`, `onWords` ready to use or compose.
 - **Permutation groups** — `PermGp` supporting element enumeration, conjugacy classes, subgroup enumeration, membership testing, and random element sampling.
 - **Coxeter groups** — `CoxeterGp` built from a Cartan matrix: root systems, reflections, Coxeter length, reduced words, parabolic subgroups and transversals, conjugacy classes.
-- **Standard Young tableaux** — partitions, Newton polynomials, composition/subset conversions, tableau paths.
+- **Standard Young tableaux** — partitions, Newton sums and differences, composition/subset conversions, tableau paths.
 - **Visualization** — D3.js force-directed Cayley graphs rendered in Jupyter notebooks.
 
 ## Installation
