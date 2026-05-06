@@ -47,6 +47,14 @@ end
     Perm(n::Int)
 
 Construct the identity permutation on `1:n`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> Perm(3)
+Perm([1, 2, 3])
+```
 """
 Perm(n::Int) = Perm(collect(1:n))
 
@@ -54,6 +62,14 @@ Perm(n::Int) = Perm(collect(1:n))
     one(Perm, n::Int)
 
 Alias for `Perm(n)` — the identity permutation on `n` elements.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> one(Perm, 3)
+Perm([1, 2, 3])
+```
 """
 one(Perm, n::Int) = Perm(n)
 
@@ -61,6 +77,14 @@ one(Perm, n::Int) = Perm(n)
     one(perm::Perm)
 
 Identity permutation with the same degree as `perm`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> one(Perm([2, 1, 3]))
+Perm([1, 2, 3])
+```
 """
 one(perm::Perm) = Perm(domain(perm))
 
@@ -69,6 +93,14 @@ one(perm::Perm) = Perm(domain(perm))
 
 Construct a permutation of degree `n` from disjoint cycles.
 Each cycle is a vector of indices.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> Perm(4, [[1, 2, 3]])
+Perm([2, 3, 1, 4])
+```
 """
 function Perm(n::Int, cycles::Array)
     perm = Perm(n)
@@ -83,6 +115,14 @@ end
     degree(perm::Perm)
 
 Returns the degree (length of the domain) of the permutation.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> degree(Perm([2, 1, 3]))
+3
+```
 """
 degree(perm::Perm) = length(perm.list)
 
@@ -90,6 +130,14 @@ degree(perm::Perm) = length(perm.list)
     domain(perm::Perm)
 
 Returns the domain of the permutation as range `1:n`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> domain(Perm([2, 1, 3]))
+1:3
+```
 """
 domain(perm::Perm) = 1:degree(perm)
 
@@ -98,20 +146,48 @@ domain(perm::Perm) = 1:degree(perm)
     ==(p::Perm, q::Perm)
 
 Check two permutations for equality.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> Perm([2, 1, 3]) == Perm([2, 1, 3])
+true
+
+julia> Perm([2, 1, 3]) == Perm([1, 2, 3])
+false
+```
 """
 ==(perm::Perm, other::Perm) = perm.list == other.list
 
 """
     hash(perm::Perm, h::UInt)
 
-Compute the hash of a permutation.
+Compute the hash of a permutation, consistent with `==`.
+Enables use of `Perm` as a dictionary key or set element.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> hash(Perm([2, 1, 3])) == hash(Perm([2, 1, 3]))
+true
+```
 """
 hash(perm::Perm, h::UInt) = hash(perm.list, h)
 
 """
     isless(p::Perm, q::Perm)
 
-Lexicographic comparison of two permutations.
+Lexicographic comparison of two permutations (by image list).
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> isless(Perm([1, 2, 3]), Perm([2, 1, 3]))
+true
+```
 """
 isless(perm::Perm, other::Perm) = perm.list < other.list
 
@@ -120,7 +196,22 @@ isless(perm::Perm, other::Perm) = perm.list < other.list
 """
     x ^ p
 
-Apply the permutation `p` to the point or vector `x`.
+Apply the permutation `p` to the integer point `x` or integer vector `xs`,
+returning the image under `p`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> 1 ^ Perm([2, 1, 3])
+2
+
+julia> [1, 2, 3] ^ Perm([2, 1, 3])
+3-element Vector{Int64}:
+ 2
+ 1
+ 3
+```
 """
 ^(x::Int, perm::Perm) = perm.list[x]
 ^(xs::Vector{Int}, perm::Perm) = perm.list[xs]
@@ -130,6 +221,19 @@ Apply the permutation `p` to the point or vector `x`.
     inv(perm::Perm)
 
 Returns the inverse of the permutation.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> p = Perm([2, 3, 1]);
+
+julia> inv(p)
+Perm([3, 1, 2])
+
+julia> p * inv(p) == one(p)
+true
+```
 """
 function inv(perm::Perm)
     other = similar(perm.list)
@@ -142,20 +246,48 @@ end
     p * q
 
 Permutation multiplication: `i^(p*q) == (i^p)^q`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> Perm([2, 1, 3]) * Perm([1, 3, 2])
+Perm([3, 1, 2])
+```
 """
 *(perm::Perm, other::Perm) = Perm(perm.list^other)
 
 """
     p / q
 
-Right division: `p * inv(q)`
+Right division: `p * inv(q)`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> p = Perm([2, 3, 1]); q = Perm([1, 3, 2]);
+
+julia> p / q == p * inv(q)
+true
+```
 """
 /(perm::Perm, other::Perm) = perm * inv(other)
 
 """
     p ^ q
 
-Conjugation of `p` by `q`: `q⁻¹ * p * q`
+Conjugation of `p` by `q`: `inv(q) * p * q`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> p = Perm([2, 1, 3]); q = Perm([2, 3, 1]);
+
+julia> p^q == inv(q) * p * q
+true
+```
 """
 ^(perm::Perm, other::Perm) = inv(other) * perm * other
 
@@ -163,6 +295,16 @@ Conjugation of `p` by `q`: `q⁻¹ * p * q`
     p ^ n
 
 Raise the permutation `p` to the integer power `n`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> p = Perm([2, 3, 1]);
+
+julia> p^3 == one(p)
+true
+```
 """
 function ^(perm::Perm, n::Int)
     n == 1 && return perm
@@ -176,21 +318,50 @@ end
 """
     shape(perm::Perm)
 
-Returns the list of cycle lengths, sorted decreasingly.
+Returns the cycle type: cycle lengths sorted in decreasing order.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> shape(Perm([2, 3, 1, 5, 4]))
+2-element Vector{Int64}:
+ 3
+ 2
+```
 """
 shape(perm::Perm) = sort(length.(cycles(perm)), rev=true)
 
 """
     order(perm::Perm)
 
-Returns the order of the permutation.
+Returns the order of the permutation (the smallest positive `n` with `p^n == one(p)`).
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> order(Perm([2, 3, 1, 5, 4]))
+6
+```
 """
 order(perm::Perm) = lcm(shape(perm))
 
 """
     sign(perm::Perm)
 
-Returns the sign (+1 or -1) of the permutation.
+Returns the sign of the permutation: `+1` for even permutations, `-1` for odd.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> sign(Perm([2, 1, 3]))
+-1
+
+julia> sign(Perm([2, 3, 1]))
+1
+```
 """
 sign(perm::Perm) = (-1)^(degree(perm) - length(cycles(perm)))
 
@@ -198,7 +369,18 @@ sign(perm::Perm) = (-1)^(degree(perm) - length(cycles(perm)))
 """
     last_moved(perm::Perm)
 
-Returns the largest index moved by the permutation (0 if identity).
+Returns the largest index moved by the permutation, or `0` if it is the identity.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> last_moved(Perm([2, 1, 3]))
+2
+
+julia> last_moved(Perm([1, 2, 3]))
+0
+```
 """
 function last_moved(perm::Perm)
     for i in reverse(eachindex(perm.list))
@@ -210,7 +392,18 @@ end
 """
     isidentity(perm::Perm)
 
-Check whether the permutation is the identity.
+Return `true` if the permutation is the identity.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> isidentity(Perm([1, 2, 3]))
+true
+
+julia> isidentity(Perm([2, 1, 3]))
+false
+```
 """
 isidentity(perm::Perm) = last_moved(perm) == 0
 
@@ -218,7 +411,18 @@ isidentity(perm::Perm) = last_moved(perm) == 0
 """
     cycles(perm::Perm)
 
-Decompose the permutation into disjoint cycles.
+Decompose the permutation into disjoint cycles, returned as a vector of
+index vectors in order of their smallest element.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> cycles(Perm([2, 3, 1, 5, 4]))
+2-element Vector{Array{Int64}}:
+ [1, 2, 3]
+ [4, 5]
+```
 """
 function cycles(perm::Perm, x = 1, open = trues(degree(perm)), cycle = Int[], ccc = Array{Int}[])
     isempty(open) && return ccc  # all points have been seen
@@ -237,7 +441,18 @@ end
 """
     transpositions(n)
 
-Return the list of adjacent transpositions `(j-1 j)` for j = 2 to n.
+Return the list of adjacent transpositions `(j-1 j)` for `j = 2, …, n`.
+These are the standard Coxeter generators of the symmetric group `Sₙ`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> transpositions(3)
+2-element Vector{Perm}:
+ Perm([2, 1, 3])
+ Perm([1, 3, 2])
+```
 """
 transpositions(n::Int) = [Perm(n, [[j-1, j]]) for j in 2:n]
 
@@ -245,7 +460,22 @@ transpositions(n::Int) = [Perm(n, [[j-1, j]]) for j in 2:n]
 """
     shuffle!(perm::Perm)
 
-Apply the Fisher-Yates shuffle to `perm` in-place.
+Apply the Fisher-Yates shuffle to `perm` in-place and return it.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> p = Perm(5); shuffle!(p);
+
+julia> sort(p.list)
+5-element Vector{Int64}:
+ 1
+ 2
+ 3
+ 4
+ 5
+```
 """
 function shuffle!(perm::Perm)
     n = degree(perm)
@@ -259,7 +489,22 @@ end
 """
     rand(Perm, n)
 
-Generate a random permutation of size `n`.
+Generate a uniformly random permutation of size `n`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> p = rand(Perm, 5);
+
+julia> sort(p.list)
+5-element Vector{Int64}:
+ 1
+ 2
+ 3
+ 4
+ 5
+```
 """
 rand(T::Type{X}, n::Int) where X <: Perm = shuffle!(one(Perm, n))
 
@@ -267,7 +512,19 @@ rand(T::Type{X}, n::Int) where X <: Perm = shuffle!(one(Perm, n))
 """
     permuted(list, perm)
 
-Apply the inverse of `perm` to a list — Polya-style.
+Return `list` rearranged by the inverse of `perm`: `permuted(list, perm)[i] == list[i^inv(perm)]`.
+This is the standard Pólya action of a permutation on a list.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> permuted([10, 20, 30], Perm([2, 3, 1]))
+3-element Vector{Int64}:
+ 30
+ 10
+ 20
+```
 """
 permuted(list::Array, perm::Perm) = list[inv(perm).list]
 
