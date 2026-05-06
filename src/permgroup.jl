@@ -17,26 +17,60 @@ export APermGp, PermGp
 export elements, conjClasses, closure, subgroups, subgpClasses
 export sizeOfGroup, randomGroupElement, memberOfGroup
 
+"""
+    APermGp
+
+Abstract supertype for all permutation group types.
+"""
 abstract type APermGp end
 
-## Perm group
+"""
+    PermGp(gens, one)
+
+A permutation group with generators `gens::Vector{Perm}` and identity element `one`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> G = PermGp([s, t], one(s));
+
+julia> sizeOfGroup(G)
+6
+```
+"""
 struct PermGp <: APermGp
     gens::Vector{Perm}
     one::Perm
 end
 
-## elements
+"""
+    elements(group)
+
+Return all elements of `group` as a sorted vector.
+"""
 elements(group::APermGp) = sort(orbit(group.gens, group.one, onRight))
 
 ## equality, comparison
 ==(group::APermGp, other::APermGp) = elements(group) == elements(other)
 isless(group::APermGp, other::APermGp) = elements(group) < elements(other)
 
-##  closure
+"""
+    closure(group, a)
+
+Return a new `PermGp` formed by adding generator `a` to `group`.
+"""
 closure(group::APermGp, a::Perm) = PermGp(union(group.gens, [a]), group.one)
 onGroups(x, a) = closure(x, a)
 
-##  subgroups
+"""
+    subgroups(group)
+
+Return all subgroups of `group` as a vector of `PermGp` values,
+computed by orbit enumeration under the closure action.
+"""
 subgroups(group) = orbit(elements(group), PermGp([], group.one), onGroups)
 
 ## conjugation
@@ -51,12 +85,23 @@ subgpClass(gp::APermGp, subgp::APermGp) = orbit(gp.gens, subgp, onPoints)
 ## conjugacy classes
 onClasses(x, a) = (x.elts[1] * a)^(x.group)
 
+"""
+    conjClasses(gp)
+
+Return the conjugacy classes of `gp` as a vector of `Orbit` objects,
+each containing the elements of one class.
+"""
 function conjClasses(gp::APermGp)
     orbit(orbitx(gp.gens, copy(gp.gens), onPoints), gp.one^gp, onClasses)
 end
 
 onSubgpClasses(x, a) = onGroups(x.elts[1], a)^(x.group)
 
+"""
+    subgpClasses(gp)
+
+Return the conjugacy classes of subgroups of `gp` as a vector of `Orbit` objects.
+"""
 function subgpClasses(gp::APermGp)
     orbit(elements(gp), PermGp([], gp.one)^gp, onSubgpClasses)
 end
@@ -67,7 +112,22 @@ is_trivial(group::APermGp) = all(isidentity, group.gens)
 ## largest moved point
 last_moved(group::APermGp) = max(last_moved.(group.gens)...)
 
-## size of group
+"""
+    sizeOfGroup(group)
+
+Return the order of `group` using the orbit-stabilizer theorem,
+without enumerating all elements.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> sizeOfGroup(PermGp([s, t], one(s)))
+6
+```
+"""
 function sizeOfGroup(group::APermGp)
     is_trivial(group) && return 1
     x = last_moved(group)
@@ -77,7 +137,12 @@ function sizeOfGroup(group::APermGp)
 end
 size(group::APermGp) = sizeOfGroup(group)
 
-## random group element
+"""
+    randomGroupElement(group)
+
+Return a uniformly random element of `group` using a recursive
+orbit-stabilizer decomposition.
+"""
 function randomGroupElement(group::APermGp)
     is_trivial(group) && return group.one
     x = last_moved(group)
@@ -87,7 +152,26 @@ function randomGroupElement(group::APermGp)
 end
 rand(group::APermGp) = randomGroupElement(group)
 
-## membership test
+"""
+    memberOfGroup(group, perm)
+
+Return `true` if `perm` belongs to `group`, using a recursive sifting algorithm.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> G = PermGp([s, t], one(s));
+
+julia> memberOfGroup(G, s)
+true
+
+julia> memberOfGroup(G, Perm([2,3,4,1]))
+false
+```
+"""
 function memberOfGroup(group::APermGp, perm::Perm)
     is_trivial(group) && return perm == group.one
     x = last_moved(group)

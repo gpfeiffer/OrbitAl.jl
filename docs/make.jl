@@ -12,6 +12,8 @@ makedocs(
         "Home" => "index.md",
         "Permutations" => "permutation.md",
         "Orbits" => "orbits.md",
+        "Permutation Groups" => "permgroup.md",
+        "Coxeter Groups" => "coxeter.md",
     ],
     authors = "Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>",
 )
