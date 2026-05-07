@@ -9,7 +9,7 @@ module orbits
 
 using ..permutation
 
-import Base: in, isless, size, ==
+import Base: in, isless, size, ==, show, hash
 
 export Orbit
 export orbit, onPoints, onRight, onWords, onPairs, onSets
@@ -17,6 +17,8 @@ export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
 export orbit_with_dist, orbit_with_tree, orbit_with_edges, orbit_with_images
 export orbitl, orbitx, orbitx_with_words, orbitx_with_dist, orbitx_with_edges
 export edges_from_images
+export orbit_and_more, orbit_and_data
+export Item, orbit_with_data
 
 ## orbit
 """
@@ -686,6 +688,201 @@ function orbitx_with_edges(aaa, xxx, under::Function)
     return (list = list, edges = collect(edges))
 end
 
+
+## orbit_and_more, orbit_and_data: orbit + words + reps + images
+
+"""
+    orbit_and_more(aaa, x, under)
+
+Compute the orbit of `x` under generators `aaa` with action `under`, tracking
+words, coset representatives, and a generator image table in parallel arrays.
+Returns a named tuple:
+- `list`: the orbit elements
+- `words`: shortest generator word reaching each element
+- `reps`: corresponding coset representative (product of generators)
+- `images`: for each generator, the vector of image indices into `list`
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_and_more([s, t], 1, onPoints);
+
+julia> o.list
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+
+julia> o.images
+2-element Vector{Vector{Int64}}:
+ [2, 1, 3]
+ [1, 3, 2]
+```
+"""
+function orbit_and_more(aaa, x, under)
+    list = [x]
+    index = Dict(x => 1)
+    words = [[]]
+    reps = [one(aaa[1])]
+    images = [Int[] for a in aaa]
+    for (i, y) in enumerate(list)
+        for (k, a) in enumerate(aaa)
+            z = under(y, a)
+            l = get!(index, z) do
+                push!(list, z)
+                push!(words, onWords(words[i], k))
+                push!(reps, onRight(reps[i], a))
+                length(list)
+            end
+            push!(images[k], l)
+        end
+    end
+    return (list = list, words = words, reps = reps, images = images)
+end
+
+"""
+    orbit_and_data(aaa, x, under)
+
+Like `orbit_and_more`, but initialises all arrays together as a single named
+tuple `data`, which is extended in place. The result is identical:
+- `list`: the orbit elements
+- `words`: shortest generator word reaching each element
+- `reps`: corresponding coset representative (product of generators)
+- `images`: for each generator, the vector of image indices into `list`
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_and_data([s, t], 1, onPoints);
+
+julia> o.list
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+
+julia> o.images
+2-element Vector{Vector{Int64}}:
+ [2, 1, 3]
+ [1, 3, 2]
+```
+"""
+function orbit_and_data(aaa, x, under)
+    data = (
+        list = [x],
+        words = [[]],
+        reps = [one(aaa[1])],
+        images = [Int[] for a in aaa]
+    )
+    index = Dict(x => 1)
+    for (i, y) in enumerate(data.list)
+        for (k, a) in enumerate(aaa)
+            z = under(y, a)
+            l = get!(index, z) do
+                push!(data.list, z)
+                push!(data.words, onWords(data.words[i], k))
+                push!(data.reps, onRight(data.reps[i], a))
+                length(data.list)
+            end
+            push!(data.images[k], l)
+        end
+    end
+    return data
+end
+
+## Item: a node carrying orbit metadata
+
+"""
+    Item(key)
+
+A node object for orbit computation with attached metadata. Wraps a domain
+element `key` and provides:
+- `next`: list of successor `Item` nodes (one per generator)
+- `data`: a `Dict{Symbol, Any}` for arbitrary per-node data (`:idx`, `:rep`,
+  `:word`, etc.)
+
+Items are compared and hashed by `key`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> a = Item(1); b = Item(1); c = Item(2);
+
+julia> a == b
+true
+
+julia> a == c
+false
+```
+"""
+struct Item
+    key
+    next::Vector{Item}
+    data::Dict{Symbol, Any}
+    Item(key) = new(key, [], Dict())
+end
+
+show(io::IO, item::Item) = print(io, "Item(", item.key, ")")
+==(lft::Item, rgt::Item) = lft.key == rgt.key
+hash(item::Item, h::UInt) = hash(item.key, h)
+isless(lft::Item, rgt::Item) = lft.key < rgt.key
+
+"""
+    orbit_with_data(aaa, item, under)
+
+Compute the orbit starting from `item` (an `Item` wrapping the seed element)
+under generators `aaa` with action `under`. Populates each node's `:idx`,
+`:rep`, and `:word` data fields and links successor nodes via `next`. Returns
+the list of `Item` nodes.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_with_data([s, t], Item(1), onPoints);
+
+julia> length(o)
+3
+
+julia> [x.key for x in o]
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+```
+"""
+function orbit_with_data(aaa, item, under)
+    list = [item]
+    item.data[:idx] = 1
+    item.data[:rep] = aaa[1]^0
+    item.data[:word] = []
+    for x in list
+        for (k, a) in enumerate(aaa)
+            y = Item(under(x.key, a))
+            l = findfirst(==(y), list)
+            if isnothing(l)
+                push!(list, y)
+                y.data[:idx] = length(list)
+                y.data[:rep] = x.data[:rep] * a
+                y.data[:word] = onWords(x.data[:word], k)
+                z = y
+            else
+                z = list[l]
+            end
+            push!(x.next, z)
+        end
+    end
+    return list
+end
 
 """
     Orbit

@@ -43,6 +43,30 @@ OrbitAl.orbits.orbit_with_images
 
 ---
 
+## Orbit with Full Data
+
+These compute the orbit together with words, coset representatives, and a
+complete generator image table:
+
+```@docs
+OrbitAl.orbits.orbit_and_more
+OrbitAl.orbits.orbit_and_data
+```
+
+---
+
+## Item Nodes
+
+An `Item` wraps an orbit element with attached metadata and successor links,
+supporting a more object-oriented style of orbit computation:
+
+```@docs
+OrbitAl.orbits.Item
+OrbitAl.orbits.orbit_with_data
+```
+
+---
+
 ## Multiple Starting Points
 
 For cases where orbit computation begins from a set of starting points:
