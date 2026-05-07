@@ -12,7 +12,7 @@ import Base: in, size, rand
 using ..orbits
 import ..permutation: Perm, isidentity, last_moved
 
-export SimsGp, orbit_sims
+export SimsGp, orbit_sims, cube
 
 """
     SimsGp(gens, one)
