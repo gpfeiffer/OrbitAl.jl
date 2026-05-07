@@ -8,6 +8,7 @@
 Manifest.toml
 
 # Ignore compiled packages and environments
+build/
 compiled/
 deps/
 logs/
