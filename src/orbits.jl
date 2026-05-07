@@ -15,7 +15,7 @@ export Orbit
 export orbit, onPoints, onRight, onWords, onPairs, onSets
 export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
 export orbit_with_dist, orbit_with_tree, orbit_with_edges, orbit_with_images
-export orbitl, orbitx, orbitx_with_words, orbitx_with_edges
+export orbitl, orbitx, orbitx_with_words, orbitx_with_dist, orbitx_with_edges
 export edges_from_images
 
 ## orbit
@@ -590,6 +590,23 @@ function orbitx_with_words(aaa, xxx, under::Function)
     end
     return (list = list, words = words)
 end
+
+function orbitx_with_dist(aaa, xxx, under::Function)
+    list = xxx
+    dist = [0 for x in xxx]
+    for (i, y) in enumerate(list)
+        for a in aaa
+            z = under(y, a)
+            z in list || begin
+                push!(list, z)
+                push!(dist, dist[i]+1)
+            end
+        end
+    end
+    return (list = list, dist = dist)
+end
+
+
 
 """
     orbitx_with_edges(aaa, xxx, under)
