@@ -4,7 +4,7 @@ This module defines the core `Perm` type and basic operations on permutations in
 
 ---
 
-## 📦 Data Type: `Perm`
+## Data Type: `Perm`
 
 ```@docs
 OrbitAl.permutation.Perm
@@ -12,7 +12,7 @@ OrbitAl.permutation.Perm
 
 ---
 
-## 🏗 Constructors
+## Constructors
 
 ```@docs
 OrbitAl.permutation.one
@@ -23,7 +23,7 @@ OrbitAl.permutation.rand
 
 ---
 
-## 📏 Attributes and Properties
+## Attributes and Properties
 
 ```@docs
 OrbitAl.permutation.degree
@@ -38,7 +38,7 @@ OrbitAl.permutation.cycles
 
 ---
 
-## 🔄 Group Operations
+## Group Operations
 
 ```@docs
 ==(::OrbitAl.permutation.Perm, ::OrbitAl.permutation.Perm)
@@ -52,7 +52,7 @@ inv(::OrbitAl.permutation.Perm)
 
 ---
 
-## 🎯 Actions
+## Actions
 
 ```@docs
 ^(::Int, ::OrbitAl.permutation.Perm)

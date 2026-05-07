@@ -24,7 +24,7 @@ export takeAway, subsets, partitions, standardYTs, tableau_path
 ##    newtonSum(newtonDif(list)) = list
 ##
 
-## [l_1, l_2 ..  l_n] -> [l_1, l_2 - l_1, l_3 - l_2 .. l_n -l_{n-1}]
+## [l_1, l_2 ..  l_n] -> [l_1, l_2 - l_1, l_3 - l_2 .. l_n - l_{n-1}]
 """
     newtonDif(list)
 
