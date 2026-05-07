@@ -22,6 +22,10 @@ export sizeOfGroup, randomGroupElement, memberOfGroup
 include("bfsdfs.jl")
 include("plotting.jl")
 include("syt.jl")
+using .syt
+export newtonDif, newtonSum, newtonDifR, newtonSumR
+export compositionSubset, subsetComposition
+export takeAway, subsets, partitions, standardYTs, tableau_path
 include("simsgroup.jl")
 
 include("coxeter.jl")

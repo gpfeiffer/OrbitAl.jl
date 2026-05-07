@@ -8,6 +8,7 @@ This documentation provides an overview of its modules and functionality.
 - [Permutation Groups](permgroup.md)
 - [Orbits](orbits.md)
 - [Coxeter Groups](coxeter.md)
+- [Standard Young Tableaux](syt.md)
 
 ## Installation
 

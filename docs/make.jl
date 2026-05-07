@@ -14,6 +14,7 @@ makedocs(
         "Orbits" => "orbits.md",
         "Permutation Groups" => "permgroup.md",
         "Coxeter Groups" => "coxeter.md",
+        "Standard Young Tableaux" => "syt.md",
     ],
     authors = "Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>",
 )
