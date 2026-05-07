@@ -9,6 +9,7 @@ This documentation provides an overview of its modules and functionality.
 - [Orbits](orbits.md)
 - [Coxeter Groups](coxeter.md)
 - [Standard Young Tableaux](syt.md)
+- [Involutions](involution.md)
 
 ## Installation
 

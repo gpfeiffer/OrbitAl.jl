@@ -15,6 +15,7 @@ makedocs(
         "Permutation Groups" => "permgroup.md",
         "Coxeter Groups" => "coxeter.md",
         "Standard Young Tableaux" => "syt.md",
+        "Involutions" => "involution.md",
     ],
     authors = "Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>",
 )
