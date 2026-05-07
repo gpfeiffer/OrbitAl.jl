@@ -591,6 +591,37 @@ function orbitx_with_words(aaa, xxx, under::Function)
     return (list = list, words = words)
 end
 
+"""
+    orbitx_with_dist(aaa, xxx, under)
+
+Like `orbit_with_dist`, but starts from a set of points `xxx` rather than a
+single point. Computes all elements reachable from any element of `xxx` and
+records the BFS distance from the nearest starting element. Returns a named
+tuple:
+- `list`: all reachable elements (starting with `xxx`)
+- `dist`: the corresponding BFS distances (0 for elements of `xxx`)
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbitx_with_dist([s, t], [1, 2], onPoints);
+
+julia> o.list
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+
+julia> o.dist
+3-element Vector{Int64}:
+ 0
+ 0
+ 1
+```
+"""
 function orbitx_with_dist(aaa, xxx, under::Function)
     list = xxx
     dist = [0 for x in xxx]

@@ -50,6 +50,7 @@ For cases where orbit computation begins from a set of starting points:
 ```@docs
 OrbitAl.orbits.orbitx
 OrbitAl.orbits.orbitx_with_words
+OrbitAl.orbits.orbitx_with_dist
 OrbitAl.orbits.orbitx_with_edges
 ```
 
