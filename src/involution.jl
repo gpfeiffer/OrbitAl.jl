@@ -10,7 +10,7 @@ module involution
 using ..orbits
 import ..coxeter: reflections
 
-export onInvolutions, involutions, involutionClasses
+export onInvolutions, involutions, onInvolutionClasses, involutionClasses
 
 onInvolutions(x, s) =  x * s == s * x ? onRight(x, s) : onPoints(x, s)
 

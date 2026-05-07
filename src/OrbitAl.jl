@@ -38,6 +38,8 @@ export prefixes, prefixes_with_edges, shapes, longestElt, parabolicTransversal
 
 include("shifts.jl")
 include("involution.jl")
+using .involution
+export onInvolutions, involutions, onInvolutionClasses, involutionClasses
 
 include("presentations.jl")
 include("variants.jl")
