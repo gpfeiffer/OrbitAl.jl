@@ -13,38 +13,61 @@ using ..orbits
 import ..permutation: Perm, isidentity, last_moved
 
 export SimsGp, orbit_sims
-export cube
 
-struct SimsGp
+"""
+    SimsGp(gens, one)
+
+A permutation group represented by a Schreier-Sims stabilizer chain.
+`gens` is a list of generating permutations; `one` is the group identity.
+The stabilizer chain is built lazily on first use.
+"""
+mutable struct SimsGp
     gens::Vector{Perm}
     one::Perm
-    sims::Vector{NamedTuple}
-    SimsGp(gens, one) = new(gens, one, [])
+    sims::Union{Nothing, NamedTuple}
+    SimsGp(gens, one) = new(gens, one, nothing)
 end
 
 is_trivial(group::SimsGp) = all(isidentity, group.gens)
 
-last_moved(group::SimsGp) = max(last_moved.(group.gens)...)
+last_moved(group::SimsGp) = is_trivial(group) ? 0 : max(last_moved.(group.gens)...)
 
+"""
+    in(a, group)
+
+Test whether permutation `a` belongs to `group` by sifting through the
+Schreier-Sims stabilizer chain.
+"""
 function in(a::Perm, group::SimsGp)
     is_trivial(group) && return isidentity(a)
     s = sims(group)
     pos = findfirst(==(s.list[1]^a), s.list)
-    pos == nothing && return false
+    isnothing(pos) && return false
     return a/s.reps[pos] in s.stab
 end
 
+"""
+    closure(group, a)
+
+Return the smallest `SimsGp` containing both `group` and the permutation `a`.
+"""
 function closure(group::SimsGp, a::Perm)
     a in group && return group
     return SimsGp(vcat(group.gens, a), group.one)
 end
 
+"""
+    orbit_sims(aaa, x, under=^)
+
+Compute the orbit of point `x` under generators `aaa` with action `under`,
+recording a right transversal and the point stabilizer as a `SimsGp`.
+Returns a named tuple with fields `list`, `reps`, and `stab`.
+"""
 function orbit_sims(aaa, x, under=^)
     list = [x]
     index = Dict(x => 1)
     reps = [aaa[1]^0]
     stab = SimsGp([], aaa[1]^0)
-    i = 0
     for (i, y) in enumerate(list)
         for a in aaa
             z = under(y, a)
@@ -61,23 +84,36 @@ function orbit_sims(aaa, x, under=^)
 end
 
 function sims(group::SimsGp)
-    group.sims == [] && push!(group.sims,
-      orbit_sims(group.gens, last_moved(group)))
-    return group.sims[1]
+    if isnothing(group.sims)
+        group.sims = orbit_sims(group.gens, last_moved(group))
+    end
+    return group.sims
 end
 
+"""
+    size(group)
+
+Return the order of `group` as a `BigInt`, computed as the product of orbit
+lengths along the stabilizer chain.
+"""
 function size(group::SimsGp)::BigInt
     is_trivial(group) && return 1
     length(sims(group).list) * size(sims(group).stab)
 end
 
+"""
+    rand(group)
+
+Return a uniformly random element of `group` by multiplying a random stabilizer
+element with a random coset representative.
+"""
 function rand(group::SimsGp)
     is_trivial(group) && return group.one
     rand(sims(group).stab) * rand(sims(group).reps)
 end
 
-## test data
-
+## test data: Rubik's cube group
+##
 ##                 +--------------+
 ##                 |              |
 ##                 |  1    2    3 |
@@ -104,7 +140,6 @@ end
 ##                 |              |
 ##                 +--------------+
 ##
-##
 cube = SimsGp([Perm(48, cycles) for cycles in [
   [[ 1, 3, 8, 6],[ 2, 5, 7, 4],[ 9,33,25,17],[10,34,26,18],[11,35,27,19]],
   [[ 9,11,16,14],[10,13,15,12],[ 1,17,41,40],[ 4,20,44,37],[ 6,22,46,35]],
@@ -113,4 +148,5 @@ cube = SimsGp([Perm(48, cycles) for cycles in [
   [[33,35,40,38],[34,37,39,36],[ 3, 9,46,32],[ 2,12,47,29],[ 1,14,48,27]],
   [[41,43,48,46],[42,45,47,44],[14,22,30,38],[15,23,31,39],[16,24,32,40]],
 ]], Perm(48))
+
 end # module

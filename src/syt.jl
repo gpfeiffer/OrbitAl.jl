@@ -285,7 +285,7 @@ function youngLattice(lambda)
     ## how to add to the list
     function grow(list, y, r, c)
         pos = findfirst(==(y), list)
-        if pos == nothing
+        if isnothing(pos)
             push!(list, y)
             push!(next, [])
             pos = length(list)
