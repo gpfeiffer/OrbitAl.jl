@@ -17,6 +17,7 @@ export APermGp, PermGp
 export elements, conjClasses, closure, subgroups, subgpClasses
 export sizeOfGroup, randomGroupElement, memberOfGroup
 export isPrimePower, zuppos
+export intersect_groups
 
 """
     APermGp
@@ -219,4 +220,71 @@ function zuppos(group::APermGp)
     end
     return Z
 end
+
+"""
+    intersect_groups(G, H)
+
+Return generators of G ∩ H using a complete orbit-stabilizer recursion.
+
+Selects a base point `α` (the largest point moved by either group).
+For each `β` in the orbit intersection `α^G ∩ α^H`, searches the coset
+`G_α · t_β` (where `t_β ∈ G` is the BFS transversal element with
+`α^{t_β} = β`) for an element that also lies in H; if found it becomes
+a coset representative of G ∩ H. The stabilizer part `G_α ∩ H_α` is
+found by the same algorithm applied recursively.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3,4]); t = Perm([1,2,4,3]);
+
+julia> G = PermGp([s, t], one(s));  # Klein 4-group
+
+julia> H = PermGp([s], one(s));     # ℤ/2
+
+julia> K = intersect_groups(G, H);
+
+julia> elements(K)
+2-element Vector{Perm}:
+ Perm([1, 2, 3, 4])
+ Perm([2, 1, 3, 4])
+```
+"""
+function intersect_groups(G::APermGp, H::APermGp)
+    is_trivial(G) && return PermGp([], G.one)
+    is_trivial(H) && return PermGp([], G.one)
+
+    α = max(last_moved(G), last_moved(H))
+
+    oG = orbit_with_stabilizer(G.gens, α, onPoints)
+    oH = orbit_with_stabilizer(H.gens, α, onPoints)
+
+    H_orbit  = Set(oH.list)
+    Gα_gens  = setdiff(oG.stab, [G.one])
+    Gα_elts  = orbit(Gα_gens, G.one, onRight)
+
+    coset_reps = Perm[]
+    for i in eachindex(oG.list)
+        β = oG.list[i]
+        β == α && continue
+        β ∈ H_orbit || continue
+        tβ = oG.reps[i]
+        for g₀ in Gα_elts
+            c = g₀ * tβ
+            if c ∈ H
+                push!(coset_reps, c)
+                break
+            end
+        end
+    end
+
+    Gα = PermGp(Gα_gens, G.one)
+    Hα = PermGp(setdiff(oH.stab, [H.one]), G.one)
+    K  = intersect_groups(Gα, Hα)
+
+    gens = filter(!isidentity, vcat(K.gens, coset_reps))
+    return PermGp(gens, G.one)
+end
+
 end # module

@@ -21,6 +21,7 @@ using .permgroup
 export PermGp, elements, conjClasses, closure, subgroups, subgpClasses
 export sizeOfGroup, randomGroupElement, memberOfGroup
 export isPrimePower, zuppos
+export intersect_groups
 
 include("bfsdfs.jl")
 include("plotting.jl")

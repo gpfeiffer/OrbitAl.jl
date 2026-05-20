@@ -27,8 +27,8 @@ OrbitAl.jl is a Julia package for computational group theory and orbit algorithm
 - `orbits.jl` — The core BFS orbit engine with ~10 variants: `orbit`, `orbitl`, `orbit_with_words`, `orbit_with_tree`, `orbit_with_transversal`, `orbit_with_stabilizer`, `orbit_with_images`, `orbit_with_edges`. Standard actions (`onPoints`, `onRight`, `onSets`, `onPairs`, `onWords`) live here.
 
 **Group layer** (depends on permutation + orbits)
-- `permgroup.jl` — `PermGp` struct: closure, conjugacy classes, subgroups, membership, random elements. Built on top of orbit algorithms.
-- `simsgroup.jl` — `SimsGp`: Schreier-Sims algorithm for efficient size/membership without enumerating all elements.
+- `permgroup.jl` — `PermGp` struct: closure, conjugacy classes, subgroups, membership, random elements. Also `isPrimePower` and `zuppos` (one generator per cyclic prime-power-order subgroup). Built on top of orbit algorithms.
+- `simsgroup.jl` — `SimsGp`: Schreier-Sims algorithm for efficient size/membership without enumerating all elements. Also exports `cube` and `orbit_sims`.
 - `bfsdfs.jl` — `Node` struct, generic BFS/DFS tree traversal utilities.
 
 **Algebraic structures** (depend on group layer)
@@ -51,8 +51,7 @@ OrbitAl.jl is a Julia package for computational group theory and orbit algorithm
 - Permutations use **1-based indexing** throughout.
 - The caret `^` operator is heavily overloaded: `x ^ g` applies permutation `g` to point/set/word `x`, and `g ^ h` conjugates `g` by `h`.
 - Orbit functions follow a consistent BFS pattern — the primary `orbit` returns a `Vector`, while `orbitl` returns an `Orbit` struct containing both the list and a position lookup.
-- `coxeter.jl` and `involution.jl` have modifications tracked in the git status but not yet committed; treat these as work-in-progress.
-- `src/p.jl`, `src/enumerate.jl`, `src/test.jl`, and `src/coxeter.new` are scratch/draft files, not part of the active module.
+- The coset enumeration files (`presentations.jl`, `variants.jl`, `enumerator.jl`, `coset.jl`) are experimental and not yet part of the exported API.
 
 ## Documentation
 
