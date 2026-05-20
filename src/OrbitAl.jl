@@ -20,6 +20,7 @@ include("permgroup.jl")
 using .permgroup
 export PermGp, elements, conjClasses, closure, subgroups, subgpClasses
 export sizeOfGroup, randomGroupElement, memberOfGroup
+export isPrimePower, zuppos
 
 include("bfsdfs.jl")
 include("plotting.jl")

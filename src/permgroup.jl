@@ -16,6 +16,7 @@ import ..permutation: isidentity, last_moved
 export APermGp, PermGp
 export elements, conjClasses, closure, subgroups, subgpClasses
 export sizeOfGroup, randomGroupElement, memberOfGroup
+export isPrimePower, zuppos
 
 """
     APermGp
@@ -183,4 +184,39 @@ function memberOfGroup(group::APermGp, perm::Perm)
 end
 in(a::Perm, group::APermGp) = memberOfGroup(group, a)
 
+"""
+    isPrimePower(n)
+
+Return `true` if `n > 1` is a power of a single prime, i.e., `n = p^k` for some prime `p`
+and `k ≥ 1`.
+"""
+function isPrimePower(n::Int)
+    n > 1 || return false
+    p = first(p for p in 2:n if n % p == 0)
+    while n % p == 0; n ÷= p; end
+    return n == 1
+end
+
+"""
+    zuppos(group)
+
+Return one generator for each cyclic subgroup of prime-power order (zuppo) of `group`.
+The returned generators suffice to find all subgroups of `group` under the closure action.
+"""
+function zuppos(group::APermGp)
+    list = [group.one]
+    Z = Perm[]
+    for g in list
+        for a in group.gens
+            z = g * a
+            z ∈ list || push!(list, z)
+        end
+        g == group.one && continue
+        ord = order(g)
+        isPrimePower(ord) || continue
+        any(order(z) == ord && g ∈ orbit([z], group.one, onRight) for z in Z) && continue
+        push!(Z, g)
+    end
+    return Z
+end
 end # module
