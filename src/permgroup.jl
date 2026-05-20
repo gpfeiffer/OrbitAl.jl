@@ -220,6 +220,19 @@ function zuppos(group::APermGp)
     return Z
 end
 
+# Search the coset Gα·t for an element in H, using Gα's stabilizer chain.
+function find_coset_rep_in(Gα::APermGp, t::Perm, H::APermGp)
+    is_trivial(Gα) && return t ∈ H ? t : nothing
+    α′ = last_moved(Gα)
+    oGα = orbit_with_stabilizer(Gα.gens, α′, onPoints)
+    Gα_stab = PermGp(setdiff(oGα.stab, [Gα.one]), Gα.one)
+    for v in oGα.reps
+        c = find_coset_rep_in(Gα_stab, v * t, H)
+        c === nothing || return c
+    end
+    return nothing
+end
+
 """
     intersect(G, H)
     G ∩ H
@@ -228,10 +241,9 @@ Return generators of G ∩ H using a complete orbit-stabilizer recursion.
 
 Selects a base point `α` (the largest point moved by either group).
 For each `β` in the orbit intersection `α^G ∩ α^H`, searches the coset
-`G_α · t_β` (where `t_β ∈ G` is the BFS transversal element with
-`α^{t_β} = β`) for an element that also lies in H; if found it becomes
-a coset representative of G ∩ H. The stabilizer part `G_α ∩ H_α` is
-found by the same algorithm applied recursively.
+`G_α · t_β` for an element that also lies in H using `find_coset_rep_in`,
+which recurses through G_α's own stabilizer chain rather than enumerating
+its elements. The stabilizer part `G_α ∩ H_α` is found recursively.
 
 # Examples
 ```jldoctest
@@ -260,26 +272,18 @@ function intersect(G::APermGp, H::APermGp)
     oG = orbit_with_stabilizer(G.gens, α, onPoints)
     oH = orbit_with_stabilizer(H.gens, α, onPoints)
 
-    H_orbit  = Set(oH.list)
-    Gα_gens  = setdiff(oG.stab, [G.one])
-    Gα_elts  = orbit(Gα_gens, G.one, onRight)
+    H_orbit = Set(oH.list)
+    Gα = PermGp(setdiff(oG.stab, [G.one]), G.one)
 
     coset_reps = Perm[]
     for i in eachindex(oG.list)
         β = oG.list[i]
         β == α && continue
         β ∈ H_orbit || continue
-        tβ = oG.reps[i]
-        for g₀ in Gα_elts
-            c = g₀ * tβ
-            if c ∈ H
-                push!(coset_reps, c)
-                break
-            end
-        end
+        c = find_coset_rep_in(Gα, oG.reps[i], H)
+        c === nothing || push!(coset_reps, c)
     end
 
-    Gα = PermGp(Gα_gens, G.one)
     Hα = PermGp(setdiff(oH.stab, [H.one]), G.one)
     K  = intersect(Gα, Hα)
 
