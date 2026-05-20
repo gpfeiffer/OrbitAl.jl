@@ -224,13 +224,13 @@ end
     intersect(G, H)
     G ∩ H
 
-Return generators of G ∩ H by a BFS through H, treating elements in the
-same coset of the (growing) intersection as equivalent.
-
-Each element of H is visited once. When a new element `s` (not yet in the
-current known intersection `K`) is found to lie in G, it is added as a
-generator of K. The BFS terminates once all cosets of the final K in H
-have been checked.
+Return generators of G ∩ H by a BFS through H's Cayley graph, starting
+from the identity. A `Dict` index deduplicates visited elements. For each
+new element `s` not yet indexed: if `s` already lies in the current known
+intersection `K`, it is recorded but not expanded; otherwise `s` is added
+to the BFS queue and, if `s ∈ G`, added as a new generator of `K`. By the
+coset argument, every element of H not in K when first reached represents a
+distinct coset of K in H, so at most [H : G∩H] elements enter the queue.
 
 # Examples
 ```jldoctest
@@ -254,13 +254,13 @@ function intersect(G::APermGp, H::APermGp)
     K     = PermGp([], G.one)
     list  = [G.one]
     index = Dict(G.one => 1)
-    for t in list
+    for y in list
         for b in H.gens
-            s = t * b
-            get!(index, s) do
-                s ∈ K && return 0
-                push!(list, s)
-                s ∈ G && (K = closure(K, s))
+            z = y * b
+            get!(index, z) do
+                z ∈ K && return 0
+                push!(list, z)
+                z ∈ G && (K = closure(K, z))
                 length(list)
             end
         end
