@@ -220,30 +220,17 @@ function zuppos(group::APermGp)
     return Z
 end
 
-# Search the coset Gα·t for an element in H, using Gα's stabilizer chain.
-function find_coset_rep_in(Gα::APermGp, t::Perm, H::APermGp)
-    is_trivial(Gα) && return t ∈ H ? t : nothing
-    α′ = last_moved(Gα)
-    oGα = orbit_with_stabilizer(Gα.gens, α′, onPoints)
-    Gα_stab = PermGp(setdiff(oGα.stab, [Gα.one]), Gα.one)
-    for v in oGα.reps
-        c = find_coset_rep_in(Gα_stab, v * t, H)
-        isnothing(c) || return c
-    end
-    return nothing
-end
-
 """
     intersect(G, H)
     G ∩ H
 
-Return generators of G ∩ H using a complete orbit-stabilizer recursion.
+Return generators of G ∩ H by a BFS through H, treating elements in the
+same coset of the (growing) intersection as equivalent.
 
-Selects a base point `α` (the largest point moved by either group).
-For each `β` in the orbit intersection `α^G ∩ α^H`, searches the coset
-`G_α · t_β` for an element that also lies in H using `find_coset_rep_in`,
-which recurses through G_α's own stabilizer chain rather than enumerating
-its elements. The stabilizer part `G_α ∩ H_α` is found recursively.
+Each element of H is visited once. When a new element `s` (not yet in the
+current known intersection `K`) is found to lie in G, it is added as a
+generator of K. The BFS terminates once all cosets of the final K in H
+have been checked.
 
 # Examples
 ```jldoctest
@@ -264,31 +251,21 @@ julia> elements(K)
 ```
 """
 function intersect(G::APermGp, H::APermGp)
-    is_trivial(G) && return PermGp([], G.one)
-    is_trivial(H) && return PermGp([], G.one)
-
-    α = max(last_moved(G), last_moved(H))
-
-    oG = orbit_with_stabilizer(G.gens, α, onPoints)
-    oH = orbit_with_stabilizer(H.gens, α, onPoints)
-
-    H_orbit = Set(oH.list)
-    Gα = PermGp(setdiff(oG.stab, [G.one]), G.one)
-
-    coset_reps = Perm[]
-    for i in eachindex(oG.list)
-        β = oG.list[i]
-        β == α && continue
-        β ∈ H_orbit || continue
-        c = find_coset_rep_in(Gα, oG.reps[i], H)
-        isnothing(c) || push!(coset_reps, c)
+    K     = PermGp([], G.one)
+    list  = [G.one]
+    index = Dict(G.one => 1)
+    for t in list
+        for b in H.gens
+            s = t * b
+            get!(index, s) do
+                s ∈ K && return 0
+                push!(list, s)
+                s ∈ G && (K = closure(K, s))
+                length(list)
+            end
+        end
     end
-
-    Hα = PermGp(setdiff(oH.stab, [H.one]), G.one)
-    K  = intersect(Gα, Hα)
-
-    gens = filter(!isidentity, vcat(K.gens, coset_reps))
-    return PermGp(gens, G.one)
+    return K
 end
 
 end # module
