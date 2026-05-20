@@ -13,6 +13,7 @@ makedocs(
         "Permutations" => "permutation.md",
         "Orbits" => "orbits.md",
         "Permutation Groups" => "permgroup.md",
+        "Schreier-Sims Groups" => "simsgroup.md",
         "Coxeter Groups" => "coxeter.md",
         "Standard Young Tableaux" => "syt.md",
         "Involutions" => "involution.md",
