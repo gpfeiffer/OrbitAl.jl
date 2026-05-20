@@ -31,6 +31,8 @@ export newtonDif, newtonSum, newtonDifR, newtonSumR
 export compositionSubset, subsetComposition
 export takeAway, subsets, partitions, standardYTs, tableau_path
 include("simsgroup.jl")
+using .simsgroup
+export SimsGp, orbit_sims, cube
 
 include("coxeter.jl")
 using .coxeter

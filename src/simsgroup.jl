@@ -11,8 +11,10 @@ import Base: in, size, rand
 
 using ..orbits
 import ..permutation: Perm, isidentity, last_moved
+import ..permgroup: intersect_groups
 
 export SimsGp, orbit_sims, cube
+export intersect_groups
 
 """
     SimsGp(gens, one)
@@ -110,6 +112,66 @@ element with a random coset representative.
 function rand(group::SimsGp)
     is_trivial(group) && return group.one
     rand(sims(group).stab) * rand(sims(group).reps)
+end
+
+"""
+    intersect_groups(G::SimsGp, H::SimsGp)
+
+Return generators of G ∩ H as a `SimsGp`, using an orbit-stabilizer recursion
+with Schreier-Sims membership testing.
+
+Uses `orbit_sims` to compute the orbit and stabilizer of a base point `α` in
+both groups. For each `β` in `α^G ∩ α^H`, searches the coset `G_α · t_β` for
+an element lying in H, using the Schreier-Sims membership test on H. The
+stabilizer part `G_α ∩ H_α` is found by the same algorithm recursively.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3,4]); t = Perm([1,2,4,3]);
+
+julia> G = SimsGp([s, t], one(s));  # Klein 4-group
+
+julia> H = SimsGp([s], one(s));     # ℤ/2
+
+julia> K = intersect_groups(G, H);
+
+julia> size(K)
+2
+```
+"""
+function intersect_groups(G::SimsGp, H::SimsGp)
+    is_trivial(G) && return SimsGp([], G.one)
+    is_trivial(H) && return SimsGp([], G.one)
+
+    α = max(last_moved(G), last_moved(H))
+
+    oG = orbit_sims(G.gens, α)
+    oH = orbit_sims(H.gens, α)
+
+    H_orbit = Set(oH.list)
+    Gα_elts = orbit(oG.stab.gens, G.one, onRight)
+
+    coset_reps = Perm[]
+    for i in eachindex(oG.list)
+        β = oG.list[i]
+        β == α && continue
+        β ∈ H_orbit || continue
+        tβ = oG.reps[i]
+        for g₀ in Gα_elts
+            c = g₀ * tβ
+            if c ∈ H
+                push!(coset_reps, c)
+                break
+            end
+        end
+    end
+
+    K = intersect_groups(oG.stab, oH.stab)
+
+    gens = filter(!isidentity, vcat(K.gens, coset_reps))
+    return SimsGp(gens, G.one)
 end
 
 ## test data: Rubik's cube group
