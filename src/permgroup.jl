@@ -228,7 +228,7 @@ function find_coset_rep_in(Gα::APermGp, t::Perm, H::APermGp)
     Gα_stab = PermGp(setdiff(oGα.stab, [Gα.one]), Gα.one)
     for v in oGα.reps
         c = find_coset_rep_in(Gα_stab, v * t, H)
-        c === nothing || return c
+        isnothing(c) || return c
     end
     return nothing
 end
@@ -281,7 +281,7 @@ function intersect(G::APermGp, H::APermGp)
         β == α && continue
         β ∈ H_orbit || continue
         c = find_coset_rep_in(Gα, oG.reps[i], H)
-        c === nothing || push!(coset_reps, c)
+        isnothing(c) || push!(coset_reps, c)
     end
 
     Hα = PermGp(setdiff(oH.stab, [H.one]), G.one)

@@ -118,7 +118,7 @@ function find_coset_rep_in(Gα::SimsGp, t::Perm, H::SimsGp)
     s = sims(Gα)
     for v in s.reps
         c = find_coset_rep_in(s.stab, v * t, H)
-        c === nothing || return c
+        isnothing(c) || return c
     end
     return nothing
 end
@@ -169,7 +169,7 @@ function intersect(G::SimsGp, H::SimsGp)
         β == α && continue
         β ∈ H_orbit || continue
         c = find_coset_rep_in(oG.stab, oG.reps[i], H)
-        c === nothing || push!(coset_reps, c)
+        isnothing(c) || push!(coset_reps, c)
     end
 
     K = intersect(oG.stab, oH.stab)
