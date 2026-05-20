@@ -128,11 +128,11 @@ stabilizer part `G_α ∩ H_α` is found by the same algorithm recursively.
 ```jldoctest
 julia> using OrbitAl
 
-julia> s = Perm([2,1,3,4]); t = Perm([1,2,4,3]);
+julia> s = Perm([2,1,3,4]); t = Perm([1,3,2,4]); u = Perm([1,2,4,3]);
 
-julia> G = SimsGp([s, t], one(s));  # Klein 4-group
+julia> G = SimsGp([s, t], one(s));  # S3 on {1,2,3}, order 6
 
-julia> H = SimsGp([s], one(s));     # ℤ/2
+julia> H = SimsGp([t, u], one(s));  # S3 on {2,3,4}, order 6
 
 julia> K = G ∩ H;
 
