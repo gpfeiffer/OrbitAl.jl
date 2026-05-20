@@ -112,6 +112,17 @@ function rand(group::SimsGp)
     rand(sims(group).stab) * rand(sims(group).reps)
 end
 
+# Search the coset Gα·t for an element in H, using Gα's stabilizer chain.
+function find_coset_rep_in(Gα::SimsGp, t::Perm, H::SimsGp)
+    is_trivial(Gα) && return t ∈ H ? t : nothing
+    s = sims(Gα)
+    for v in s.reps
+        c = find_coset_rep_in(s.stab, v * t, H)
+        c === nothing || return c
+    end
+    return nothing
+end
+
 """
     intersect(G::SimsGp, H::SimsGp)
     G ∩ H
@@ -121,8 +132,9 @@ with Schreier-Sims membership testing.
 
 Uses `orbit_sims` to compute the orbit and stabilizer of a base point `α` in
 both groups. For each `β` in `α^G ∩ α^H`, searches the coset `G_α · t_β` for
-an element lying in H, using the Schreier-Sims membership test on H. The
-stabilizer part `G_α ∩ H_α` is found by the same algorithm recursively.
+an element lying in H using `find_coset_rep_in`, which recurses through G_α's
+own stabilizer chain rather than enumerating its elements. The stabilizer part
+`G_α ∩ H_α` is found by the same algorithm recursively.
 
 # Examples
 ```jldoctest
@@ -150,21 +162,14 @@ function intersect(G::SimsGp, H::SimsGp)
     oH = orbit_sims(H.gens, α)
 
     H_orbit = Set(oH.list)
-    Gα_elts = orbit(oG.stab.gens, G.one, onRight)
 
     coset_reps = Perm[]
     for i in eachindex(oG.list)
         β = oG.list[i]
         β == α && continue
         β ∈ H_orbit || continue
-        tβ = oG.reps[i]
-        for g₀ in Gα_elts
-            c = g₀ * tβ
-            if c ∈ H
-                push!(coset_reps, c)
-                break
-            end
-        end
+        c = find_coset_rep_in(oG.stab, oG.reps[i], H)
+        c === nothing || push!(coset_reps, c)
     end
 
     K = intersect(oG.stab, oH.stab)
