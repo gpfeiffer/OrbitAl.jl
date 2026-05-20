@@ -10,7 +10,7 @@ module bfsdfs
 export gcd
 export Node, BFS, DFS, tree_print
 
-##  Euclid's algorithm in as a one-liner
+##  Euclid's algorithm as a one-liner
 gcd(a, b) = b == 0 ? a : gcd(b, a % b)
 
 ##  a tree type
