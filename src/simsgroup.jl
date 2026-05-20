@@ -7,14 +7,12 @@
 ##
 module simsgroup
 
-import Base: in, size, rand
+import Base: in, size, rand, intersect
 
 using ..orbits
 import ..permutation: Perm, isidentity, last_moved
-import ..permgroup: intersect_groups
 
 export SimsGp, orbit_sims, cube
-export intersect_groups
 
 """
     SimsGp(gens, one)
@@ -115,7 +113,8 @@ function rand(group::SimsGp)
 end
 
 """
-    intersect_groups(G::SimsGp, H::SimsGp)
+    intersect(G::SimsGp, H::SimsGp)
+    G ∩ H
 
 Return generators of G ∩ H as a `SimsGp`, using an orbit-stabilizer recursion
 with Schreier-Sims membership testing.
@@ -135,13 +134,13 @@ julia> G = SimsGp([s, t], one(s));  # Klein 4-group
 
 julia> H = SimsGp([s], one(s));     # ℤ/2
 
-julia> K = intersect_groups(G, H);
+julia> K = G ∩ H;
 
 julia> size(K)
 2
 ```
 """
-function intersect_groups(G::SimsGp, H::SimsGp)
+function intersect(G::SimsGp, H::SimsGp)
     is_trivial(G) && return SimsGp([], G.one)
     is_trivial(H) && return SimsGp([], G.one)
 
@@ -168,7 +167,7 @@ function intersect_groups(G::SimsGp, H::SimsGp)
         end
     end
 
-    K = intersect_groups(oG.stab, oH.stab)
+    K = intersect(oG.stab, oH.stab)
 
     gens = filter(!isidentity, vcat(K.gens, coset_reps))
     return SimsGp(gens, G.one)

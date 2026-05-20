@@ -10,14 +10,13 @@ module permgroup
 using ..permutation
 using ..orbits
 
-import Base: in, isless, rand, size, ==, ^
+import Base: in, isless, rand, size, ==, ^, intersect
 import ..permutation: isidentity, last_moved
 
 export APermGp, PermGp
 export elements, conjClasses, closure, subgroups, subgpClasses
 export sizeOfGroup, randomGroupElement, memberOfGroup
 export isPrimePower, zuppos
-export intersect_groups
 
 """
     APermGp
@@ -222,7 +221,8 @@ function zuppos(group::APermGp)
 end
 
 """
-    intersect_groups(G, H)
+    intersect(G, H)
+    G ∩ H
 
 Return generators of G ∩ H using a complete orbit-stabilizer recursion.
 
@@ -243,7 +243,7 @@ julia> G = PermGp([s, t], one(s));  # Klein 4-group
 
 julia> H = PermGp([s], one(s));     # ℤ/2
 
-julia> K = intersect_groups(G, H);
+julia> K = G ∩ H;
 
 julia> elements(K)
 2-element Vector{Perm}:
@@ -251,7 +251,7 @@ julia> elements(K)
  Perm([2, 1, 3, 4])
 ```
 """
-function intersect_groups(G::APermGp, H::APermGp)
+function intersect(G::APermGp, H::APermGp)
     is_trivial(G) && return PermGp([], G.one)
     is_trivial(H) && return PermGp([], G.one)
 
@@ -281,7 +281,7 @@ function intersect_groups(G::APermGp, H::APermGp)
 
     Gα = PermGp(Gα_gens, G.one)
     Hα = PermGp(setdiff(oH.stab, [H.one]), G.one)
-    K  = intersect_groups(Gα, Hα)
+    K  = intersect(Gα, Hα)
 
     gens = filter(!isidentity, vcat(K.gens, coset_reps))
     return PermGp(gens, G.one)

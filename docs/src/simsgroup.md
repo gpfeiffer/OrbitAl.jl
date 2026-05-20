@@ -39,5 +39,5 @@ OrbitAl.simsgroup.orbit_sims
 ## Intersection
 
 ```@docs
-OrbitAl.simsgroup.intersect_groups(::OrbitAl.simsgroup.SimsGp, ::OrbitAl.simsgroup.SimsGp)
+Base.intersect(::OrbitAl.simsgroup.SimsGp, ::OrbitAl.simsgroup.SimsGp)
 ```

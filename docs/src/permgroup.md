@@ -55,5 +55,5 @@ OrbitAl.permgroup.zuppos
 ## Intersection
 
 ```@docs
-OrbitAl.permgroup.intersect_groups
+Base.intersect(::OrbitAl.permgroup.APermGp, ::OrbitAl.permgroup.APermGp)
 ```
