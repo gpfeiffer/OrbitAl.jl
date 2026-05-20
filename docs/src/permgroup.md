@@ -40,3 +40,20 @@ OrbitAl.permgroup.conjClasses
 OrbitAl.permgroup.subgpClasses
 OrbitAl.permgroup.closure
 ```
+
+---
+
+## Subgroup Structure
+
+```@docs
+OrbitAl.permgroup.isPrimePower
+OrbitAl.permgroup.zuppos
+```
+
+---
+
+## Intersection
+
+```@docs
+OrbitAl.permgroup.intersect_groups
+```
