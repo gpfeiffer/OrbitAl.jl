@@ -232,8 +232,8 @@ subsets(set) = orbit(set, set, takeAway)
     partitions(n)
 
 Enumerate all integer partitions of `n` as an orbit under a partition-removal
-action. Returns a vector of non-increasing integer vectors, in reverse
-lexicographic order (smallest partition first).
+action. Returns a vector of non-increasing integer vectors in lexicographic
+order (all-ones partition first, single-part partition last).
 
 # Examples
 ```jldoctest
@@ -261,25 +261,25 @@ end
 ##  SYT: a standard Young tableau is a shortest path in the Young lattice
 ##
 
-##  normal case action
+# Decrement part k of partition lambda (caller ensures lambda[k] > lambda[k+1]).
 function remove1Hook2(lambda, k)
     new = copy(lambda)
     new[k] -= 1
     return new
 end
 
-##  special case action
+# Remove a box from row k: drops the row entirely when lambda[k] == 1.
 function remove1Hook1(lambda, k)
     lambda[k] == 1 && return lambda[1:k-1]
     remove1Hook2(lambda, k)
 end
 
-##  Young lattice and shortest paths.  2-step process.
-##  1. build graph "bottom up" from lambda; for each edge, record the row/col
-##     positions it corresponds to.
-##  2. find shortest paths "top down" from 0
-##  (consider setting this up as starting with a list of partitions of n)
-##
+# Build the Hasse diagram of the Young lattice from `lambda` down to the empty
+# partition via a BFS. Each directed edge records the (row, col) of the removed
+# box, used to reconstruct the entry positions in a standard Young tableau.
+#
+# Returns (list = partitions in BFS order, next = adjacency list of
+# (pos, row, col) named tuples for each node).
 function youngLattice(lambda)
 
     ## how to add to the list
@@ -312,16 +312,18 @@ function youngLattice(lambda)
     return (list = list, next = next)
 end
 
-##  DFS with a visitor that makes shortest paths if unknown.
+# Memoized DFS over the Young-lattice graph. Returns all paths from node `x`
+# to the empty partition as vectors of (row, col) pairs; path[i] is the
+# position (row, col) of entry i in the standard Young tableau.
 function pathfinder(x, next, path)
-    if ismissing(path[x])
+    if isnothing(path[x])
         path[x] = []
         for z in next[x]
             for p in pathfinder(z.pos, next, path)
                 push!(path[x], vcat(p, [(z.row, z.col)]))
             end
         end
-        path[x] == [] && push!(path[x], [])   # empty path
+        path[x] == [] && push!(path[x], [])   # base case: empty partition
     end
     return path[x]
 end
@@ -331,8 +333,10 @@ end
 
 Return all standard Young tableaux of shape `lambda` (a partition given as a
 non-increasing integer vector). Each tableau is represented as a path in the
-Young lattice: a vector of `(row, col)` pairs recording where each number
-`1, 2, …, n` was placed.
+Young lattice: a vector of `(row, col)` pairs where the `i`-th pair is the
+position of entry `i` in the tableau.
+
+See also `tableau_path` to convert a path into a row-array representation.
 
 # Examples
 ```jldoctest
@@ -347,7 +351,7 @@ julia> length(standardYTs([3, 2, 1]))
 """
 function standardYTs(lambda)
     next = youngLattice(lambda).next
-    return pathfinder(1, next, Any[missing for x in next])
+    return pathfinder(1, next, Any[nothing for x in next])
 end
 
 """
