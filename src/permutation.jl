@@ -311,7 +311,8 @@ function ^(perm::Perm, n::Int)
     n == 0 && return one(perm)
     n < 0 && return inv(perm)^(-n)
     q, r = divrem(n, 2)
-    return perm^q * perm^q * perm^r
+    perm_q = perm^q
+    return perm_q * perm_q * perm^r
 end
 
 ##  shape, order, sign

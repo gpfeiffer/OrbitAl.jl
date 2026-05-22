@@ -295,7 +295,7 @@ function youngLattice(lambda)
 
     ## orbit-with-edges
     list = [lambda]
-    next = [[] for x in list]
+    next = [[]]
     i = 0
     while i < length(list)
         i += 1
