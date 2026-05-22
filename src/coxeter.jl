@@ -30,7 +30,7 @@ Each edge `(i, j)` indicates that generators `s_i` and `s_j` have Coxeter order 
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.coxeter
 
 julia> coxeterGraph("A", 3)
 2-element Vector{Tuple{Int64, Int64}}:
@@ -53,7 +53,7 @@ Entry `m[i,j]` is the order of the product `s_i * s_j` of generators.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.coxeter
 
 julia> coxeterMat("A", 2)
 2×2 Matrix{Int64}:
@@ -98,7 +98,7 @@ Return the Cartan matrix for the Lie algebra of given `series` and `rank`.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.coxeter
 
 julia> cartanMat("A", 2)
 2×2 Matrix{Int64}:
@@ -143,7 +143,7 @@ group acting on its root system. The generators correspond to simple reflections
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.coxeter
 
 julia> W = CoxeterGp(cartanMat("A", 2));
 
@@ -172,7 +172,7 @@ positive roots.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.coxeter
 
 julia> W = CoxeterGp(cartanMat("A", 2));
 
@@ -194,7 +194,7 @@ generator word for `w`.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.coxeter
 
 julia> W = CoxeterGp(cartanMat("A", 2));
 
@@ -230,7 +230,7 @@ computed by iteratively stripping left descents.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.coxeter
 
 julia> W = CoxeterGp(cartanMat("A", 2));
 

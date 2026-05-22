@@ -1,5 +1,8 @@
 # Coxeter Groups
 
+!!! note
+    This is an on-demand module. Load it with `using OrbitAl.coxeter`.
+
 This module constructs finite Coxeter groups as permutation groups acting on their
 root systems, and provides algorithms for lengths, reduced words, reflections,
 parabolic subgroups, and conjugacy classes.

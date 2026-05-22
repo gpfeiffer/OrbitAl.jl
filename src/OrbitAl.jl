@@ -24,13 +24,9 @@ export isPrimePower, zuppos
 
 include("bfsdfs.jl")
 include("plotting.jl")
-include("coxeter.jl")
-using .coxeter
-export coxeterGraph, coxeterMat, cartanMat, CoxeterGp, coxeterConjugacyClasses
-export coxeterLength, coxeterWord, permCoxeterWord, reflections
-export prefixes, prefixes_with_edges, shapes, longestElt, parabolicTransversal
 
 # on-demand modules: load with e.g. `using OrbitAl.syt`
+include("coxeter.jl")
 include("syt.jl")
 include("simsgroup.jl")
 include("shifts.jl")

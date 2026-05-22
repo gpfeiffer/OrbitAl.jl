@@ -1,5 +1,6 @@
 using Documenter
 using OrbitAl
+using OrbitAl.coxeter
 using OrbitAl.simsgroup
 using OrbitAl.syt
 using OrbitAl.coset
@@ -7,7 +8,7 @@ using OrbitAl.involution
 
 makedocs(
     sitename = "OrbitAl.jl",
-    modules = [OrbitAl, OrbitAl.simsgroup, OrbitAl.syt, OrbitAl.coset, OrbitAl.involution],
+    modules = [OrbitAl, OrbitAl.coxeter, OrbitAl.simsgroup, OrbitAl.syt, OrbitAl.coset, OrbitAl.involution],
     checkdocs = :none,
     doctest = true,
     format = Documenter.HTML(),
@@ -17,8 +18,8 @@ makedocs(
         "Permutations" => "permutation.md",
         "Orbits" => "orbits.md",
         "Permutation Groups" => "permgroup.md",
-        "Coxeter Groups" => "coxeter.md",
         "On Demand" => [
+            "Coxeter Groups" => "coxeter.md",
             "Schreier-Sims Groups" => "simsgroup.md",
             "Standard Young Tableaux" => "syt.md",
             "Cosets" => "coset.md",

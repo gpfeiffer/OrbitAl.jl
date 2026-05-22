@@ -25,7 +25,7 @@ yields all involutions of the group.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl, OrbitAl.involution
+julia> using OrbitAl, OrbitAl.coxeter, OrbitAl.involution
 
 julia> W = CoxeterGp(cartanMat("A", 2));
 
@@ -45,7 +45,7 @@ the identity under the involution action `onInvolutions`.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl, OrbitAl.involution
+julia> using OrbitAl, OrbitAl.coxeter, OrbitAl.involution
 
 julia> W = CoxeterGp(cartanMat("A", 2));
 
@@ -70,7 +70,7 @@ yields all conjugacy classes of involutions.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl, OrbitAl.involution
+julia> using OrbitAl, OrbitAl.coxeter, OrbitAl.involution
 
 julia> W = CoxeterGp(cartanMat("A", 2));
 
@@ -95,7 +95,7 @@ Each element of the result is an `Orbit` (a conjugacy class).
 
 # Examples
 ```jldoctest
-julia> using OrbitAl, OrbitAl.involution
+julia> using OrbitAl, OrbitAl.coxeter, OrbitAl.involution
 
 julia> W = CoxeterGp(cartanMat("A", 2));
 

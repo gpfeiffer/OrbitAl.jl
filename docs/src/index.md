@@ -9,12 +9,12 @@ Loaded automatically with `using OrbitAl`:
 - [Permutations](permutation.md)
 - [Orbits](orbits.md)
 - [Permutation Groups](permgroup.md)
-- [Coxeter Groups](coxeter.md)
 
 ## On-demand modules
 
 Load explicitly, e.g. `using OrbitAl.syt`:
 
+- [Coxeter Groups](coxeter.md) — `using OrbitAl.coxeter`
 - [Schreier-Sims Groups](simsgroup.md) — `using OrbitAl.simsgroup`
 - [Standard Young Tableaux](syt.md) — `using OrbitAl.syt`
 - [Cosets](coset.md) — `using OrbitAl.coset`
@@ -37,11 +37,11 @@ Pkg.add(url="https://github.com/gpfeiffer/OrbitAl.jl")
 - **Orbit engine** — BFS-based orbit algorithms in 10+ variants: with words, transversals, stabilizers, edges, images, and multi-seed (`orbitx`) forms.
 - **Standard actions** — `onPoints`, `onRight`, `onSets`, `onPairs`, `onWords` ready to use or compose.
 - **Permutation groups** — `PermGp` supporting element enumeration, conjugacy classes, subgroup enumeration, membership testing, random element sampling, and intersection.
-- **Coxeter groups** — `CoxeterGp` built from a Cartan matrix: root systems, reflections, Coxeter length, reduced words, parabolic subgroups and transversals, conjugacy classes.
 - **Visualization** — D3.js force-directed Cayley graphs rendered in Jupyter notebooks.
 
 ### On-demand
 
+- **Coxeter groups** — `CoxeterGp` built from a Cartan matrix: root systems, reflections, Coxeter length, reduced words, parabolic subgroups and transversals, conjugacy classes.
 - **Schreier-Sims groups** — `SimsGp` with cached stabilizer chain for fast repeated membership tests and size computation without enumerating all elements.
 - **Standard Young tableaux** — partitions, Newton sums and differences, composition/subset conversions, tableau paths.
 - **Cosets** — `Coset` type and `cosets` for orbit enumeration of right cosets of a subgroup.
@@ -72,10 +72,10 @@ t = Perm([2, 3, 4, 1])       # 4-cycle (1 2 3 4)
 orbit([s, t], 1, onPoints)   # [1, 2, 3, 4]
 ```
 
-### Coxeter groups
+### On-demand: Coxeter groups
 
 ```julia
-using OrbitAl
+using OrbitAl, OrbitAl.coxeter
 
 W = CoxeterGp(cartanMat("A", 3))   # symmetric group S4 as a Coxeter group
 sizeOfGroup(W)                      # 24
