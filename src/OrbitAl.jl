@@ -33,6 +33,10 @@ include("simsgroup.jl")
 using .simsgroup
 export SimsGp, orbit_sims, cube
 
+include("coset.jl")
+using .coset
+export Coset, cosets
+
 include("coxeter.jl")
 using .coxeter
 export coxeterGraph, coxeterMat, cartanMat, CoxeterGp, coxeterConjugacyClasses
