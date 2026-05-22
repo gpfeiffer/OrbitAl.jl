@@ -1,5 +1,8 @@
 # Standard Young Tableaux
 
+!!! note
+    This is an on-demand module. Load it with `using OrbitAl.syt`.
+
 This module provides tools for working with integer partitions and standard
 Young tableaux, built on top of the orbit machinery.
 

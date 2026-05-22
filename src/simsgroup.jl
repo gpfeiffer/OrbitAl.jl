@@ -138,7 +138,7 @@ own stabilizer chain rather than enumerating its elements. The stabilizer part
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.simsgroup
 
 julia> s = Perm([2,1,3,4]); t = Perm([1,3,2,4]); u = Perm([1,2,4,3]);
 

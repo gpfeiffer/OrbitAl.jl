@@ -36,7 +36,7 @@ Inverse of `newtonSum`: `newtonDif(newtonSum(list)) == list`.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> newtonDif([1, 3, 6, 10])
 4-element Vector{Int64}:
@@ -62,7 +62,7 @@ Inverse of `newtonDif`: `newtonSum(newtonDif(list)) == list`.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> newtonSum([1, 2, 3, 4])
 4-element Vector{Int64}:
@@ -95,7 +95,7 @@ Inverse of `newtonSumR`: `newtonDifR(newtonSumR(list)) == list`.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> newtonDifR([6, 5, 3])
 3-element Vector{Int64}:
@@ -118,7 +118,7 @@ Inverse of `newtonDifR`: `newtonSumR(newtonDifR(list)) == list`.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> newtonSumR([1, 2, 3])
 3-element Vector{Int64}:
@@ -150,7 +150,7 @@ Inverse of `subsetComposition`.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> compositionSubset(9, [4, 5, 7])
 6-element Vector{Int64}:
@@ -175,7 +175,7 @@ Inverse of `compositionSubset`.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> subsetComposition(9, [1, 1, 1, 3, 2, 1])
 3-element Vector{Int64}:
@@ -196,7 +196,7 @@ Remove element `s` from `set` and return the resulting set.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> takeAway([1, 2, 3], 2)
 2-element Vector{Int64}:
@@ -215,7 +215,7 @@ Returns a vector of all subsets (as vectors), starting with `set` itself.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> subsets([1, 2])
 4-element Vector{Vector{Int64}}:
@@ -237,7 +237,7 @@ lexicographic order (smallest partition first).
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> partitions(4)
 5-element Vector{Vector{Int64}}:
@@ -336,7 +336,7 @@ Young lattice: a vector of `(row, col)` pairs recording where each number
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> length(standardYTs([2, 1]))
 2
@@ -359,7 +359,7 @@ placed in row `r`, column `c`.
 
 # Examples
 ```jldoctest
-julia> using OrbitAl
+julia> using OrbitAl, OrbitAl.syt
 
 julia> paths = standardYTs([2, 1]);
 

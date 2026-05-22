@@ -1,5 +1,8 @@
 # Schreier-Sims Groups
 
+!!! note
+    This is an on-demand module. Load it with `using OrbitAl.simsgroup`.
+
 This module provides an alternative permutation group representation built on the
 Schreier-Sims stabilizer chain. Unlike `PermGp`, which recomputes the orbit-stabilizer
 decomposition on every query, `SimsGp` caches the chain on first use, giving fast

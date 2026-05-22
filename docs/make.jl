@@ -1,9 +1,13 @@
 using Documenter
 using OrbitAl
+using OrbitAl.simsgroup
+using OrbitAl.syt
+using OrbitAl.coset
+using OrbitAl.involution
 
 makedocs(
     sitename = "OrbitAl.jl",
-    modules = [OrbitAl],
+    modules = [OrbitAl, OrbitAl.simsgroup, OrbitAl.syt, OrbitAl.coset, OrbitAl.involution],
     checkdocs = :none,
     doctest = true,
     format = Documenter.HTML(),
@@ -13,10 +17,13 @@ makedocs(
         "Permutations" => "permutation.md",
         "Orbits" => "orbits.md",
         "Permutation Groups" => "permgroup.md",
-        "Schreier-Sims Groups" => "simsgroup.md",
         "Coxeter Groups" => "coxeter.md",
-        "Standard Young Tableaux" => "syt.md",
-        "Involutions" => "involution.md",
+        "On Demand" => [
+            "Schreier-Sims Groups" => "simsgroup.md",
+            "Standard Young Tableaux" => "syt.md",
+            "Cosets" => "coset.md",
+            "Involutions" => "involution.md",
+        ],
     ],
     authors = "Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>",
 )

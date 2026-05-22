@@ -2,14 +2,23 @@
 
 Welcome to the documentation for `OrbitAl.jl`, a Julia package for working with permutations and orbits in a simple and composable way.
 
-This documentation provides an overview of its modules and functionality.
+## Core modules
+
+Loaded automatically with `using OrbitAl`:
 
 - [Permutations](permutation.md)
-- [Permutation Groups](permgroup.md)
 - [Orbits](orbits.md)
+- [Permutation Groups](permgroup.md)
 - [Coxeter Groups](coxeter.md)
-- [Standard Young Tableaux](syt.md)
-- [Involutions](involution.md)
+
+## On-demand modules
+
+Load explicitly, e.g. `using OrbitAl.syt`:
+
+- [Schreier-Sims Groups](simsgroup.md) — `using OrbitAl.simsgroup`
+- [Standard Young Tableaux](syt.md) — `using OrbitAl.syt`
+- [Cosets](coset.md) — `using OrbitAl.coset`
+- [Involutions](involution.md) — `using OrbitAl.involution`
 
 ## Installation
 
@@ -22,13 +31,21 @@ Pkg.add(url="https://github.com/gpfeiffer/OrbitAl.jl")
 
 ## Features
 
+### Core
+
 - **Permutations** — `Perm` type with full arithmetic: composition `*`, inversion `inv`, power `^`, conjugation, cycle decomposition, sign, order.
 - **Orbit engine** — BFS-based orbit algorithms in 10+ variants: with words, transversals, stabilizers, edges, images, and multi-seed (`orbitx`) forms.
 - **Standard actions** — `onPoints`, `onRight`, `onSets`, `onPairs`, `onWords` ready to use or compose.
-- **Permutation groups** — `PermGp` supporting element enumeration, conjugacy classes, subgroup enumeration, membership testing, and random element sampling.
+- **Permutation groups** — `PermGp` supporting element enumeration, conjugacy classes, subgroup enumeration, membership testing, random element sampling, and intersection.
 - **Coxeter groups** — `CoxeterGp` built from a Cartan matrix: root systems, reflections, Coxeter length, reduced words, parabolic subgroups and transversals, conjugacy classes.
-- **Standard Young tableaux** — partitions, Newton sums and differences, composition/subset conversions, tableau paths.
 - **Visualization** — D3.js force-directed Cayley graphs rendered in Jupyter notebooks.
+
+### On-demand
+
+- **Schreier-Sims groups** — `SimsGp` with cached stabilizer chain for fast repeated membership tests and size computation without enumerating all elements.
+- **Standard Young tableaux** — partitions, Newton sums and differences, composition/subset conversions, tableau paths.
+- **Cosets** — `Coset` type and `cosets` for orbit enumeration of right cosets of a subgroup.
+- **Involutions** — actions and orbit algorithms for involutions and their conjugacy classes in Coxeter groups.
 
 ## Usage
 
@@ -65,3 +82,10 @@ sizeOfGroup(W)                      # 24
 length(coxeterConjugacyClasses(W))  # 5 (partitions of 4)
 ```
 
+### On-demand: Schreier-Sims
+
+```julia
+using OrbitAl.simsgroup
+
+size(cube)   # order of Rubik's cube group
+```
