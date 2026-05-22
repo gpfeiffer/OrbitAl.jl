@@ -224,13 +224,16 @@ end
     intersect(G, H)
     G ∩ H
 
-Return generators of G ∩ H by a BFS through H's Cayley graph, starting
-from the identity. A `Dict` index deduplicates visited elements. For each
-new element `s` not yet indexed: if `s` already lies in the current known
-intersection `K`, it is recorded but not expanded; otherwise `s` is added
-to the BFS queue and, if `s ∈ G`, added as a new generator of `K`. By the
-coset argument, every element of H not in K when first reached represents a
-distinct coset of K in H, so at most [H : G∩H] elements enter the queue.
+Return generators of G ∩ H by a BFS through H's Cayley graph from the
+identity. A `Dict` tracks visited elements with value `0` (in the current
+`K` at discovery: marked seen but not queued), `1` (in G: queued and added
+as a new generator of `K`), or `2` (not in G: queued as a coset
+representative). Skipping elements of `K` is safe: for `z ∈ K` and
+`b ∈ H.gens`, either `b ∈ G` (hence `b ∈ K`, so `z*b ∈ K` already) or
+`b ∉ G` (so `z*b ∉ G`). Elements of non-trivial cosets of K in H lie
+outside K and are therefore always queued on first encounter, so every
+coset of K in H is represented in the queue. Not all elements of H
+need be visited.
 
 # Examples
 ```jldoctest
@@ -261,7 +264,7 @@ function intersect(G::APermGp, H::APermGp)
                 z ∈ K && return 0
                 push!(list, z)
                 z ∈ G && (K = closure(K, z))
-                length(list)
+                z ∈ G ? 1 : 2
             end
         end
     end
