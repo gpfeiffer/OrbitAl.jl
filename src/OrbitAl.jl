@@ -25,6 +25,15 @@ export isPrimePower, zuppos
 include("bfsdfs.jl")
 include("plotting.jl")
 
+##  Methods are added by the extensions in ext/, when the packages they need
+##  are loaded.
+plot_edges(args...) =
+    error("plot_edges needs Graphs and GraphPlot: `using Graphs, GraphPlot`")
+write_d3_edges(args...) = error("write_d3_edges needs JSON: `using JSON`")
+write_d3_col_edges(args...) = error("write_d3_col_edges needs JSON: `using JSON`")
+
+export plot_edges, write_d3_edges, write_d3_col_edges
+
 # on-demand modules: load with e.g. `using OrbitAl.syt`
 include("coxeter.jl")
 include("syt.jl")

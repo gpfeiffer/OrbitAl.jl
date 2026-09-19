@@ -3,24 +3,13 @@
 #A  plotting.jl                                                       OrbitAl
 #B    by Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>
 ##
-#C  Plotting graphs in jupyter notebooks using different interfaces.
+#C  The graph data and the d3 page, as plain Dicts and strings.
+##
+##  What needs a plotting or a JSON package lives in ext/, and is reached
+##  through OrbitAl.plot_edges, OrbitAl.write_d3_edges, and
+##  OrbitAl.write_d3_col_edges.
 ##
 module plotting
-
-export plot_edges, write_d3_edges, write_d3_col_edges
-
-using Graphs, GraphPlot
-
-function plot_edges(edges)
-    graph = SimpleGraph(Edge.(edges))
-    gplot(graph, nodelabel=vertices(graph))
-end
-
-# using Compose, Cairo
-# p = plot_edges(orb.edges)
-# draw(PDF("graph.pdf",  600px, 400px), p)
-
-using JSON
 
 function d3_json(edges)
     nodes = Set(vcat(collect.(edges)...))
@@ -36,8 +25,6 @@ function d3_col_json(edges)
     ]
     Dict("nodes" => [Dict("id" => n) for n in nodes], "links" => links)
 end
-
-using Base64, IJulia
 
 function html_d3_force_graph(graph_json::String)
     return """
@@ -214,20 +201,6 @@ function html_d3_col_force_graph(graph_json::String)
     }
     </script>
     """
-end
-
-function write_d3_edges(edges, filename::String="graph.html")
-    graph_data = d3_json(edges)
-    graph_json = JSON.json(graph_data)
-    html = html_d3_force_graph(graph_json)
-    write(filename, html)
-end
-
-function write_d3_col_edges(edges, filename::String="graph.html")
-    graph_data = d3_col_json(edges)
-    graph_json = JSON.json(graph_data)
-    html = html_d3_col_force_graph(graph_json)
-    write(filename, html)
 end
 
 end # module
