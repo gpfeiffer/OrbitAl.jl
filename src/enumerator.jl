@@ -19,18 +19,19 @@ export CosetTable, coset_table, is_active, active_cosets, perms
 A coset table under construction.  Cosets are numbered `1, 2, 3, ...`;
 `next[x][s]` is the image of coset `x` under generator `s` (`0` if not yet
 known), `parent` is a Union-Find forest on the cosets (`parent[x] == x` if `x`
-is active), and `word[x]` is the word that defined coset `x`.
+is active), `queue` holds the pending coincidences, and `word[x]` is the word that defined coset `x`.
 """
 mutable struct CosetTable
     next::Vector{Vector{Int}}             # next[x][s], 0 = not yet known
     parent::Vector{Int}                   # the Union-Find forest on the cosets
+    queue::Vector{Tuple{Int,Int}}         # the pending coincidences
     word::Vector{Vector{Int}}             # the word that defined each coset
     invr::Vector{Int}                     # invr[s] is the inverse of s
     variants::Vector{Vector{Vector{Int}}} # the relation variants
     active::Int                           # the number of active cosets
 end
 
-CosetTable(genrel) = CosetTable([], [], [], genrel.invr, variantsRelations(genrel), 0)
+CosetTable(genrel) = CosetTable([], [], [], [], genrel.invr, variantsRelations(genrel), 0)
 
 ##  Union-Find: the active coset that x has been merged into
 function find(T::CosetTable, x)
@@ -90,29 +91,39 @@ function underWordSprout!(T::CosetTable, x, word)
     return x
 end
 
-##  x.s = y and y.s^-1 = x; a clash with an existing entry is a coincidence
-function link!(T::CosetTable, x, s, y, queue)
-    for (u, t, v) in ((x, s, y), (y, T.invr[s], x))
-        u, v = find(T, u), find(T, v)
-        w = T.next[u][t]
-        w == 0 ? (T.next[u][t] = v) : push!(queue, (v, w))
+##  x.s = y, or a coincidence if x.s is already set
+function setImage!(T::CosetTable, x, s, y)
+    x, y = find(T, x), find(T, y)
+    z = T.next[x][s]
+    z == 0 ? (T.next[x][s] = y) : push!(T.queue, (y, z))
+end
+
+##  x.s = y and y.s^-1 = x
+function link!(T::CosetTable, x, s, y)
+    setImage!(T, x, s, y)
+    setImage!(T, y, T.invr[s], x)
+end
+
+##  merge the cosets a and b, and their rows
+function unite!(T::CosetTable, a, b)
+    a, b = find(T, a), find(T, b)
+    a == b && return false
+    a > b && ((a, b) = (b, a))
+    T.parent[b] = a                        # the larger coset points to the smaller one
+    T.active -= 1
+    for (t, y) in enumerate(T.next[b])     # move b's edges over to a
+        y == 0 || link!(T, a, t, y)
     end
+    return true
 end
 
 ##  set x.s = y, and process the resulting coincidences
 function updateEdge!(T::CosetTable, x, s, y)
-    queue = Tuple{Int,Int}[]
-    link!(T, x, s, y, queue)
-    for (a, b) in queue                        # the queue grows while we loop
-        a, b = find(T, a), find(T, b)
-        a == b && continue
-        a > b && ((a, b) = (b, a))
-        T.parent[b] = a                        # unite: b is no longer active
-        T.active -= 1
-        for (t, y) in enumerate(T.next[b])     # move b's edges over to a
-            y == 0 || link!(T, a, t, y, queue)
-        end
+    link!(T, x, s, y)
+    for (a, b) in T.queue                      # the queue grows while we loop
+        unite!(T, a, b)
     end
+    empty!(T.queue)                            # ready for the next edge
 end
 
 ##  make sure that x.word = x
