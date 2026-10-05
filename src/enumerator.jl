@@ -19,13 +19,13 @@ export CosetTable, coset_table, is_active, active_cosets, perms
 A coset table under construction.  Cosets are numbered `1, 2, 3, ...`;
 `next[x][s]` is the image of coset `x` under generator `s` (`0` if not yet
 known), `parent` is a Union-Find forest on the cosets (`parent[x] == x` if `x`
-is active), `queue` holds the pending coincidences, and `word[x]` is the word that defined coset `x`.
+is active), `queue` holds the pending coincidences, and `words[x]` is the word that defined coset `x`.
 """
 mutable struct CosetTable
     next::Vector{Vector{Int}}             # next[x][s], 0 = not yet known
     parent::Vector{Int}                   # the Union-Find forest on the cosets
     queue::Vector{Tuple{Int,Int}}         # the pending coincidences
-    word::Vector{Vector{Int}}             # the word that defined each coset
+    words::Vector{Vector{Int}}            # the word that defined each coset
     invr::Vector{Int}                     # invr[s] is the inverse of s
     variants::Vector{Vector{Vector{Int}}} # the relation variants
     active::Int                           # the number of active cosets
@@ -51,14 +51,14 @@ image(T::CosetTable, x, s) = (y = T.next[x][s]; y == 0 ? 0 : find(T, y))
 function newcoset!(T::CosetTable, word)
     push!(T.next, zeros(Int, length(T.invr)))
     push!(T.parent, length(T.parent) + 1)
-    push!(T.word, word)
+    push!(T.words, word)
     T.active += 1
     return length(T.parent)
 end
 
 ##  define a new coset y = x.s
 function sprout!(T::CosetTable, x, s)
-    y = newcoset!(T, [T.word[x]; s])
+    y = newcoset!(T, [T.words[x]; s])
     T.next[x][s] = y
     T.next[y][T.invr[s]] = x
     return y
@@ -68,7 +68,7 @@ function Base.show(io::IO, ::MIME"text/plain", T::CosetTable)
     acti = active_cosets(T)
     println(io, "CosetTable: ", length(acti), " active of ", length(T.parent), " cosets")
     for x in acti[1:min(end, 12)]
-        println(io, lpad(x, 4), ": ", rpad(join(T.word[x]), 10), [image(T, x, s) for s in eachindex(T.invr)])
+        println(io, lpad(x, 4), ": ", rpad(join(T.words[x]), 10), [image(T, x, s) for s in eachindex(T.invr)])
     end
     length(acti) > 12 && print(io, "   ...")
 end
