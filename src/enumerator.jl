@@ -3,175 +3,171 @@
 #A  enumerator.jl                                                     OrbitAl
 #B    by Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>
 ##
-#C  A simple, modular coset enumerator
+#C  A simple coset enumerator: orbit algorithm + Union-Find + relation variants
 ##
 module enumerator
 
 using ..variants
-using ..orbits
 using ..permutation
-using ..permgroup
 import ..permgroup: PermGp
 
-export Node, is_active, flat
-export coset_table, compact_table
+export CosetTable, coset_table, is_active, active_cosets, perms
 
-mutable struct Node
-    idx::Int
-    word::Vector{Int}
-    flat::Union{Node, Nothing}
-    next::Vector{Union{Node, Nothing}}
-    data::Dict{Symbol, Any}
-    function Node(word, data)
-        l = length(data[:list])
-        next = similar(data[:gens], Nothing)
-        node = new(l + 1, word, nothing, next, data)
-        push!(data[:list], node)
-        data[:active] += 1
-        return node
+"""
+    CosetTable
+
+A coset table under construction.  Cosets are numbered `1, 2, 3, ...`;
+`next[x][s]` is the image of coset `x` under generator `s` (`0` if not yet
+known), `parent` is a Union-Find forest on the cosets (`parent[x] == x` if `x`
+is active), and `word[x]` is the word that defined coset `x`.
+"""
+mutable struct CosetTable
+    next::Vector{Vector{Int}}             # next[x][s], 0 = not yet known
+    parent::Vector{Int}                   # the Union-Find forest on the cosets
+    word::Vector{Vector{Int}}             # the word that defined each coset
+    invr::Vector{Int}                     # invr[s] is the inverse of s
+    variants::Vector{Vector{Vector{Int}}} # the relation variants
+    active::Int                           # the number of active cosets
+end
+
+CosetTable(genrel) = CosetTable([], [], [], genrel.invr, variantsRelations(genrel), 0)
+
+##  Union-Find: the active coset that x has been merged into
+function find(T::CosetTable, x)
+    while T.parent[x] != x
+        x = T.parent[x]
     end
+    return x
 end
 
-## print a node
-Base.show(io::IO, node::Node) = print(io, "Node(", node.idx, ")")
-Base.show(io::IO, ::MIME"text/plain", node::Node) = print(io, "Node(", node.idx, ", word=", node.word, ")")
+is_active(T::CosetTable, x) = T.parent[x] == x
 
-##  comparison
-import Base: ==
-==(node::Node, other::Node) = node.idx == other.idx
-Base.hash(node::Node, h::UInt) = hash(node.idx, h)
-Base.isless(node::Node, other::Node) = node.idx < other.idx
+active_cosets(T::CosetTable) = filter(x -> is_active(T, x), eachindex(T.parent))
 
+##  x.s as an active coset, or 0 if not yet known
+image(T::CosetTable, x, s) = (y = T.next[x][s]; y == 0 ? 0 : find(T, y))
 
-## A node x is **active** if x.flat = \perp.
-is_active(node::Node) = isnothing(node.flat)
-
-## Each node x \in X has an associated active node x^{\flat} defined
-## recursively as x if x is active, and as (x.flat)^{\flat} otherwise
-flat(node::Node) = is_active(node) ? node : flat(node.flat)
-
-##  get node.next[s], allowing for inverses
-function getImage(node::Node, s::Int)
-    s < 0 ? node.next[node.data[:invr][-s]] : node.next[s]
+function newcoset!(T::CosetTable, word)
+    push!(T.next, zeros(Int, length(T.invr)))
+    push!(T.parent, length(T.parent) + 1)
+    push!(T.word, word)
+    T.active += 1
+    return length(T.parent)
 end
 
-## To sprout a new node $x.s$:
-function sprout(node::Node, s::Int)
-    @assert node.next[s] === nothing "node.$s already defined"
-    next = Node(onWords(node.word, s), node.data) # new node
-    node.next[s] = next
-    next.next[node.data[:invr][s]] = node
-    return next
+##  define a new coset y = x.s
+function sprout!(T::CosetTable, x, s)
+    y = newcoset!(T, [T.word[x]; s])
+    T.next[x][s] = y
+    T.next[y][T.invr[s]] = x
+    return y
 end
 
-# We will work with two distinct actions:
-# * a **partial action** which returns `nothing` for undefined images
-# * a **sprouting action** which sprouts a new node if necessary.
-function onNodes(node::Node, s::Int, func::Function)
-    next = getImage(node, s)
-    isnothing(next) ? func(node, s) : flat(next)
+function Base.show(io::IO, ::MIME"text/plain", T::CosetTable)
+    acti = active_cosets(T)
+    println(io, "CosetTable: ", length(acti), " active of ", length(T.parent), " cosets")
+    for x in acti[1:min(end, 12)]
+        println(io, lpad(x, 4), ": ", rpad(join(T.word[x]), 10), [image(T, x, s) for s in eachindex(T.invr)])
+    end
+    length(acti) > 12 && print(io, "   ...")
 end
-onNodesPartial(node, s) = onNodes(node, s, (x, a) -> nothing)
-onNodesSprout(node, s) = onNodes(node, s, sprout)
 
-# Extend both actions to words in S
-function nodeUnderWordSprout(node::Node, word::Vector{Int})
+##  the partial action gives up (returns 0) at an unknown image
+function underWordPartial(T::CosetTable, x, word)
     for s in word
-        node = onNodesSprout(node, s)
+        x = image(T, x, s)
+        x == 0 && return 0
     end
-    return node
+    return x
 end
 
-function nodeUnderWordPartial(node::Node, word::Vector{Int})
+##  the defining action defines new cosets where necessary
+function underWordSprout!(T::CosetTable, x, word)
     for s in word
-        node = onNodesPartial(node, s)
-        isnothing(node) && return node
+        y = image(T, x, s)
+        x = y == 0 ? sprout!(T, x, s) : y
     end
-    return node
+    return x
 end
 
-## construct the trivial coset and close subgroup tables.
-function trivialCoset(data, sbgp)
-    node = Node([], data)
-    for word in sbgp    # close the subgroup tables.
-        trace(node, word)
+##  x.s = y and y.s^-1 = x; a clash with an existing entry is a coincidence
+function link!(T::CosetTable, x, s, y, queue)
+    for (u, t, v) in ((x, s, y), (y, T.invr[s], x))
+        u, v = find(T, u), find(T, v)
+        w = T.next[u][t]
+        w == 0 ? (T.next[u][t] = v) : push!(queue, (v, w))
     end
-    return node
 end
 
-# Tracing node x under word w ensures x.w = x, using the sprouting action
-function trace(node::Node, word::Vector{Int})
-    other = nodeUnderWordSprout(node, word[1:end-1])
-    updateEdge(other, word[end], node)
-end
-
-# To find x.s, try all variants of the relations, create x.s if that fails.
-function finalize(node::Node, s::Int)
-    for variant in node.data[:variants][s]
-        if is_active(node)
-            next = nodeUnderWordPartial(node, variant)
-            isnothing(next) || updateEdge(node, s, next)
+##  set x.s = y, and process the resulting coincidences
+function updateEdge!(T::CosetTable, x, s, y)
+    queue = Tuple{Int,Int}[]
+    link!(T, x, s, y, queue)
+    for (a, b) in queue                        # the queue grows while we loop
+        a, b = find(T, a), find(T, b)
+        a == b && continue
+        a > b && ((a, b) = (b, a))
+        T.parent[b] = a                        # unite: b is no longer active
+        T.active -= 1
+        for (t, y) in enumerate(T.next[b])     # move b's edges over to a
+            y == 0 || link!(T, a, t, y, queue)
         end
     end
-    if is_active(node) && isnothing(node.next[s])
-        return sprout(node, s)
+end
+
+##  make sure that x.word = x
+function trace!(T::CosetTable, x, word)
+    y = underWordSprout!(T, x, word[1:end-1])
+    updateEdge!(T, y, word[end], x)
+end
+
+##  find x.s from the relation variants, or define it
+function finalize!(T::CosetTable, x, s)
+    for variant in T.variants[s]
+        is_active(T, x) || return
+        y = underWordPartial(T, x, variant)
+        y == 0 || updateEdge!(T, x, s, y)
     end
-    return flat(node).next[s]  # assuming that flat(node).next is done
+    is_active(T, x) && T.next[x][s] == 0 && sprout!(T, x, s)
 end
 
-# carefully update the edge x.s = y in both directions
-function updateEdge(node::Node, s::Int, next::Node)
-    setImage(node, s, next)
-    setImage(next, node.data[:invr][s], node)
-end
+"""
+    coset_table(genrel, sbgp)
 
-# carefully set x.s to y making deductions and stacking coincidences
-function setImage(node::Node, s::Int, next::Node)
-    if isnothing(node.next[s])
-        node.next[s] = next           # deduction!
-    else
-        y, z = flat(next), flat(node.next[s])
-        y > z && ((y, z) = (z, y))        # sort
-        y == z || mergeNodes(z, y)  # coincidence!
-    end
-end
-
-# merge nodes z and y, keeping the older one
-function mergeNodes(node::Node, other::Node)
-    node.flat = other
-    node.data[:active] -= 1
-    for (s, next) in enumerate(node.next)
-        isnothing(next) || updateEdge(other, s, next)
-    end
-end
-
-## construct the coset table as an orbit
+Enumerate the cosets of the subgroup generated by the words `sbgp` in the
+group with presentation `genrel` (with fields `gens`, `invr` and `rels`).
+Returns a `CosetTable`; its active cosets are the cosets of the subgroup.
+"""
 function coset_table(genrel, sbgp)
-    data = Dict(
-        :list => Node[],
-        :active => 0,
-        :gens => genrel.gens,
-        :invr => genrel.invr
-    )
-    data[:variants] = variantsRelations(genrel)
-    node = trivialCoset(data, sbgp)
-    return orbitx(data[:gens], data[:list], finalize)
-end
-
-# drop redundant nodes and relabel.
-function compact_table(list)
-    acti = filter(is_active, list)
-    for (i, node) in enumerate(acti)
-        node.next = flat.(node.next)
-        node.idx = i
+    T = CosetTable(genrel)
+    x = newcoset!(T, Int[])
+    for word in sbgp
+        trace!(T, x, word)
     end
-    return acti
+    x = 0
+    while x < length(T.parent)                # the table grows while we loop
+        x += 1
+        for s in genrel.gens
+            finalize!(T, x, s)
+        end
+    end
+    return T
 end
 
-# how to convert coset table into a perm group
-function PermGp(list::Vector{Node})
-    imgs = [[next.idx for next in node.next] for node in compact_table(list)]
-    gens = [Perm([x[i] for x in imgs]) for i in eachindex(imgs[1])]
+"""
+    perms(T::CosetTable)
+
+The permutations of the generators on the active cosets, renumbered `1, ..., n`.
+"""
+function perms(T::CosetTable)
+    acti = active_cosets(T)
+    idx = Dict(x => i for (i, x) in enumerate(acti))
+    [Perm([idx[image(T, x, s)] for x in acti]) for s in eachindex(T.invr)]
+end
+
+##  how to convert a coset table into a permutation group
+function PermGp(T::CosetTable)
+    gens = perms(T)
     return PermGp(gens, one(gens[1]))
 end
 

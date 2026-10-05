@@ -99,3 +99,16 @@ using OrbitAl.orbits
     o = orbit(aaa, aaa[1], *)
     @test length(o) == 6
 end
+
+using OrbitAl.presentations
+using OrbitAl.enumerator
+
+@testset "Coset Enumeration" begin
+    for (name, index, order) in [(:G4, 8, 24), (:G12, 24, 48), (:G333, 9, 54)]
+        G = getfield(presentations, name)
+        T = coset_table(G, G.sbgp)
+        @test T.active == index == length(active_cosets(T))
+        @test length(perms(T)) == length(G.gens)
+        @test sizeOfGroup(PermGp(coset_table(G, Vector{Int}[]))) == order
+    end
+end
