@@ -46,7 +46,7 @@ is_active(T::CosetTable, x) = T.parent[x] == x
 active_cosets(T::CosetTable) = filter(x -> is_active(T, x), eachindex(T.parent))
 
 ##  x.s as an active coset, or 0 if not yet known
-image(T::CosetTable, x, s) = (y = T.next[x][s]; y == 0 ? 0 : find(T, y))
+image(T::CosetTable, x, s) = (y = T.next[x][s]; y > 0 ? find(T, y) : 0)
 
 function newcoset!(T::CosetTable, word)
     push!(T.next, zeros(Int, length(T.invr)))
@@ -77,7 +77,7 @@ end
 function underWordPartial(T::CosetTable, x, word)
     for s in word
         x = image(T, x, s)
-        x == 0 && return 0
+        x > 0 || return 0
     end
     return x
 end
@@ -86,7 +86,7 @@ end
 function underWordSprout!(T::CosetTable, x, word)
     for s in word
         y = image(T, x, s)
-        x = y == 0 ? sprout!(T, x, s) : y
+        x = y > 0 ? y : sprout!(T, x, s)
     end
     return x
 end
@@ -106,9 +106,8 @@ end
 
 ##  merge the cosets a and b, and their rows
 function unite!(T::CosetTable, a, b)
-    a, b = find(T, a), find(T, b)
-    a == b && return false
-    a > b && ((a, b) = (b, a))
+    a, b = minmax(find(T, a), find(T, b))
+    a < b || return false
     T.parent[b] = a                        # the larger coset points to the smaller one
     T.active -= 1
     for (t, y) in enumerate(T.next[b])     # move b's edges over to a
@@ -139,7 +138,8 @@ function finalize!(T::CosetTable, x, s)
         y = underWordPartial(T, x, variant)
         y == 0 || updateEdge!(T, x, s, y)
     end
-    is_active(T, x) && T.next[x][s] == 0 && sprout!(T, x, s)
+    is_active(T, x) || return
+    T.next[x][s] > 0 || sprout!(T, x, s)
 end
 
 """
