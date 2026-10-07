@@ -37,8 +37,19 @@ CosetTable(genrel) = CosetTable([], [], [], [], genrel.invr, variantsRelations(g
 ##  Union-Find: the active coset that x has been merged into
 find(T::CosetTable, x) = find(T.parent, x)
 
+"""
+    is_active(T::CosetTable, x)
+
+Whether coset `x` is active, that is, has not been merged into another coset.
+"""
 is_active(T::CosetTable, x) = T.parent[x] == x
 
+"""
+    active_cosets(T::CosetTable)
+
+The list of active cosets of `T`.  Once the enumeration is complete, these
+are the cosets of the subgroup, and their number is `T.active`.
+"""
 active_cosets(T::CosetTable) = filter(x -> is_active(T, x), eachindex(T.parent))
 
 ##  x.s as an active coset, or 0 if not yet known

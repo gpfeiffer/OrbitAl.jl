@@ -5,10 +5,15 @@ using OrbitAl.simsgroup
 using OrbitAl.syt
 using OrbitAl.coset
 using OrbitAl.involution
+using OrbitAl.sparsevec
+using OrbitAl.unionfind
+using OrbitAl.linear
+using OrbitAl.enumerator
 
 makedocs(
     sitename = "OrbitAl.jl",
-    modules = [OrbitAl, OrbitAl.coxeter, OrbitAl.simsgroup, OrbitAl.syt, OrbitAl.coset, OrbitAl.involution],
+    modules = [OrbitAl, OrbitAl.coxeter, OrbitAl.simsgroup, OrbitAl.syt, OrbitAl.coset, OrbitAl.involution,
+               OrbitAl.sparsevec, OrbitAl.unionfind, OrbitAl.linear, OrbitAl.enumerator],
     checkdocs = :none,
     doctest = true,
     format = Documenter.HTML(),
@@ -24,6 +29,10 @@ makedocs(
             "Standard Young Tableaux" => "syt.md",
             "Cosets" => "coset.md",
             "Involutions" => "involution.md",
+            "Sparse Vectors" => "sparsevec.md",
+            "Union-Find" => "unionfind.md",
+            "Linear Orbit Algorithms" => "linear.md",
+            "Coset Enumeration" => "enumerator.md",
         ],
     ],
     authors = "Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>",
