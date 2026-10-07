@@ -37,6 +37,18 @@ function SparseVec(pairs::Pair...)
 end
 
 """
+    SparseVec(v::AbstractArray)
+
+The sparse vector of the dense vector `v`.  A row vector, or any other array,
+is read as the plain vector `v[:]`.
+"""
+function SparseVec(v::AbstractArray)
+    v = v[:]
+    poss = findall(!iszero, v)
+    return SparseVec(poss, v[poss])
+end
+
+"""
     unitVec(T, i)
 
 The unit vector ``e_i`` over `T`.

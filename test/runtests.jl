@@ -120,6 +120,8 @@ using OrbitAl.sparsevec
     v = SparseVec(3 => 2//1, 1 => 1//1, 3 => 1//1)
     @test v.poss == [1, 3] && v.vals == [1, 3]
     @test v == e(1) + 3 * e(3)
+    @test SparseVec(Rational{Int}[1, 0, 3]) == v == SparseVec(Rational{Int}[1 0 3 0])
+    @test SparseVec(Rational{Int}[0 0 0]) == zero(v)
     @test v[3] == 3 && v[2] == 0 && v[7] == 0
     @test length(v) == 2
     @test eltype(v) == eltype(SparseVec{Rational{Int}}) == Rational{Int}
@@ -173,4 +175,25 @@ using OrbitAl.unionfind
         @test all(find(parent, u) == find(parent, w) for (u, w) in rels)
         @test all(!haskey(parent, j) for i in 1:m for j in find(parent, e(i)).poss)
     end
+end
+
+using OrbitAl.linear
+
+@testset "Spinning" begin
+    # companion matrix of x^5 + x^4 + x^3 + x^2 + x + 1, acting on row vectors
+    A = Rational{Int}[0 1 0 0 0; 0 0 1 0 0; 0 0 0 1 0; 0 0 0 0 1; -1 -1 -1 -1 -1]
+    list = spinning([A], Rational{Int}[0 0 1 0 0], onRight)
+    @test vcat(list...) == Rational{Int}[0 0 1 0 0; 0 0 0 1 0; 0 0 0 0 1; -1 -1 -1 -1 -1; 1 0 0 0 0]
+    @test length(spinning([A], Rational{Int}[1 1 0 1 1], onRight)) == 2
+    @test length(spinning([A], Rational{Int}[1 0 1 0 1], onRight)) == 1
+
+    # companion matrix of x^20 - 1: e_1 + e_2 spans a subspace of dimension 19
+    n = 20
+    C = zeros(Rational{Int}, n, n)
+    for i in 1:n-1
+        C[i, i+1] = 1
+    end
+    C[n, 1] = 1
+    x = zeros(Rational{Int}, 1, n); x[1] = x[2] = 1
+    @test length(spinning([C], x, onRight)) == 19
 end
