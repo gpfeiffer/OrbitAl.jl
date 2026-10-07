@@ -25,10 +25,18 @@ Union-Find tests this incrementally: each basis vector `v` is entered as the
 relation `v = 0`, and `unite!` returns `0` exactly for the vectors in the span.
 """
 function spinning(aaa, x, under)
-    list = [x]
-    parent = Dict{Int, SparseVec{eltype(x)}}()     # the span of list, as relations v = 0
-    inSpan!(v) = (v = SparseVec(v); unite!(parent, v, zero(v)) == 0)   # records v, if new
+
+    # the span of list, as relations v = 0
+    parent = Dict{Int, SparseVec{eltype(x)}}()
+
+    # records v, if new
+    function inSpan!(v)
+        v = SparseVec(v)
+        return unite!(parent, v, zero(v)) == 0
+    end
+
     inSpan!(x)
+    list = [x]
     for y in list, a in aaa
         z = under(y, a)
         inSpan!(z) || push!(list, z)
