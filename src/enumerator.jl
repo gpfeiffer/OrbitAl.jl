@@ -102,9 +102,9 @@ end
 
 ##  merge the cosets a and b, and their rows: Union-Find with consequences
 function unite!(T::CosetTable, a, b)
-    b = unite!(T.parent, a, b)             # the coset that is no longer active, or 0
-    b > 0 || return 0
-    a = T.parent[b]                        # the coset that b is merged into
+    b = unite!(T.parent, a, b)   # the coset that is no longer active, or 0
+    b > 0 || return b
+    a = T.parent[b]              # the coset that b is merged into
     T.active -= 1
     for (t, y) in enumerate(T.next[b])     # move b's edges over to a
         y == 0 || link!(T, a, t, y)
