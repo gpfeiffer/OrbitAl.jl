@@ -112,3 +112,22 @@ using OrbitAl.enumerator
         @test sizeOfGroup(PermGp(coset_table(G, Vector{Int}[]))) == order
     end
 end
+
+using OrbitAl.sparsevec
+
+@testset "Sparse Vectors" begin
+    e(p) = unitVec(Rational{Int}, p)
+    v = SparseVec(3 => 2//1, 1 => 1//1, 3 => 1//1)
+    @test v.poss == [1, 3] && v.vals == [1, 3]
+    @test v == e(1) + 3 * e(3)
+    @test v[3] == 3 && v[2] == 0 && v[7] == 0
+    @test length(v) == 2
+    @test iszero(v - v) && v - v == zero(v)
+    @test -v + v == zero(v)
+    @test 0 * v == zero(v)
+    @test v / 3 == SparseVec(1 => 1//3, 3 => 1//1)
+    @test e(1) + e(2) == e(2) + e(1)
+    @test length(Set([e(1) + e(2), e(2) + e(1)])) == 1
+    @test sprint(show, v) == "e1 + (3)e3"
+    @test sprint(show, zero(v)) == "0"
+end

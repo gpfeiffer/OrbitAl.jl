@@ -43,6 +43,7 @@ include("involution.jl")
 include("coset.jl")
 include("presentations.jl")
 include("variants.jl")
+include("sparsevec.jl")
 include("enumerator.jl")
 
 end # module OrbitAl
