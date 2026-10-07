@@ -196,4 +196,22 @@ using OrbitAl.linear
     C[n, 1] = 1
     x = zeros(Rational{Int}, 1, n); x[1] = x[2] = 1
     @test length(spinning([C], x, onRight)) == 19
+
+    # spinning with images: the same basis, and the images express the action
+    acts(res, aaa) = all(onRight(res.list[j], a) ==
+                         sum(c * res.list[l] for (l, c) in zip(res.images[k][j].poss, res.images[k][j].vals))
+                         for (k, a) in enumerate(aaa) for j in eachindex(res.list))
+    for v in (Rational{Int}[0 0 1 0 0], Rational{Int}[1 1 0 1 1], Rational{Int}[1 0 1 0 1])
+        res = spinning_with_images([A], v, onRight)
+        @test res.list == spinning([A], v, onRight)
+        @test acts(res, [A])
+    end
+    res = spinning_with_images([A], Rational{Int}[1 1 0 1 1], onRight)
+    @test res.images[1] == [SparseVec(2 => 1//1), SparseVec(1 => -1//1, 2 => -1//1)]
+    for _ in 1:10
+        B = [Rational{Int}.(rand(-1:1, 8, 8)) for _ in 1:2]
+        x = Rational{Int}.(rand(-1:1, 1, 8))
+        res = spinning_with_images(B, x, onRight)
+        @test res.list == spinning(B, x, onRight) && acts(res, B)
+    end
 end
