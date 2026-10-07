@@ -139,20 +139,20 @@ using OrbitAl.unionfind
     n = 10
     pairs = [(1, 6), (4, 9), (6, 2), (8, 3), (9, 10), (2, 7), (3, 5)]
     forest = collect(1:n)
-    @test all(unite!(forest, i, j) for (i, j) in pairs)
-    @test !unite!(forest, 7, 1)
+    @test [unite!(forest, i, j) for (i, j) in pairs] == [6, 9, 2, 8, 10, 7, 5]
+    @test unite!(forest, 7, 1) == 0
     classes = [[i for i in 1:n if find(forest, i) == r] for r in 1:n if forest[r] == r]
     @test classes == [[1, 2, 6, 7], [3, 5, 8], [4, 9, 10]]
 
     # linear: x_4 = x_1 + x_3, x_3 = 2 x_2, x_4 + x_5 = x_1
     e(i) = unitVec(Rational{Int}, i)
     parent = Dict{Int, SparseVec{Rational{Int}}}()
-    @test unite!(parent, e(4), e(1) + e(3))
-    @test unite!(parent, e(3), 2 * e(2))
-    @test unite!(parent, e(4) + e(5), e(1))
+    @test unite!(parent, e(4), e(1) + e(3)) == 4
+    @test unite!(parent, e(3), 2 * e(2)) == 3
+    @test unite!(parent, e(4) + e(5), e(1)) == 5
     @test parent[5] == -2 * e(2)
     @test find(parent, e(4)) == e(1) + 2 * e(2)
-    @test !unite!(parent, e(5), -2 * e(2))
+    @test unite!(parent, e(5), -2 * e(2)) == 0
 
     # Union-Find is linear Union-Find for the relations e_i = e_j
     parent = Dict{Int, SparseVec{Rational{Int}}}()

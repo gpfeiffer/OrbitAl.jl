@@ -33,14 +33,14 @@ end
     unite!(parent::Vector{Int}, i, j)
 
 Add the relation `i ~ j` to the forest `parent`: the larger root points to
-the smaller one.  Returns `false` if `i` and `j` were in the same class
-already.
+the smaller one.  Returns the larger root, which is no longer a root, or `0`
+if `i` and `j` were in the same class already.
 """
 function unite!(parent::Vector{Int}, i::Int, j::Int)
     i, j = minmax(find(parent, i), find(parent, j))
-    i < j || return false
+    i < j || return 0
     parent[j] = i    # the larger root points to the smaller one
-    return true
+    return j
 end
 
 #############################################################################
@@ -75,16 +75,16 @@ end
     unite!(parent::Dict, u::SparseVec, w::SparseVec)
 
 Add the relation `u = w` to `parent`: reduce `u - w`, and solve the result
-for its last position, which then becomes inactive.  Returns `false` if the
-relation follows from the earlier ones.  The coefficient at the last position
-must be invertible.
+for its last position, which then becomes inactive.  Returns that position,
+or `0` if the relation follows from the earlier ones.  The coefficient at the
+last position must be invertible.
 """
 function unite!(parent::Dict, u::SparseVec, w::SparseVec)
     v = find(parent, u - w)                    # the relation u = w, reduced
-    length(v) > 0 || return false
+    length(v) > 0 || return 0
     i, c = v.poss[end], v.vals[end]            # the last position of v ...
     parent[i] = unitVec(eltype(v), i) - v / c  # ... is replaced by the others
-    return true
+    return i
 end
 
 end # module

@@ -10,6 +10,7 @@ module enumerator
 using ..variants
 using ..permutation
 import ..permgroup: PermGp
+import ..unionfind: find, unite!
 
 export CosetTable, coset_table, is_active, active_cosets, perms
 
@@ -34,12 +35,7 @@ end
 CosetTable(genrel) = CosetTable([], [], [], [], genrel.invr, variantsRelations(genrel), 0)
 
 ##  Union-Find: the active coset that x has been merged into
-function find(T::CosetTable, x)
-    while T.parent[x] != x
-        x = T.parent[x]
-    end
-    return x
-end
+find(T::CosetTable, x) = find(T.parent, x)
 
 is_active(T::CosetTable, x) = T.parent[x] == x
 
@@ -104,16 +100,16 @@ function link!(T::CosetTable, x, s, y)
     setImage!(T, y, T.invr[s], x)
 end
 
-##  merge the cosets a and b, and their rows
+##  merge the cosets a and b, and their rows: Union-Find with consequences
 function unite!(T::CosetTable, a, b)
-    a, b = minmax(find(T, a), find(T, b))
-    a < b || return false
-    T.parent[b] = a                        # the larger coset points to the smaller one
+    b = unite!(T.parent, a, b)             # the coset that is no longer active, or 0
+    b > 0 || return 0
+    a = T.parent[b]                        # the coset that b is merged into
     T.active -= 1
     for (t, y) in enumerate(T.next[b])     # move b's edges over to a
         y == 0 || link!(T, a, t, y)
     end
-    return true
+    return b
 end
 
 ##  set x.s = y, and process the resulting coincidences
