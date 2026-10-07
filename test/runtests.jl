@@ -116,7 +116,7 @@ end
 using OrbitAl.sparsevec
 
 @testset "Sparse Vectors" begin
-    e(p) = unitVec(Rational{Int}, p)
+    e(i) = unitVec(Rational{Int}, i)
     v = SparseVec(3 => 2//1, 1 => 1//1, 3 => 1//1)
     @test v.poss == [1, 3] && v.vals == [1, 3]
     @test v == e(1) + 3 * e(3)
