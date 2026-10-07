@@ -14,6 +14,7 @@ import Base: in, isless, size, ==, show, hash
 export Orbit
 export orbit, onPoints, onRight, onWords, onPairs, onSets
 export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
+export orbit_with_schreier
 export orbit_with_dist, orbit_with_tree, orbit_with_edges, orbit_with_images
 export orbitl, orbitx, orbitx_with_words, orbitx_with_dist, orbitx_with_edges
 export edges_from_images
@@ -387,6 +388,59 @@ function orbit_with_stabilizer(aaa, x, under::Function)
         end
     end
     return (list = list, reps = reps, stab = stab)
+end
+
+## orbit with Schreier generators
+"""
+    orbit_with_schreier(aaa, x, under)
+
+Compute the orbit of `x` under the generators `aaa`, and record for each
+generator the images, together with their Schreier generators.  Returns a
+named tuple:
+- `list`: the orbit elements
+- `reps`: permutations such that `x^reps[i] == list[i]`
+- `images`: a vector of lists, one per generator, where `images[k][i]` is the
+  sparse row `(poss = [l], vals = [h])` with `under(list[i], aaa[k]) == list[l]`
+  and the Schreier generator `h = reps[i] * aaa[k] / reps[l]`, an element of
+  the stabilizer of `x`
+
+The rows `images[k]` form the **Schreier matrix** of `aaa[k]`: the permutation
+matrix of its action on the orbit, with the Schreier generators in place of
+the entries `1`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
+
+julia> o = orbit_with_schreier([s, t], 1, onPoints);
+
+julia> o.images[2]
+3-element Vector{Any}:
+ (poss = [1], vals = Perm[Perm([1, 3, 2])])
+ (poss = [3], vals = Perm[Perm([1, 2, 3])])
+ (poss = [2], vals = Perm[Perm([1, 2, 3])])
+```
+"""
+function orbit_with_schreier(aaa, x, under::Function)
+    list = [x]
+    index = Dict(x => 1)
+    reps = [aaa[1]^0]  # identity maps x to x
+    images = [[] for a in aaa]
+    for (i, y) in enumerate(list)
+        for (k, a) in enumerate(aaa)
+            z = under(y, a)
+            t = onRight(reps[i], a)
+            l = get!(index, z) do
+                push!(list, z)
+                push!(reps, t)
+                length(list)
+            end   # x^(reps[i] * a) = x^reps[l]
+            push!(images[k], (poss = [l], vals = [t / reps[l]]))
+        end
+    end
+    return (list = list, reps = reps, images = images)
 end
 
 ## orbit with edges

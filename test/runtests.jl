@@ -100,6 +100,39 @@ using OrbitAl.orbits
     @test length(o) == 6
 end
 
+@testset "Schreier Generators" begin
+    # the version of Part 4 of the notebooks, as a reference
+    function reference(aaa, x, under)
+        list = [x]
+        reps = [aaa[1]^0]
+        images = [[] for _ in aaa]
+        for (i, y) in enumerate(list)
+            for (k, a) in enumerate(aaa)
+                z = under(y, a)
+                l = findfirst(==(z), list)
+                if isnothing(l)
+                    push!(list, z)
+                    push!(reps, reps[i] * a)
+                    l = length(list)
+                end
+                push!(images[k], (poss=[l], vals=[reps[i] * a / reps[l]]))
+            end
+        end
+        return (list = list, images = images)
+    end
+    for (aaa, x, under) in [(transpositions(4), 4, onPoints), (transpositions(5), Set([1, 2]), onSets)]
+        o = orbit_with_schreier(aaa, x, under)
+        r = reference(aaa, x, under)
+        @test o.list == r.list && o.images == r.images
+        for (k, a) in enumerate(aaa), (i, y) in enumerate(o.list)
+            l, h = o.images[k][i].poss[1], o.images[k][i].vals[1]
+            @test under(y, a) == o.list[l]
+            @test o.reps[i] * a == h * o.reps[l]
+            @test under(x, h) == x
+        end
+    end
+end
+
 using OrbitAl.presentations
 using OrbitAl.enumerator
 

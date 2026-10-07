@@ -37,6 +37,7 @@ OrbitAl.orbits.orbit_with_dist
 OrbitAl.orbits.orbit_with_tree
 OrbitAl.orbits.orbit_with_transversal
 OrbitAl.orbits.orbit_with_stabilizer
+OrbitAl.orbits.orbit_with_schreier
 OrbitAl.orbits.orbit_with_edges
 OrbitAl.orbits.orbit_with_images
 ```
