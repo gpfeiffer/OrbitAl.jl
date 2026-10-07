@@ -43,6 +43,9 @@ The unit vector ``e_i`` over `T`.
 """
 unitVec(T::Type, i::Int) = SparseVec([i], [one(T)])
 
+##  the type of the coefficients
+Base.eltype(::Type{SparseVec{T}}) where T = T
+
 Base.zero(::Type{SparseVec{T}}) where T = SparseVec(Int[], T[])
 Base.zero(v::SparseVec) = zero(typeof(v))
 Base.iszero(v::SparseVec) = isempty(v.poss)
@@ -53,7 +56,7 @@ Base.length(v::SparseVec) = length(v.poss)
 ##  the coefficient at position i, by binary search
 function Base.getindex(v::SparseVec, i::Int)
     k = searchsortedfirst(v.poss, i)
-    return k <= length(v.poss) && v.poss[k] == i ? v.vals[k] : zero(eltype(v.vals))
+    return k <= length(v.poss) && v.poss[k] == i ? v.vals[k] : zero(eltype(v))
 end
 
 function Base.:+(v::SparseVec, w::SparseVec)

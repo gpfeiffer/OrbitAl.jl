@@ -122,6 +122,7 @@ using OrbitAl.sparsevec
     @test v == e(1) + 3 * e(3)
     @test v[3] == 3 && v[2] == 0 && v[7] == 0
     @test length(v) == 2
+    @test eltype(v) == eltype(SparseVec{Rational{Int}}) == Rational{Int}
     @test iszero(v - v) && v - v == zero(v)
     @test -v + v == zero(v)
     @test 0 * v == zero(v)
@@ -130,4 +131,46 @@ using OrbitAl.sparsevec
     @test length(Set([e(1) + e(2), e(2) + e(1)])) == 1
     @test sprint(show, v) == "e1 + (3)e3"
     @test sprint(show, zero(v)) == "0"
+end
+
+using OrbitAl.unionfind
+
+@testset "Union-Find" begin
+    n = 10
+    pairs = [(1, 6), (4, 9), (6, 2), (8, 3), (9, 10), (2, 7), (3, 5)]
+    forest = collect(1:n)
+    @test all(unite!(forest, i, j) for (i, j) in pairs)
+    @test !unite!(forest, 7, 1)
+    classes = [[i for i in 1:n if find(forest, i) == r] for r in 1:n if forest[r] == r]
+    @test classes == [[1, 2, 6, 7], [3, 5, 8], [4, 9, 10]]
+
+    # linear: x_4 = x_1 + x_3, x_3 = 2 x_2, x_4 + x_5 = x_1
+    e(i) = unitVec(Rational{Int}, i)
+    parent = Dict{Int, SparseVec{Rational{Int}}}()
+    @test unite!(parent, e(4), e(1) + e(3))
+    @test unite!(parent, e(3), 2 * e(2))
+    @test unite!(parent, e(4) + e(5), e(1))
+    @test parent[5] == -2 * e(2)
+    @test find(parent, e(4)) == e(1) + 2 * e(2)
+    @test !unite!(parent, e(5), -2 * e(2))
+
+    # Union-Find is linear Union-Find for the relations e_i = e_j
+    parent = Dict{Int, SparseVec{Rational{Int}}}()
+    for (i, j) in pairs
+        unite!(parent, e(i), e(j))
+    end
+    @test all(find(parent, e(i)) == e(find(forest, i)) for i in 1:n)
+
+    # every relation holds in canonical form, and canonical forms are reduced
+    m = 30
+    for _ in 1:20
+        rels = [(SparseVec(rand(1:m) => rand([-2, -1, 1, 2])//1, rand(1:m) => 1//1),
+                 SparseVec(rand(1:m) => rand(1:3)//1)) for _ in 1:20]
+        parent = Dict{Int, SparseVec{Rational{Int}}}()
+        for (u, w) in rels
+            unite!(parent, u, w)
+        end
+        @test all(find(parent, u) == find(parent, w) for (u, w) in rels)
+        @test all(!haskey(parent, j) for i in 1:m for j in find(parent, e(i)).poss)
+    end
 end

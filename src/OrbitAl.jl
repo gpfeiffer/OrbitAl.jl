@@ -44,6 +44,7 @@ include("coset.jl")
 include("presentations.jl")
 include("variants.jl")
 include("sparsevec.jl")
+include("unionfind.jl")
 include("enumerator.jl")
 
 end # module OrbitAl
