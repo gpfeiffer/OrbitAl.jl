@@ -10,11 +10,12 @@ using OrbitAl.unionfind
 using OrbitAl.hecke
 using OrbitAl.linear
 using OrbitAl.enumerator
+using OrbitAl.vectorenum
 
 makedocs(
     sitename = "OrbitAl.jl",
     modules = [OrbitAl, OrbitAl.coxeter, OrbitAl.simsgroup, OrbitAl.syt, OrbitAl.coset, OrbitAl.involution,
-               OrbitAl.sparsevec, OrbitAl.unionfind, OrbitAl.hecke, OrbitAl.linear, OrbitAl.enumerator],
+               OrbitAl.sparsevec, OrbitAl.unionfind, OrbitAl.hecke, OrbitAl.linear, OrbitAl.enumerator, OrbitAl.vectorenum],
     checkdocs = :none,
     doctest = true,
     format = Documenter.HTML(),
@@ -35,6 +36,7 @@ makedocs(
             "Hecke Algebras" => "hecke.md",
             "Linear Orbit Algorithms" => "linear.md",
             "Coset Enumeration" => "enumerator.md",
+            "Vector Enumeration" => "vectorenum.md",
         ],
     ],
     authors = "Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>",

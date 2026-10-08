@@ -49,5 +49,6 @@ include("unionfind.jl")
 include("hecke.jl")
 include("linear.jl")
 include("enumerator.jl")
+include("vectorenum.jl")
 
 end # module OrbitAl

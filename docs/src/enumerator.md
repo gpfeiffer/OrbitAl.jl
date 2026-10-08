@@ -45,7 +45,7 @@ julia> sizeOfGroup(PermGp(coset_table(presentations.A3, Vector{Int}[])))
 ```@docs
 OrbitAl.enumerator.CosetTable
 OrbitAl.enumerator.coset_table
-OrbitAl.enumerator.is_active
-OrbitAl.enumerator.active_cosets
+OrbitAl.enumerator.is_active(::OrbitAl.enumerator.CosetTable, ::Any)
+OrbitAl.enumerator.active_cosets(::OrbitAl.enumerator.CosetTable)
 OrbitAl.enumerator.perms
 ```

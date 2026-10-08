@@ -332,3 +332,71 @@ using OrbitAl.coxeter, OrbitAl.hecke
     @test find(parent, T2 * e(3)) == (T2 * T1) * e(1)
     @test unite!(parent, T2 * e(4) + (T1 + T0) * e(2), e(1)) == 0
 end
+
+@testset "Coxeter Presentations" begin
+    for (series, n) in [("A", 3), ("B", 3), ("C", 3), ("D", 4), ("F", 4)]
+        G = OrbitAl.coxeter.coxeterPresentation(series, n)
+        @test coset_table(G, Vector{Int}[]).active == sizeOfGroup(CoxeterGp(cartanMat(series, n)))
+        @test coxeterMat(series, n) == transpose(coxeterMat(series, n))
+    end
+    @test coxeterMat("B", 2) == [1 4; 4 1] && coxeterMat("F", 4)[3, 4] == 4
+end
+
+using OrbitAl.vectorenum
+
+@testset "Vector Enumeration" begin
+    # every relator acts as 0 on every active coset
+    e(V, x) = SparseVec([x], [V.one])
+    holds(V) = all(iszero(sum(c * knownact(V, e(V, x), word) for (c, word) in rel))
+                   for x in active_cosets(V) for rel in V.relators)
+    parabolic(series, n, J, q) = HeckeAlg(CoxeterGp(cartanMat(series, n)[J, J]), q)
+
+    # A_3, J = {1, 2}: the table of Part 4, over Q and over H_J
+    q = 2//1
+    V = vector_enum(presentations.A3, q, [1, 2], [q, q])
+    @test length(active_cosets(V)) == length(V.next) == 4 && holds(V)
+    @test V.words == [Int[], [3], [3, 2], [3, 2, 1]]
+    M = matrices(V)
+    @test M[3] == Rational{Int}[0 1 0 0; 2 1 0 0; 0 0 2 0; 0 0 0 2]
+    @test all(M[s]^2 == (q - 1) * M[s] + q * M[s]^0 for s in 1:3)
+    @test M[1] * M[2] * M[1] == M[2] * M[1] * M[2] && M[1] * M[3] == M[3] * M[1]
+    H = parabolic("A", 3, [1, 2], q)
+    V = vector_enum(presentations.A3, q, [1, 2], [Tw(H, 1), Tw(H, 2)])
+    @test length(active_cosets(V)) == length(V.next) == 4 && holds(V)
+    @test V.next[1][1] == Tw(H, 1) * e(V, 1) && V.next[4][2] == Tw(H, 1) * e(V, 4)
+    @test V.next[3][2] == 2 * e(V, 2) + e(V, 3)
+
+    # Deodhar: |W : W_J| cosets, and no coincidences, over Q and over H_J
+    for (series, n, J, index) in [("A", 4, [1, 3], 30), ("B", 3, [2, 3], 8), ("D", 4, [1, 2, 3], 8), ("F", 4, [2, 3, 4], 24)]
+        genrel = OrbitAl.coxeter.coxeterPresentation(series, n)
+        for q in (2//1, 1//1, -1//1, 1//3, 0//1)
+            V = vector_enum(genrel, q, J, fill(q, length(J)))
+            @test length(active_cosets(V)) == length(V.next) == index && holds(V) && isempty(V.pending)
+        end
+        q = 3//1
+        H = parabolic(series, n, J, q)
+        V = vector_enum(genrel, q, J, [Tw(H, k) for k in eachindex(J)])
+        @test length(active_cosets(V)) == length(V.next) == index && holds(V)
+    end
+
+    # G(3,3,3), with H_J = H(A_2) and T_{t_2} = T_{t_1} T_{t_0} T_{t_1}^{-1}:
+    # the hand-made table of Part 4
+    G = presentations.G333
+    H = HeckeAlg(CoxeterGp(cartanMat("A", 2)), q)
+    t0, t1 = Tw(H, 1), Tw(H, 2)
+    t2 = t1 * t0 * inv(t1)
+    @test t2 * t1 == t1 * t0 == t0 * t2
+    defs = [[4], [4, 1], [4, 2], [4, 3], [4, 2, 1], [4, 3, 1], [4, 2, 1, 4], [4, 3, 1, 4]]
+    V = vector_enum(G, q, [1, 2, 3], [t0, t1, t2]; defs)
+    @test length(active_cosets(V)) == length(V.next) == 9 && holds(V)
+    x = [e(V, i) for i in active_cosets(V)]           # x[k] is x_{k-1}
+    entry(i, s) = find(V.parent, V.next[active_cosets(V)[i + 1]][s])
+    t0p, c = inv(t0), one(H)
+    @test entry(2, 2) == ((q - 1) * c) * x[4] + ((1 - q) * c) * x[5] + x[7]
+    @test entry(8, 2) == ((q - 1) * t2) * x[6] + (q * (q - 1) * (t2 * t0p)) * x[4] + t0 * x[9] +
+                         ((1 - q) * (t0 * t2)) * x[5] + (q * (1 - q) * t1) * x[2]
+    @test entry(8, 3) == (q * (q - 1) * c) * x[4] + ((q - 1) * t0) * x[6] + t1 * x[9] +
+                         ((1 - q) * t1) * x[7] + (q * (1 - q) * (t1 * t0p)) * x[3]
+    V = vector_enum(G, q, [1, 2, 3], [t0, t1, t2])
+    @test length(active_cosets(V)) == 9 && holds(V)
+end
