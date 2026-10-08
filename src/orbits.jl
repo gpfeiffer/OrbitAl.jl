@@ -449,8 +449,10 @@ end
 
 Compute the orbit of `x` under the generators `aaa` and return:
 - `list`: the list of orbit elements
-- `edges`: directed edge pairs `(i, j)` (both directions included for each
-  generator application `list[i] -> list[j]` with `i ≠ j`)
+- `edges`: the edges `(i, j)` of the action graph, one for each pair with
+  `under(list[i], a) == list[j]` for some generator `a` and `i ≠ j`.  The
+  edges are directed: `(j, i)` is an edge only if some generator maps
+  `list[j]` to `list[i]`, as for involutions.
 
 # Examples
 ```jldoctest
@@ -464,7 +466,7 @@ julia> o.list
  2
 
 julia> sort(o.edges)
-2-element Vector{Any}:
+2-element Vector{Tuple{Int64, Int64}}:
  (1, 2)
  (2, 1)
 ```
@@ -472,7 +474,7 @@ julia> sort(o.edges)
 function orbit_with_edges(aaa, x, under::Function)
     list = [x]
     index = Dict(x => 1)
-    edges = Set()
+    edges = Set{Tuple{Int, Int}}()
     for (i, y) in enumerate(list)
         for a in aaa
             z = under(y, a)
