@@ -157,6 +157,12 @@ using OrbitAl.sparsevec
     @test SparseVec(Rational{Int}[0 0 0]) == zero(v)
     @test v[3] == 3 && v[2] == 0 && v[7] == 0
     @test length(v) == 2
+    @test drop(v, 3) == e(1) && drop(v, 2) == v && iszero(drop(e(1), 1))
+    @test drop(v, 1) + v[1] * e(1) == v
+    for _ in 1:20    # addition agrees with dense addition, cancellations included
+        a, b = rand(-1:1, 12) .// 1, rand(-1:1, 12) .// 1
+        @test SparseVec(a) + SparseVec(b) == SparseVec(a + b)
+    end
     @test eltype(v) == eltype(SparseVec{Rational{Int}}) == Rational{Int}
     @test iszero(v - v) && v - v == zero(v)
     @test -v + v == zero(v)

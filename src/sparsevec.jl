@@ -7,7 +7,7 @@
 ##
 module sparsevec
 
-export SparseVec, unitVec
+export SparseVec, unitVec, drop
 
 """
     SparseVec{T}
@@ -71,9 +71,34 @@ function Base.getindex(v::SparseVec, i::Int)
     return k <= length(v.poss) && v.poss[k] == i ? v.vals[k] : zero(eltype(v))
 end
 
+"""
+    drop(v::SparseVec, i)
+
+The vector `v` without its coefficient at position `i`.
+"""
+function drop(v::SparseVec, i::Int)
+    keep = v.poss .!= i
+    return SparseVec(v.poss[keep], v.vals[keep])
+end
+
+##  merge the two sorted lists of positions, adding where they meet
 function Base.:+(v::SparseVec, w::SparseVec)
-    poss = sort(union(v.poss, w.poss))
-    return nonzero(poss, [v[i] + w[i] for i in poss])
+    poss, vals = Int[], promote_type(eltype(v), eltype(w))[]
+    j, k, m, n = 1, 1, length(v), length(w)
+    while j <= m || k <= n
+        if k > n || j <= m && v.poss[j] < w.poss[k]        # only in v
+            push!(poss, v.poss[j]); push!(vals, v.vals[j])
+            j += 1
+        elseif j > m || w.poss[k] < v.poss[j]               # only in w
+            push!(poss, w.poss[k]); push!(vals, w.vals[k])
+            k += 1
+        else                                                # in both
+            c = v.vals[j] + w.vals[k]
+            iszero(c) || (push!(poss, v.poss[j]); push!(vals, c))
+            j += 1; k += 1
+        end
+    end
+    return SparseVec(poss, vals)
 end
 
 Base.:*(c, v::SparseVec) = nonzero(v.poss, c .* v.vals)

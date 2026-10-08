@@ -10,9 +10,9 @@ of an enumeration.  The last position, which linear Union-Find asks for all the
 time, is simply `v.poss[end]`.
 
 Sparse vectors support `+`, `-`, multiplication by scalars, division by
-invertible scalars, indexing `v[i]`, `zero`, `iszero`, `length` (the number of
-nonzero coefficients), `eltype` (the type of the coefficients), `==` and
-`hash`.
+invertible scalars, indexing `v[i]`, removing a position with `drop(v, i)`,
+`zero`, `iszero`, `length` (the number of nonzero coefficients), `eltype` (the
+type of the coefficients), `==` and `hash`.
 
 ```jldoctest
 julia> using OrbitAl.sparsevec
@@ -37,4 +37,5 @@ e2 + (4)e4
 ```@docs
 OrbitAl.sparsevec.SparseVec
 OrbitAl.sparsevec.unitVec
+OrbitAl.sparsevec.drop
 ```

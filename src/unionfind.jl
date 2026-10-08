@@ -78,8 +78,8 @@ each of them.
 """
 function find(parent::Dict, v::SparseVec)
     while (k = lastDead(parent, v)) > 0
-        i = v.poss[k]
-        v -= v.vals[k] * (unitVec(eltype(v), i) - parent[i])   # replace e_i by parent[i]
+        i, c = v.poss[k], v.vals[k]
+        v = drop(v, i) + c * parent[i]             # replace e_i by parent[i]
     end
     return v
 end
@@ -102,8 +102,8 @@ function unite!(parent::Dict, u::SparseVec, w::SparseVec)
     k = findlast(isunit, v.vals)               # the last position with a unit coefficient ...
     isnothing(k) && return -1
     i, c = v.poss[k], v.vals[k]
-    parent[i] = unitVec(eltype(v), i) - inv(c) * v   # ... is replaced by the others
-    return i
+    parent[i] = -(inv(c) * drop(v, i))         # ... is replaced by the others:
+    return i                                   # c e_i + r = 0 means e_i = -c⁻¹ r
 end
 
 end # module
