@@ -393,7 +393,7 @@ end
 
 function coxeterMinRep(W, w)
     v = first(minLenCons(W, w))
-    K = unique(coxeterWord(W, v))
+    K = unique(sort(coxeterWord(W, v)))    # the support of v, as a sorted tuple
     shape = shape_with_transversal(W, K)
     (L, j) = findmin(shape.list)
     return minimum(minLenCons(W, v^shape.reps[j]))
