@@ -378,6 +378,7 @@ end
 
 function minLenCons(W, x)
     list = [x]
+    seen = Set(list)                   # the elements seen so far
     lx = coxeterLength(W, x)
     for (i, y) in enumerate(list)
         for s in W.gens
@@ -385,7 +386,7 @@ function minLenCons(W, x)
             lz = coxeterLength(W, z)
             lz < lx && return minLenCons(W, z) # recurse!
             lz > lx && continue
-            z in list || push!(list, z)
+            z in seen || (push!(list, z); push!(seen, z))
         end
     end
     return list
