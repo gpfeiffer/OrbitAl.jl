@@ -58,5 +58,5 @@ methods for coset tables: Union-Find with consequences.
 ```@docs
 OrbitAl.unionfind.find
 OrbitAl.unionfind.unite!
-OrbitAl.unionfind.isunit
+OrbitAl.unionfind.isunit(::Any)
 ```

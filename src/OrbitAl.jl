@@ -46,6 +46,7 @@ include("presentations.jl")
 include("variants.jl")
 include("sparsevec.jl")
 include("unionfind.jl")
+include("hecke.jl")
 include("linear.jl")
 include("enumerator.jl")
 

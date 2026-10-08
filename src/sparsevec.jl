@@ -49,11 +49,13 @@ function SparseVec(v::AbstractArray)
 end
 
 """
-    unitVec(T, i)
+    unitVec(K, i)
 
-The unit vector ``e_i`` over `T`.
+The unit vector ``e_i`` over `K`: a type, such as `Rational{Int}`, or a ring
+that makes its own elements, such as a [`HeckeAlg`](@ref
+OrbitAl.hecke.HeckeAlg).
 """
-unitVec(T::Type, i::Int) = SparseVec([i], [one(T)])
+unitVec(K, i::Int) = SparseVec([i], [one(K)])
 
 ##  the type of the coefficients
 Base.eltype(::Type{SparseVec{T}}) where T = T

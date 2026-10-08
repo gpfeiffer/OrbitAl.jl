@@ -291,3 +291,44 @@ using OrbitAl.linear
         @test res.list == spinning(B, x, onRight) && acts(res, B)
     end
 end
+
+using OrbitAl.coxeter, OrbitAl.hecke
+
+@testset "Hecke Algebras" begin
+    for q in (2//1, 1//1, -1//1, 1//3)
+        H = HeckeAlg(CoxeterGp(cartanMat("A", 2)), q)
+        T1, T2, T0 = Tw(H, 1), Tw(H, 2), one(H)
+        @test T1 * T1 == (q - 1) * T1 + q * T0              # quadratic relation
+        @test T1 * T2 * T1 == T2 * T1 * T2 == Tw(H, 1, 2, 1)    # braid relation
+        @test (T1 - q * T0) * (T1 + T0) == zero(H) == zero(T1)
+        @test isone(T0) && iszero(T1 - T1) && T1 + T2 == T2 + T1
+        @test inv(T1) == (1 / q) * T1 - (1 - 1 / q) * T0
+        @test !isunit(T1 + T0) && isunit(T1 * T2) && isunit(3 * T0)
+        @test !isunit(T1 + 5 * T0)        # a unit, but not a monomial
+        h = 3 * Tw(H, 1, 2)
+        @test inv(h) * h == T0 == h * inv(h)
+    end
+    H = HeckeAlg(CoxeterGp(cartanMat("A", 2)), 0//1)     # q = 0: T_s is no unit
+    @test !isunit(Tw(H, 1)) && isunit(2 * one(H)) && Tw(H, 1) * Tw(H, 1) == -Tw(H, 1)
+    @test_throws ErrorException inv(Tw(H, 1))
+    H = HeckeAlg(CoxeterGp(cartanMat("B", 3)), 2//1)
+    w = Tw(H, 1, 2, 3, 2, 1, 2, 3, 2, 3)                    # the longest element
+    @test inv(w) * w == one(H) == w * inv(w)
+    @test (Tw(H, 1) * Tw(H, 2)) * Tw(H, 3) == Tw(H, 1) * (Tw(H, 2) * Tw(H, 3))
+    @test sprint(show, Tw(H, 1) - 2 * one(H)) == "-2 + T1"
+    G = HeckeAlg(CoxeterGp(cartanMat("A", 2)), 2//1)
+    @test_throws ErrorException Tw(H, 1) + Tw(G, 1)
+    @test Tw(H, 1) != Tw(G, 1)
+
+    # linear Union-Find over H(A_2), solving for unit coefficients only
+    H = HeckeAlg(CoxeterGp(cartanMat("A", 2)), 2//1)
+    T1, T2, T0 = Tw(H, 1), Tw(H, 2), one(H)
+    e(i) = unitVec(H, i)
+    parent = Dict{Int, SparseVec{HElt{Rational{Int}}}}()
+    @test unite!(parent, T1 * e(1), e(3)) == 3              # e_3 = T_1 e_1
+    @test unite!(parent, (T1 + T0) * e(2), zero(e(1))) == -1    # T_1 + 1 is no unit
+    @test unite!(parent, (T1 + T0) * e(2) + T2 * e(4), e(1)) == 4
+    @test find(parent, e(4)) == inv(T2) * (e(1) - (T1 + T0) * e(2))
+    @test find(parent, T2 * e(3)) == (T2 * T1) * e(1)
+    @test unite!(parent, T2 * e(4) + (T1 + T0) * e(2), e(1)) == 0
+end
