@@ -49,7 +49,8 @@ end
     coxeterMat(series, rank)
 
 Return the Coxeter matrix for the group of given `series` and `rank`.
-Entry `m[i,j]` is the order of the product `s_i * s_j` of generators.
+Entry `m[i,j]` is the order of the product `s_i * s_j` of generators, read off
+the Cartan matrix: ``m_{ij} = 2, 3, 4, 6`` for ``a_{ij} a_{ji} = 0, 1, 2, 3``.
 
 # Examples
 ```jldoctest
@@ -59,33 +60,30 @@ julia> coxeterMat("A", 2)
 2×2 Matrix{Int64}:
  1  3
  3  1
+
+julia> coxeterMat("B", 3)
+3×3 Matrix{Int64}:
+ 1  4  2
+ 4  1  3
+ 2  3  1
 ```
 """
 function coxeterMat(series::String, n::Int)
-    mat = zeros(Int, n, n)^0 # identity mat
-    edges = coxeterGraph(series, n)
-    for j in 1:n
-        for i in 1:j-1
-            mat[i,j] = mat[j,i] = (i,j) in edges ? 3 : 2
-        end
-    end
-    return mat
+    C = cartanMat(series, n)
+    return [i == j ? 1 : [2, 3, 4, 6][C[i,j] * C[j,i] + 1] for i in 1:n, j in 1:n]
 end
 
 
 mij(i, j, m) = repeat([i,j], div(m+1,2))[1:m]
 
+##  the braid relations (s_i s_j ...) = (s_j s_i ...), m_ij factors on each side
 function coxeterPresentation(series::String, rank::Int)
     gens = collect(1:rank)
     genrel = (gens = gens, invr = gens, rels = [])
-    edges = coxeterGraph(series, rank)
+    m = coxeterMat(series, rank)
     for j in gens
         for i in 1:j-1
-            if (i, j) in edges
-                push!(genrel.rels, [[i,j,i],[j,i,j]])
-            else
-                push!(genrel.rels, [[i,j],[j,i]])
-            end
+            push!(genrel.rels, [mij(i, j, m[i,j]), mij(j, i, m[i,j])])
         end
     end
     return genrel
