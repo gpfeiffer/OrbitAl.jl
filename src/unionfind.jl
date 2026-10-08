@@ -9,7 +9,7 @@ module unionfind
 
 using ..sparsevec
 
-export find, unite!
+export find, unite!, isunit
 
 #############################################################################
 ##
@@ -48,9 +48,21 @@ end
 ##  Linear Union-Find: linear relations between the basis vectors e_1, e_2, ...
 ##
 ##  A dictionary `parent` maps each inactive index i to the sparse vector that
-##  replaces e_i, in terms of e_j, j < i.  The index i is active if it is
-##  not a key of `parent`.
+##  replaces e_i, in terms of the indices that were active when i became
+##  inactive.  The index i is active if it is not a key of `parent`.
 ##
+##  A relation is solved for its last position with a unit coefficient: over
+##  a field, simply its last position, and then parent[i] involves e_j, j < i,
+##  only.  Coefficient types with non-units extend `isunit`.
+##
+
+"""
+    isunit(c)
+
+Whether the coefficient `c` is invertible.  The default, `!iszero(c)`, is
+right for fields; coefficient types with non-units add their own method.
+"""
+isunit(c) = !iszero(c)
 
 ##  the index k of the last inactive position v.poss[k] of v, or 0
 lastDead(parent::Dict, v::SparseVec) =
@@ -61,7 +73,8 @@ lastDead(parent::Dict, v::SparseVec) =
 
 The canonical form of `v` modulo the relations in `parent`: the unique vector
 in `v + U` that involves active positions only, where `U` is the subspace
-spanned by the relations.
+(or submodule) spanned by the relations, provided that `unite!` could solve
+each of them.
 """
 function find(parent::Dict, v::SparseVec)
     while (k = lastDead(parent, v)) > 0
@@ -75,15 +88,21 @@ end
     unite!(parent::Dict, u::SparseVec, w::SparseVec)
 
 Add the relation `u = w` to `parent`: reduce `u - w`, and solve the result
-for its last position, which then becomes inactive.  Returns that position,
-or `0` if the relation follows from the earlier ones.  The coefficient at the
-last position must be invertible.
+for its last position with a unit coefficient (see [`isunit`](@ref)), which
+then becomes inactive.  Returns that position, or `0` if the relation follows
+from the earlier ones, or `-1` if no coefficient is a unit, so that the
+relation cannot be solved (yet).
+
+Coefficients multiply from the left, so that the coefficients may come from a
+non-commutative ring, acting on the left.
 """
 function unite!(parent::Dict, u::SparseVec, w::SparseVec)
     v = find(parent, u - w)                    # the relation u = w, reduced
     length(v) > 0 || return 0
-    i, c = v.poss[end], v.vals[end]            # the last position of v ...
-    parent[i] = unitVec(eltype(v), i) - v / c  # ... is replaced by the others
+    k = findlast(isunit, v.vals)               # the last position with a unit coefficient ...
+    isnothing(k) && return -1
+    i, c = v.poss[k], v.vals[k]
+    parent[i] = unitVec(eltype(v), i) - inv(c) * v   # ... is replaced by the others
     return i
 end
 

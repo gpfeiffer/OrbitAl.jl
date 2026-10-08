@@ -210,6 +210,43 @@ using OrbitAl.unionfind
     end
 end
 
+# integers, whose only units are 1 and -1, as coefficients with non-units
+struct Zn
+    n::Int
+end
+Base.zero(::Type{Zn}) = Zn(0)
+Base.one(::Type{Zn}) = Zn(1)
+Base.iszero(a::Zn) = a.n == 0
+Base.isone(a::Zn) = a.n == 1
+Base.:+(a::Zn, b::Zn) = Zn(a.n + b.n)
+Base.:-(a::Zn) = Zn(-a.n)
+Base.:*(a::Zn, b::Zn) = Zn(a.n * b.n)
+Base.:*(c::Int, a::Zn) = Zn(c * a.n)
+Base.inv(a::Zn) = a                    # for the units 1 and -1
+Base.broadcastable(a::Zn) = Ref(a)
+OrbitAl.unionfind.isunit(a::Zn) = abs(a.n) == 1
+
+@testset "Union-Find with Unit Pivots" begin
+    # over a field, every nonzero coefficient is a unit
+    @test isunit(2//1) && !isunit(0//1)
+
+    e(i) = unitVec(Zn, i)
+    parent = Dict{Int, SparseVec{Zn}}()
+    # e_1 + 2 e_3 = 0: 2 is not a unit, so solve for e_1
+    @test unite!(parent, e(1) + 2 * e(3), zero(e(1))) == 1
+    @test parent[1] == -2 * e(3)
+    # 2 e_4 = 0 cannot be solved
+    @test unite!(parent, 2 * e(4), zero(e(1))) == -1
+    @test !haskey(parent, 4)
+    # e_3 = 3 e_2 + e_5: solved for e_5, the last position with a unit coefficient
+    @test unite!(parent, e(3), 3 * e(2) + e(5)) == 5
+    @test find(parent, e(1)) == -2 * e(3)
+    @test find(parent, e(5)) == e(3) - 3 * e(2)
+    # a relation that follows from the earlier ones
+    @test unite!(parent, e(1), -2 * e(3)) == 0
+    @test find(parent, e(1) + 2 * e(3)) == zero(e(1))
+end
+
 using OrbitAl.linear
 
 @testset "Spinning" begin

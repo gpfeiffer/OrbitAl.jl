@@ -13,12 +13,18 @@ two versions, as two methods each of `find` and `unite!`:
 - **Linear Union-Find**, for linear relations between the basis vectors
   ``e_1, e_2, \dots``, given as [`SparseVec`](@ref OrbitAl.sparsevec.SparseVec)s.
   A dictionary `parent` maps each inactive position `i` to the vector that
-  replaces ``e_i``, in terms of earlier positions.  `find` computes canonical
-  forms modulo the relations.
+  replaces ``e_i``.  `find` computes canonical forms modulo the relations.
 
 In both versions, `unite!` returns the element that has become inactive, or
 `0` if the relation adds nothing.  Union-Find is the special case of linear
 Union-Find for the relations ``e_i = e_j``.
+
+Linear Union-Find solves a relation for its last position with a **unit**
+coefficient: over a field, simply its last position.  The coefficients may
+also come from a ring, even a non-commutative one acting from the left, such
+as a Hecke algebra.  Such a coefficient type adds a method to
+[`isunit`](@ref OrbitAl.unionfind.isunit), and `unite!` returns `-1` for a
+relation that has no unit coefficient.
 
 ```jldoctest
 julia> using OrbitAl.unionfind, OrbitAl.sparsevec
@@ -52,4 +58,5 @@ methods for coset tables: Union-Find with consequences.
 ```@docs
 OrbitAl.unionfind.find
 OrbitAl.unionfind.unite!
+OrbitAl.unionfind.isunit
 ```
