@@ -78,6 +78,9 @@ Base.convert(::Type{Zn{n}}, x::Zn{n}) where n = x
 Base.promote_rule(::Type{Zn{n}}, ::Type{<:Integer}) where n = Zn{n}
 Zn{n}(x::Zn{n}) where n = x
 
-Base.show(io::IO, x::Zn{n}) where n = print(io, x.val, " mod ", n)
+# the bare residue where the type is shown already, as in a Matrix{Zn{n}}
+function Base.show(io::IO, x::Zn{n}) where n
+    get(io, :typeinfo, Any) == Zn{n} ? print(io, x.val) : print(io, x.val, " mod ", n)
+end
 
 end # module

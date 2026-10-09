@@ -414,6 +414,8 @@ using OrbitAl.modn
     @test_throws DivideError inv(zero(F))
     @test_throws ArgumentError Zn{1}(0)
     @test sprint(show, a) == "3 mod 7"
+    @test sprint(show, [a b]) == "Zn{7}[3 5]"                       # the bare residues in a Matrix{Zn{7}}
+    @test sprint(show, a; context = :typeinfo => Zn{5}) == "3 mod 7"
     @test isunit(a) && !isunit(zero(F))
 
     # a composite modulus: Z/6Z, with units 1 and 5
