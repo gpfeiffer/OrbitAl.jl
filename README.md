@@ -10,6 +10,7 @@ A Julia package for working with permutations and orbits in a simple and composa
 - **Permutation groups** — `PermGp` supporting element enumeration, conjugacy classes, subgroup enumeration, membership testing, and random element sampling.
 - **Coxeter groups** — `CoxeterGp` built from a Cartan matrix: root systems, reflections, Coxeter length, reduced words, parabolic subgroups and transversals, conjugacy classes.
 - **Standard Young tableaux** — partitions, Newton sums and differences, composition/subset conversions, tableau paths.
+- **Modular arithmetic** — `Zp{p}`: the field of residues modulo a prime `p`, with the modulus in the type, ready as coefficients for sparse vectors, Union-Find and spinning.
 - **Sparse vectors** — `SparseVec`: the positions and values of the nonzero coefficients, over any coefficient ring, with no fixed length.
 - **Union-Find** — for equivalence relations, as a forest, and for linear relations between basis vectors (linear Union-Find), solving for unit coefficients when the coefficients come from a ring.
 - **Hecke algebras** — `HeckeAlg` and `HElt`: Iwahori-Hecke algebras of finite Coxeter groups in the basis `T_w`, with monomial units and their inverses.  The elements of the group are not stored, so `W` can be as large as E8.

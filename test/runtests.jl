@@ -400,3 +400,34 @@ using OrbitAl.vectorenum
     V = vector_enum(G, q, [1, 2, 3], [t0, t1, t2])
     @test length(active_cosets(V)) == 9 && holds(V)
 end
+
+using OrbitAl.modp
+
+@testset "Modular Arithmetic" begin
+    F = Zp{7}
+    a, b = F(3), F(-2)
+    @test b == F(5) && b.val == 5 && modulus(a) == modulus(F) == 7
+    @test a + b == F(1) && a - b == F(5) && -a == F(4) && a * b == F(1)
+    @test inv(a) == F(5) && a / b == F(2) && a^6 == one(F) && a^-1 == inv(a)
+    @test iszero(zero(a)) && isone(one(a)) && a + 2 == F(5)     # promotion of Int
+    @test hash(F(10)) == hash(F(3)) && F(10) == F(3)
+    @test_throws DivideError inv(zero(F))
+    @test_throws ArgumentError Zp{1}(0)
+    @test sprint(show, a) == "3 mod 7"
+    @test Zp{2^61 - 1}(2^60) * Zp{2^61 - 1}(4) == Zp{2^61 - 1}(2)  # 2^62 = 2 * 2^61, via Int128
+
+    # coefficients of sparse vectors, linear Union-Find, spinning
+    e(i) = unitVec(F, i)
+    parent = Dict{Int, SparseVec{F}}()
+    @test unite!(parent, 3 * e(2), e(1)) == 2 && find(parent, e(2)) == 5 * e(1)
+    E = [Int(i == j) for i in 1:4, j in 1:4]
+    pm = [F.(E[Perm(g).list, :]) for g in [[2, 1, 3, 4], [1, 3, 2, 4], [1, 2, 4, 3]]]
+    @test [length(spinning(pm, F.(v), onRight)) for v in ([1 0 0 0], [1 1 1 1], [1 -1 0 0])] == [4, 1, 3]
+    # mod 2, the vector (1 1 1 1) lies in the 3-dimensional submodule spanned by (1 -1 0 0)
+    G = Zp{2}
+    pm2 = [G.(E[Perm(g).list, :]) for g in [[2, 1, 3, 4], [1, 3, 2, 4], [1, 2, 4, 3]]]
+    w = spinning(pm2, G.([1 1 0 0]), onRight)
+    parent = Dict{Int, SparseVec{G}}()
+    foreach(v -> unite!(parent, SparseVec(v), zero(SparseVec{G})), w)
+    @test length(w) == 3 && unite!(parent, SparseVec(G.([1 1 1 1])), zero(SparseVec{G})) == 0
+end

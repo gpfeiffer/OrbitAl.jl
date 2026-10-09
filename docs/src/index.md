@@ -19,6 +19,7 @@ Load explicitly, e.g. `using OrbitAl.syt`:
 - [Standard Young Tableaux](syt.md) — `using OrbitAl.syt`
 - [Cosets](coset.md) — `using OrbitAl.coset`
 - [Involutions](involution.md) — `using OrbitAl.involution`
+- [Modular Arithmetic](modp.md) — `using OrbitAl.modp`
 - [Sparse Vectors](sparsevec.md) — `using OrbitAl.sparsevec`
 - [Union-Find](unionfind.md) — `using OrbitAl.unionfind`
 - [Hecke Algebras](hecke.md) — `using OrbitAl.hecke`
@@ -52,6 +53,7 @@ Pkg.add(url="https://github.com/gpfeiffer/OrbitAl.jl")
 - **Standard Young tableaux** — partitions, Newton sums and differences, composition/subset conversions, tableau paths.
 - **Cosets** — `Coset` type and `cosets` for orbit enumeration of right cosets of a subgroup.
 - **Involutions** — actions and orbit algorithms for involutions and their conjugacy classes in Coxeter groups.
+- **Modular arithmetic** — `Zp{p}`: the field of residues modulo a prime `p`, with the modulus in the type, ready as coefficients for sparse vectors, Union-Find and spinning.
 - **Sparse vectors** — `SparseVec`: the positions and values of the nonzero coefficients, over any coefficient ring, with no fixed length.
 - **Union-Find** — for equivalence relations, as a forest, and for linear relations between basis vectors (linear Union-Find), solving for unit coefficients when the coefficients come from a ring.
 - **Hecke algebras** — `HeckeAlg` and `HElt`: Iwahori-Hecke algebras of finite Coxeter groups in the basis ``T_w``, with monomial units and their inverses.  The elements of the group are not stored, so `W` can be as large as ``E_8``.
