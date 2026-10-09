@@ -217,27 +217,27 @@ using OrbitAl.unionfind
 end
 
 # integers, whose only units are 1 and -1, as coefficients with non-units
-struct Zn
+struct Ints
     n::Int
 end
-Base.zero(::Type{Zn}) = Zn(0)
-Base.one(::Type{Zn}) = Zn(1)
-Base.iszero(a::Zn) = a.n == 0
-Base.isone(a::Zn) = a.n == 1
-Base.:+(a::Zn, b::Zn) = Zn(a.n + b.n)
-Base.:-(a::Zn) = Zn(-a.n)
-Base.:*(a::Zn, b::Zn) = Zn(a.n * b.n)
-Base.:*(c::Int, a::Zn) = Zn(c * a.n)
-Base.inv(a::Zn) = a                    # for the units 1 and -1
-Base.broadcastable(a::Zn) = Ref(a)
-OrbitAl.unionfind.isunit(a::Zn) = abs(a.n) == 1
+Base.zero(::Type{Ints}) = Ints(0)
+Base.one(::Type{Ints}) = Ints(1)
+Base.iszero(a::Ints) = a.n == 0
+Base.isone(a::Ints) = a.n == 1
+Base.:+(a::Ints, b::Ints) = Ints(a.n + b.n)
+Base.:-(a::Ints) = Ints(-a.n)
+Base.:*(a::Ints, b::Ints) = Ints(a.n * b.n)
+Base.:*(c::Int, a::Ints) = Ints(c * a.n)
+Base.inv(a::Ints) = a                    # for the units 1 and -1
+Base.broadcastable(a::Ints) = Ref(a)
+OrbitAl.unionfind.isunit(a::Ints) = abs(a.n) == 1
 
 @testset "Union-Find with Unit Pivots" begin
     # over a field, every nonzero coefficient is a unit
     @test isunit(2//1) && !isunit(0//1)
 
-    e(i) = unitVec(Zn, i)
-    parent = Dict{Int, SparseVec{Zn}}()
+    e(i) = unitVec(Ints, i)
+    parent = Dict{Int, SparseVec{Ints}}()
     # e_1 + 2 e_3 = 0: 2 is not a unit, so solve for e_1
     @test unite!(parent, e(1) + 2 * e(3), zero(e(1))) == 1
     @test parent[1] == -2 * e(3)
@@ -401,10 +401,10 @@ using OrbitAl.vectorenum
     @test length(active_cosets(V)) == 9 && holds(V)
 end
 
-using OrbitAl.modp
+using OrbitAl.modn
 
 @testset "Modular Arithmetic" begin
-    F = Zp{7}
+    F = Zn{7}
     a, b = F(3), F(-2)
     @test b == F(5) && b.val == 5 && modulus(a) == modulus(F) == 7
     @test a + b == F(1) && a - b == F(5) && -a == F(4) && a * b == F(1)
@@ -412,12 +412,12 @@ using OrbitAl.modp
     @test iszero(zero(a)) && isone(one(a)) && a + 2 == F(5)     # promotion of Int
     @test hash(F(10)) == hash(F(3)) && F(10) == F(3)
     @test_throws DivideError inv(zero(F))
-    @test_throws ArgumentError Zp{1}(0)
+    @test_throws ArgumentError Zn{1}(0)
     @test sprint(show, a) == "3 mod 7"
     @test isunit(a) && !isunit(zero(F))
 
     # a composite modulus: Z/6Z, with units 1 and 5
-    R = Zp{6}
+    R = Zn{6}
     @test inv(R(5)) == R(5)                      # Fermat would give 5^4 = 1
     @test_throws DomainError inv(R(2))
     @test [isunit(R(x)) for x in 0:5] == [false, true, false, false, false, true]
@@ -426,7 +426,7 @@ using OrbitAl.modp
     @test unite!(parent, 2 * f(1) + 3 * f(2), zero(f(1))) == -1    # no unit coefficient
     @test unite!(parent, 2 * f(1) + 5 * f(2), zero(f(1))) == 2     # solved for e_2
     @test find(parent, f(2)) == 2 * f(1)                           # e_2 = -5^-1 2 e_1 = 2 e_1
-    @test Zp{2^61 - 1}(2^60) * Zp{2^61 - 1}(4) == Zp{2^61 - 1}(2)  # 2^62 = 2 * 2^61, via Int128
+    @test Zn{2^61 - 1}(2^60) * Zn{2^61 - 1}(4) == Zn{2^61 - 1}(2)  # 2^62 = 2 * 2^61, via Int128
 
     # coefficients of sparse vectors, linear Union-Find, spinning
     e(i) = unitVec(F, i)
@@ -436,7 +436,7 @@ using OrbitAl.modp
     pm = [F.(E[Perm(g).list, :]) for g in [[2, 1, 3, 4], [1, 3, 2, 4], [1, 2, 4, 3]]]
     @test [length(spinning(pm, F.(v), onRight)) for v in ([1 0 0 0], [1 1 1 1], [1 -1 0 0])] == [4, 1, 3]
     # mod 2, the vector (1 1 1 1) lies in the 3-dimensional submodule spanned by (1 -1 0 0)
-    G = Zp{2}
+    G = Zn{2}
     pm2 = [G.(E[Perm(g).list, :]) for g in [[2, 1, 3, 4], [1, 3, 2, 4], [1, 2, 4, 3]]]
     w = spinning(pm2, G.([1 1 0 0]), onRight)
     parent = Dict{Int, SparseVec{G}}()
