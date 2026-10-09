@@ -3,8 +3,12 @@
 !!! note
     This is an on-demand module. Load it with `using OrbitAl.modp`.
 
-`Zp{p}` is the field ``\mathbb{F}_p`` of residues modulo a prime `p`, with
-`+`, `-`, `*`, `/`, `^` and `inv` (by Fermat's little theorem).  The modulus
+`Zp{p}` holds the residues modulo `p`, with `+`, `-`, `*`, `/`, `^` and
+`inv`.  For a prime `p`, this is the field ``\mathbb{F}_p``.  Otherwise it is
+the ring ``\mathbb{Z}/p\mathbb{Z}``: `inv` (by the extended Euclidean algorithm)
+raises a `DomainError` for a residue that is not a unit, and `isunit` tells
+which residues are units, so that linear Union-Find solves relations for unit
+coefficients only.  The modulus
 is a type parameter, so a vector or matrix over `Zp{p}` carries its modulus
 in its type, and integers are promoted to `Zp{p}` where needed.  Products go
 through `Int128`, so `p` can be as large as ``2^{62}``.
@@ -37,4 +41,5 @@ julia> length(spinning([A], Zp{7}.([1 1 1]), onRight))
 
 ```@docs
 OrbitAl.modp.Zp
+OrbitAl.modp.isunit(::OrbitAl.modp.Zp)
 ```

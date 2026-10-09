@@ -414,6 +414,18 @@ using OrbitAl.modp
     @test_throws DivideError inv(zero(F))
     @test_throws ArgumentError Zp{1}(0)
     @test sprint(show, a) == "3 mod 7"
+    @test isunit(a) && !isunit(zero(F))
+
+    # a composite modulus: Z/6Z, with units 1 and 5
+    R = Zp{6}
+    @test inv(R(5)) == R(5)                      # Fermat would give 5^4 = 1
+    @test_throws DomainError inv(R(2))
+    @test [isunit(R(x)) for x in 0:5] == [false, true, false, false, false, true]
+    parent = Dict{Int, SparseVec{R}}()
+    f(i) = unitVec(R, i)
+    @test unite!(parent, 2 * f(1) + 3 * f(2), zero(f(1))) == -1    # no unit coefficient
+    @test unite!(parent, 2 * f(1) + 5 * f(2), zero(f(1))) == 2     # solved for e_2
+    @test find(parent, f(2)) == 2 * f(1)                           # e_2 = -5^-1 2 e_1 = 2 e_1
     @test Zp{2^61 - 1}(2^60) * Zp{2^61 - 1}(4) == Zp{2^61 - 1}(2)  # 2^62 = 2 * 2^61, via Int128
 
     # coefficients of sparse vectors, linear Union-Find, spinning

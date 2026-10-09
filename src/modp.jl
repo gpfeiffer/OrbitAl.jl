@@ -3,20 +3,25 @@
 #A  modp.jl                                                           OrbitAl
 #B    by Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>
 ##
-#C  The coefficient field F_p
+#C  The residues modulo p: the coefficient field F_p, if p is prime
 ##
-##  Zp{p} holds a residue in [0, p).  Products go through Int128, so p up to
+##  Zp{p} holds a residue in [0, p).  For a prime p, this is the field F_p;
+##  otherwise the ring Z/pZ, whose units are the residues coprime to p.  Products go through Int128, so p up to
 ##  2^62 is safe; p is a type parameter, so a ring over Zp{p} carries its
 ##  modulus in its type and no operation has to be told the mode.
 ##
 module modp
 
-export Zp, modulus
+import ..unionfind: isunit
+
+export Zp, modulus, isunit
 
 """
     Zp{p}(x)
 
-The residue of the integer `x` modulo the prime `p`.
+The residue of the integer `x` modulo `p`.  For a prime `p`, `Zp{p}` is the
+field ``\\mathbb{F}_p``; otherwise it is the ring ``\\mathbb{Z}/p\\mathbb{Z}``, where `inv`
+and `isunit` know which residues are units.
 """
 struct Zp{p} <: Number
     val::Int64
@@ -46,11 +51,19 @@ Base.:-(x::Zp{p}) where p = Zp{p}(-x.val)
 Base.:-(x::Zp{p}, y::Zp{p}) where p = Zp{p}(x.val - y.val)
 Base.:*(x::Zp{p}, y::Zp{p}) where p = Zp{p}(mod(widemul(x.val, y.val), p))
 
-# x^(p-2) is x^-1 by Fermat, p prime.
+# by the extended Euclidean algorithm: a DomainError if x is no unit
 function Base.inv(x::Zp{p}) where p
     iszero(x) && throw(DivideError())
-    Zp{p}(powermod(x.val, p - 2, p))
+    Zp{p}(invmod(x.val, p))
 end
+
+"""
+    isunit(x::Zp)
+
+Whether `x` is a unit: whether its residue is coprime to the modulus.  For a
+prime modulus, this means `x` is not zero.
+"""
+isunit(x::Zp{p}) where p = gcd(x.val, p) == 1
 
 Base.:/(x::Zp{p}, y::Zp{p}) where p = x * inv(y)
 
