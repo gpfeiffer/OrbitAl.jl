@@ -42,7 +42,6 @@ include("syt.jl")
 include("shifts.jl")
 include("involution.jl")
 include("coset.jl")
-include("presentations.jl")
 include("variants.jl")
 include("sparsevec.jl")
 include("unionfind.jl")
@@ -51,5 +50,9 @@ include("hecke.jl")
 include("linear.jl")
 include("enumerator.jl")
 include("vectorenum.jl")
+
+# data: presentations and perm groups
+include("data/presentations.jl")
+include("data/permgroups.jl")
 
 end # module OrbitAl

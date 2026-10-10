@@ -26,6 +26,7 @@ Load explicitly, e.g. `using OrbitAl.syt`:
 - [Linear Orbit Algorithms](linear.md) — `using OrbitAl.linear`
 - [Coset Enumeration](enumerator.md) — `using OrbitAl.enumerator`, with example presentations in `OrbitAl.presentations`
 - [Vector Enumeration](vectorenum.md) — `using OrbitAl.vectorenum`
+- [Example Groups](data.md) — `using OrbitAl.presentations`, `using OrbitAl.permgroups`
 
 ## Installation
 
@@ -121,7 +122,7 @@ V                            # the table, with entries such as x2.3 = (2)x1 + x2
 ### On-demand: Schreier-Sims
 
 ```julia
-using OrbitAl.simsgroup
+using OrbitAl.simsgroup, OrbitAl.permgroups
 
-size(cube)   # order of Rubik's cube group
+size(SimsGp(permgroups.cube, Perm(48)))   # order of Rubik's cube group
 ```

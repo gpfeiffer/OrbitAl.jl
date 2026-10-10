@@ -39,6 +39,7 @@ makedocs(
             "Linear Orbit Algorithms" => "linear.md",
             "Coset Enumeration" => "enumerator.md",
             "Vector Enumeration" => "vectorenum.md",
+            "Example Groups" => "data.md",
         ],
     ],
     authors = "Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>",

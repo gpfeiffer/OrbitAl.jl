@@ -144,6 +144,9 @@ using OrbitAl.enumerator
         @test length(perms(T)) == length(G.gens)
         @test sizeOfGroup(PermGp(coset_table(G, Vector{Int}[]))) == order
     end
+    # the Fibonacci group F(2,7), cyclic of order 29, after many more cosets
+    T = coset_table(presentations.F27, presentations.F27.sbgp)
+    @test T.active == 29 && length(T.parent) == 123415
 end
 
 using OrbitAl.sparsevec
@@ -446,15 +449,18 @@ using OrbitAl.modn
     @test length(w) == 3 && unite!(parent, SparseVec(G.([1 1 1 1])), zero(SparseVec{G})) == 0
 end
 
-using OrbitAl.simsgroup
+using OrbitAl.simsgroup, OrbitAl.permgroups
 
 @testset "Schreier-Sims" begin
     G = SimsGp(transpositions(6), Perm(6))
     @test size(G) == 720 && rand(G) in G && size(SimsGp([], Perm(6))) == 1
     ch = schreier_sims(transpositions(6), Perm(6); base = [1, 2])
     @test base(ch)[1:2] == [1, 2] && sizeOfGroup(ch) == 720
-    @test size(cube) == 43252003274489856000
-    @test !(Perm(48, [[1, 3]]) in cube)
+    rubik = SimsGp(permgroups.cube, Perm(48))
+    @test size(rubik) == 43252003274489856000
+    @test !(Perm(48, [[1, 3]]) in rubik)
+    mathieu = [permgroups.m11, permgroups.m12, permgroups.m22, permgroups.m23, permgroups.m24]
+    @test [size(SimsGp(gens, one(gens[1]))) for gens in mathieu] == [7920, 95040, 443520, 10200960, 244823040]
     a, b = Perm([2, 3, 1, 4]), Perm([2, 1, 4, 3])        # A4
     r, s = Perm([2, 3, 4, 1]), Perm([3, 2, 1, 4])        # D8
     K = SimsGp([a, b], Perm(4)) ∩ SimsGp([r, s], Perm(4))

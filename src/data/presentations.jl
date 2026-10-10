@@ -234,4 +234,23 @@ J1 = (
   sbgp =[[1],[2],[3],[4]],
 )
 
+##  The Fibonacci group F(2,7) = < x_1, ..., x_7 | x_i x_{i+1} = x_{i+2} >,
+##  indices mod 7, cyclic of order 29.  A hard case for coset enumeration:
+##  over the trivial subgroup, `coset_table` defines 123415 cosets to find 29.
+##  Generators 1..7 are the x_i, and 8..14 their inverses.
+F27 = (
+  gens = [ 1,2,3,4,5,6,7,8,9,10,11,12,13,14 ],
+  invr = [ 8,9,10,11,12,13,14,1,2,3,4,5,6,7 ],
+  rels = [
+    [[ 1,2 ], [ 3 ]],
+    [[ 2,3 ], [ 4 ]],
+    [[ 3,4 ], [ 5 ]],
+    [[ 4,5 ], [ 6 ]],
+    [[ 5,6 ], [ 7 ]],
+    [[ 6,7 ], [ 1 ]],
+    [[ 7,1 ], [ 2 ]],
+  ],
+  sbgp = Vector{Int}[],
+)
+
 end # module

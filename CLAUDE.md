@@ -28,7 +28,7 @@ OrbitAl.jl is a Julia package for computational group theory and orbit algorithm
 
 **Group layer** (depends on permutation + orbits)
 - `permgroup.jl` — `APermGp`, the abstract type: subtypes provide `sizeOfGroup`, `memberOfGroup`, `randomGroupElement`, and get `size`/`in`/`rand` and the generic algorithms (elements, closure, conjugacy classes, subgroups). `PermGp` struct: those three by the recursive orbit-stabilizer method of Part 1. Also `isPrimePower`, `zuppos`, and `intersect` (extending `Base.intersect`/`∩`) for orbit-stabilizer group intersection. Built on top of orbit algorithms.
-- `simsgroup.jl` — the code of Part 5 of the notebooks: `Link`, `sift`, `schreier_sims` (stabilizer chains with a strong generating set), `backtrack` and `subgp_gens` (backtrack search), `ASimsGp <: APermGp`, the abstract type of groups with a stabilizer chain (`stabChain`), on which `sizeOfGroup`, `memberOfGroup`, `randomGroupElement` and `intersect` use the chain, and `SimsGp`, a group whose chain is computed on first use. Included before `coxeter.jl`. Also the Rubik's cube group `cube`. On-demand: `using OrbitAl.simsgroup`.
+- `simsgroup.jl` — the code of Part 5 of the notebooks: `Link`, `sift`, `schreier_sims` (stabilizer chains with a strong generating set), `backtrack` and `subgp_gens` (backtrack search), `ASimsGp <: APermGp`, the abstract type of groups with a stabilizer chain (`stabChain`), on which `sizeOfGroup`, `memberOfGroup`, `randomGroupElement` and `intersect` use the chain, and `SimsGp`, a group whose chain is computed on first use. Included before `coxeter.jl`. On-demand: `using OrbitAl.simsgroup`.
 - `bfsdfs.jl` — `Node` struct, generic BFS/DFS tree traversal utilities.
 
 **Algebraic structures** (depend on group layer)
@@ -38,7 +38,8 @@ OrbitAl.jl is a Julia package for computational group theory and orbit algorithm
 - `syt.jl` — Standard Young tableaux: partitions, Newton polynomials, composition↔subset conversions, tableau paths.
 
 **Coset enumeration** (experimental/in-progress)
-- `presentations.jl` — Hardcoded group presentations for testing (e.g., A2).
+- `data/presentations.jl` — module `presentations`: group presentations as named tuples (`gens`, `invr`, `rels`, `sbgp`), e.g. `A2`, `G333`, `M12`, and the Fibonacci group `F27`, a hard case for coset enumeration.
+- `data/permgroups.jl` — module `permgroups`: generator lists of the Mathieu groups `m11` … `m24` (from GAP's `MathieuGroup`) and the Rubik's cube group `cube`.
 - `variants.jl` — Relation variant generation from presentations.
 - `enumerator.jl` — Todd-Coxeter-style modular coset enumerator.
 - `coset.jl` — `Coset` struct; incomplete coset action implementation.
