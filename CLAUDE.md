@@ -28,7 +28,7 @@ OrbitAl.jl is a Julia package for computational group theory and orbit algorithm
 
 **Group layer** (depends on permutation + orbits)
 - `permgroup.jl` — `PermGp` struct: closure, conjugacy classes, subgroups, membership, random elements. Also `isPrimePower`, `zuppos`, and `intersect` (extending `Base.intersect`/`∩`) for orbit-stabilizer group intersection. Built on top of orbit algorithms.
-- `simsgroup.jl` — `SimsGp`: Schreier-Sims stabilizer chain for efficient size/membership without enumerating all elements. Exports `SimsGp`, `orbit_sims`, `cube`, and extends `Base.intersect` for `SimsGp` pairs. Fully wired into `OrbitAl` via `using .simsgroup`.
+- `simsgroup.jl` — the code of Part 5 of the notebooks: `Link`, `sift`, `schreier_sims` (stabilizer chains with a strong generating set), `backtrack` and `subgp_gens` (backtrack search), and `SimsGp`, a group with a stabilizer chain computed on first use (`stabChain`), extending `size`, `in`, `rand` and `intersect`. Also the Rubik's cube group `cube`. On-demand: `using OrbitAl.simsgroup`.
 - `bfsdfs.jl` — `Node` struct, generic BFS/DFS tree traversal utilities.
 
 **Algebraic structures** (depend on group layer)

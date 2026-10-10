@@ -386,7 +386,10 @@ function minLenCons(W, x)
             lz = coxeterLength(W, z)
             lz < lx && return minLenCons(W, z) # recurse!
             lz > lx && continue
-            z in seen || (push!(list, z); push!(seen, z))
+            z in seen || begin
+                push!(list, z)
+                push!(seen, z)
+            end
         end
     end
     return list

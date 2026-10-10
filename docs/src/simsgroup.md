@@ -3,44 +3,50 @@
 !!! note
     This is an on-demand module. Load it with `using OrbitAl.simsgroup`.
 
-This module provides an alternative permutation group representation built on the
-Schreier-Sims stabilizer chain. Unlike `PermGp`, which recomputes the orbit-stabilizer
-decomposition on every query, `SimsGp` caches the chain on first use, giving fast
-repeated membership tests and size computations without enumerating all elements.
+This module is the code of Part 5 of the notebooks: the Schreier-Sims
+algorithm, which computes a stabilizer chain with a strong generating set, and
+backtrack search through the elements of a group along such a chain.  A
+`SimsGp` is a permutation group whose stabilizer chain is computed on first
+use, for fast size computations and membership tests without enumerating its
+elements.
 
 ---
 
-## Types
+## Stabilizer Chains
+
+```@docs
+OrbitAl.simsgroup.Link
+OrbitAl.simsgroup.sift
+OrbitAl.simsgroup.schreier_sims
+OrbitAl.simsgroup.base
+OrbitAl.simsgroup.strong_gens
+```
+
+---
+
+## Groups
 
 ```@docs
 OrbitAl.simsgroup.SimsGp
+OrbitAl.simsgroup.stabChain
+```
+
+The functions `sizeOfGroup`, `memberOfGroup` and `randomGroupElement` work on
+a stabilizer chain, and `size(G)`, `in(g, G)` and `rand(G)` apply them to the
+chain of a `SimsGp`.
+
+```@docs
+OrbitAl.permgroup.sizeOfGroup(::Vector{OrbitAl.simsgroup.Link})
+OrbitAl.permgroup.memberOfGroup(::Vector{OrbitAl.simsgroup.Link}, ::Any)
+OrbitAl.permgroup.randomGroupElement(::Vector{OrbitAl.simsgroup.Link}, ::Any)
 ```
 
 ---
 
-## Orbit and Stabilizer
+## Backtrack Search
 
 ```@docs
-OrbitAl.simsgroup.orbit_sims
-```
-
----
-
-## Size, Membership and Random Elements
-
-`SimsGp` extends three functions from `Base`:
-
-- **`size(G)`** — returns the group order as a `BigInt`, computed as the product of
-  orbit lengths along the stabilizer chain.
-- **`in(g, G)`** — tests whether permutation `g` belongs to `G` by sifting through
-  the Schreier-Sims chain; each level reduces the element by a coset representative.
-- **`rand(G)`** — returns a uniformly random element by multiplying a random coset
-  representative at each level of the chain.
-
----
-
-## Intersection
-
-```@docs
+OrbitAl.simsgroup.backtrack
+OrbitAl.simsgroup.subgp_gens
 Base.intersect(::OrbitAl.simsgroup.SimsGp, ::OrbitAl.simsgroup.SimsGp)
 ```

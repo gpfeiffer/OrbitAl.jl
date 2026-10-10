@@ -445,3 +445,27 @@ using OrbitAl.modn
     foreach(v -> unite!(parent, SparseVec(v), zero(SparseVec{G})), w)
     @test length(w) == 3 && unite!(parent, SparseVec(G.([1 1 1 1])), zero(SparseVec{G})) == 0
 end
+
+using OrbitAl.simsgroup
+
+@testset "Schreier-Sims" begin
+    G = SimsGp(transpositions(6), Perm(6))
+    @test size(G) == 720 && rand(G) in G && size(SimsGp([], Perm(6))) == 1
+    ch = schreier_sims(transpositions(6), Perm(6); base = [1, 2])
+    @test base(ch)[1:2] == [1, 2] && sizeOfGroup(ch) == 720
+    @test size(cube) == 43252003274489856000
+    @test !(Perm(48, [[1, 3]]) in cube)
+    a, b = Perm([2, 3, 1, 4]), Perm([2, 1, 4, 3])        # A4
+    r, s = Perm([2, 3, 4, 1]), Perm([3, 2, 1, 4])        # D8
+    K = SimsGp([a, b], Perm(4)) ∩ SimsGp([r, s], Perm(4))
+    @test size(K) == 4 && all(k -> k in SimsGp([a, b], Perm(4)) && k in SimsGp([r, s], Perm(4)), K.gens)
+    x = Perm(6, [[1, 2], [3, 4]])
+    @test length(backtrack(stabChain(G), Perm(6), g -> x^g == x).found) == 16
+    @test size(SimsGp(subgp_gens(stabChain(G), g -> x^g == x), Perm(6))) == 16
+    # against the elements of random subgroups of S5
+    for _ in 1:50
+        gs, hs = [rand(Perm, 5) for _ in 1:2], [rand(Perm, 5)]
+        E = intersect(Set(elements(PermGp(gs, Perm(5)))), Set(elements(PermGp(hs, Perm(5)))))
+        @test size(SimsGp(gs, Perm(5)) ∩ SimsGp(hs, Perm(5))) == length(E)
+    end
+end

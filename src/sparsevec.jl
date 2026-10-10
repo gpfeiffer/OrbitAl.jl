@@ -86,7 +86,8 @@ end
 ##  merge the two sorted lists of positions, adding where they meet
 function Base.:+(v::SparseVec, w::SparseVec)
     poss, vals = Int[], promote_type(eltype(v), eltype(w))[]
-    j, k, m, n = 1, 1, length(v), length(w)
+    j, k = 1, 1
+    m, n = length(v), length(w)
     while j <= m || k <= n
         if k > n || j <= m && v.poss[j] < w.poss[k]        # only in v
             push!(poss, v.poss[j]); push!(vals, v.vals[j])
@@ -96,7 +97,10 @@ function Base.:+(v::SparseVec, w::SparseVec)
             k += 1
         else                                                # in both
             c = v.vals[j] + w.vals[k]
-            iszero(c) || (push!(poss, v.poss[j]); push!(vals, c))
+            iszero(c) || begin
+                push!(poss, v.poss[j])
+                push!(vals, c)
+            end
             j += 1; k += 1
         end
     end

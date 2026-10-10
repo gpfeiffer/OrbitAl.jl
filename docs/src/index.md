@@ -49,7 +49,7 @@ Pkg.add(url="https://github.com/gpfeiffer/OrbitAl.jl")
 ### On-demand
 
 - **Coxeter groups** — `CoxeterGp` built from a Cartan matrix: root systems, reflections, Coxeter length, reduced words, parabolic subgroups and transversals, conjugacy classes.
-- **Schreier-Sims groups** — `SimsGp` with cached stabilizer chain for fast repeated membership tests and size computation without enumerating all elements.
+- **Schreier-Sims groups** — the Schreier-Sims algorithm and backtrack search; `SimsGp` with a cached stabilizer chain for fast membership tests, size and intersection without enumerating all elements.
 - **Standard Young tableaux** — partitions, Newton sums and differences, composition/subset conversions, tableau paths.
 - **Cosets** — `Coset` type and `cosets` for orbit enumeration of right cosets of a subgroup.
 - **Involutions** — actions and orbit algorithms for involutions and their conjugacy classes in Coxeter groups.

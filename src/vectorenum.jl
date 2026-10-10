@@ -93,7 +93,8 @@ end
 ##  terms (u, s), standing for u.s, plus a constant vector: a relation,
 ##  a deduction, or nothing yet
 function evaluate!(T::VectorTable, terms, constant)
-    v, unknown = constant, Dict{Tuple{Int, Int}, typeof(T.one)}()
+    v = constant
+    unknown = Dict{Tuple{Int, Int}, typeof(T.one)}()
     for (u, s) in terms
         u = find(T.parent, u)
         for (j, h) in zip(u.poss, u.vals)
@@ -117,7 +118,10 @@ end
 ##  or waits for a unit coefficient
 function relation!(T::VectorTable, v)
     i = unite!(T.parent, v, zero(v))
-    i == -1 && (push!(T.pending, v); return :wait)
+    i == -1 && begin
+        push!(T.pending, v)
+        return :wait
+    end
     i > 0 || return :none
     for s in 1:T.ngens
         w = T.next[i][s]
@@ -130,7 +134,8 @@ end
 ##  a relator at coset x, prepared for evaluate!, or nothing if an entry
 ##  before a last letter is unknown
 function terms_at(T::VectorTable, x, rel)
-    terms, constant = Tuple{SparseVec{typeof(T.one)}, Int}[], zero(basis(T, x))
+    terms = Tuple{SparseVec{typeof(T.one)}, Int}[]
+    constant = zero(basis(T, x))
     for (c, word) in rel
         if isempty(word)
             constant += c * basis(T, x)
@@ -157,7 +162,10 @@ function close!(T::VectorTable)
         end
         for k in reverse(eachindex(T.dead))
             (i, s, w) = T.dead[k]
-            evaluate!(T, [(T.parent[i], s)], -w) == :wait || (deleteat!(T.dead, k); changed = true)
+            evaluate!(T, [(T.parent[i], s)], -w) == :wait || begin
+                deleteat!(T.dead, k)
+                changed = true
+            end
         end
         pending, T.pending = T.pending, empty(T.pending)
         for v in pending                       # retry, with what is known now
