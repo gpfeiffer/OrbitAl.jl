@@ -1,7 +1,7 @@
 name = "OrbitAl"
 uuid = "b53d2297-9141-4d9f-81f1-04787862c2db"
 license = "MIT"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>"]
 
 [weakdeps]
