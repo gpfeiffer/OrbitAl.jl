@@ -468,4 +468,16 @@ using OrbitAl.simsgroup
         E = intersect(Set(elements(PermGp(gs, Perm(5)))), Set(elements(PermGp(hs, Perm(5)))))
         @test size(SimsGp(gs, Perm(5)) ∩ SimsGp(hs, Perm(5))) == length(E)
     end
+
+    # a SimsGp is an APermGp, with the generic algorithms
+    S4 = SimsGp(transpositions(4), Perm(4))
+    @test S4 isa OrbitAl.APermGp && length(elements(S4)) == 24 && length(conjClasses(S4)) == 5
+    @test length(elements(S4 ∩ PermGp([a], Perm(4)))) == 3        # the generic ∩
+
+    # a Coxeter group is an ASimsGp, with its chain kept in W.data
+    W = CoxeterGp(cartanMat("E", 8))
+    @test W isa ASimsGp && sizeOfGroup(W) == 696729600 && haskey(W.data, :chain)
+    @test rand(W) in W && !(Perm(240, [[1, 2]]) in W)
+    W = CoxeterGp(cartanMat("A", 3))
+    @test size(W ∩ SimsGp(W.gens[1:2], W.one)) == 6
 end

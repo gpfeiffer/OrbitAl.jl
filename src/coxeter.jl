@@ -15,6 +15,7 @@ import Base: ^, size
 import ..permutation: Perm
 import ..permutation: isidentity, last_moved
 import ..permgroup: PermGp
+import ..simsgroup: ASimsGp, stabChain, schreier_sims
 
 export coxeterGraph, coxeterMat, cartanMat, CoxeterGp, coxeterConjugacyClasses
 export coxeterLength, coxeterWord, permCoxeterWord, reflections
@@ -120,7 +121,7 @@ onRoots(x, a) = absRoot(onRight(x, a))
 
 Perm(a, xxx, under) = Perm(indexin([under(x, a) for x in xxx], xxx))
 
-abstract type ACoxeterGp <: APermGp end
+abstract type ACoxeterGp <: ASimsGp end
 struct CoxeterGp <: ACoxeterGp
     gens::Vector{Perm}
     one::Perm
@@ -160,6 +161,14 @@ function CoxeterGp(C::Matrix{Int})
     perms = [Perm(m, data[:phi], onRight) for m in mats]
     return CoxeterGp(perms, perms[1]^0, data)
 end
+
+"""
+    stabChain(W::CoxeterGp)
+
+The stabilizer chain of `W`, computed by `schreier_sims` on first use, and
+kept in `W.data[:chain]`.
+"""
+stabChain(W::CoxeterGp) = get!(() -> schreier_sims(W.gens, W.one), W.data, :chain)
 
 """
     reflections(W)

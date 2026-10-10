@@ -21,7 +21,11 @@ export isPrimePower, zuppos
 """
     APermGp
 
-Abstract supertype for all permutation group types.
+Abstract supertype for all permutation group types.  A subtype has fields
+`gens` and `one`, and methods for `sizeOfGroup(G)`, `memberOfGroup(G, perm)`
+and `randomGroupElement(G)`, which `size`, `in` and `rand` call.  The generic
+algorithms on `APermGp`, such as `elements`, `conjClasses` and `∩`, use only
+these.
 """
 abstract type APermGp end
 
@@ -114,7 +118,7 @@ is_trivial(group::APermGp) = all(isidentity, group.gens)
 last_moved(group::APermGp) = max(last_moved.(group.gens)...)
 
 """
-    sizeOfGroup(group)
+    sizeOfGroup(group::PermGp)
 
 Return the order of `group` using the orbit-stabilizer theorem,
 without enumerating all elements.
@@ -129,7 +133,7 @@ julia> sizeOfGroup(PermGp([s, t], one(s)))
 6
 ```
 """
-function sizeOfGroup(group::APermGp)
+function sizeOfGroup(group::PermGp)
     is_trivial(group) && return 1
     x = last_moved(group)
     orb = orbit_with_stabilizer(group.gens, x, onPoints)
@@ -139,12 +143,12 @@ end
 size(group::APermGp) = sizeOfGroup(group)
 
 """
-    randomGroupElement(group)
+    randomGroupElement(group::PermGp)
 
 Return a uniformly random element of `group` using a recursive
 orbit-stabilizer decomposition.
 """
-function randomGroupElement(group::APermGp)
+function randomGroupElement(group::PermGp)
     is_trivial(group) && return group.one
     x = last_moved(group)
     orb = orbit_with_stabilizer(group.gens, x, onPoints)
@@ -154,7 +158,7 @@ end
 rand(group::APermGp) = randomGroupElement(group)
 
 """
-    memberOfGroup(group, perm)
+    memberOfGroup(group::PermGp, perm)
 
 Return `true` if `perm` belongs to `group`, using a recursive sifting algorithm.
 
@@ -173,7 +177,7 @@ julia> memberOfGroup(G, Perm([2,3,4,1]))
 false
 ```
 """
-function memberOfGroup(group::APermGp, perm::Perm)
+function memberOfGroup(group::PermGp, perm::Perm)
     is_trivial(group) && return perm == group.one
     x = last_moved(group)
     orb = orbit_with_stabilizer(group.gens, x, onPoints)

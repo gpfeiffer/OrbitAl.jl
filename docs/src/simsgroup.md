@@ -27,13 +27,14 @@ OrbitAl.simsgroup.strong_gens
 ## Groups
 
 ```@docs
+OrbitAl.simsgroup.ASimsGp
 OrbitAl.simsgroup.SimsGp
 OrbitAl.simsgroup.stabChain
 ```
 
 The functions `sizeOfGroup`, `memberOfGroup` and `randomGroupElement` work on
-a stabilizer chain, and `size(G)`, `in(g, G)` and `rand(G)` apply them to the
-chain of a `SimsGp`.
+a stabilizer chain.  For an `ASimsGp`, such as a `SimsGp` or a `CoxeterGp`, they
+use its chain, and `size(G)`, `in(g, G)` and `rand(G)` call them.
 
 ```@docs
 OrbitAl.permgroup.sizeOfGroup(::Vector{OrbitAl.simsgroup.Link})
@@ -48,5 +49,5 @@ OrbitAl.permgroup.randomGroupElement(::Vector{OrbitAl.simsgroup.Link}, ::Any)
 ```@docs
 OrbitAl.simsgroup.backtrack
 OrbitAl.simsgroup.subgp_gens
-Base.intersect(::OrbitAl.simsgroup.SimsGp, ::OrbitAl.simsgroup.SimsGp)
+Base.intersect(::OrbitAl.simsgroup.ASimsGp, ::OrbitAl.simsgroup.ASimsGp)
 ```

@@ -11,13 +11,13 @@
 ##
 module simsgroup
 
-import Base: in, size, rand, intersect
+import Base: intersect
 
 using ..orbits: orbit, onPoints
 import ..permutation: Perm, isidentity, last_moved
-import ..permgroup: sizeOfGroup, memberOfGroup, randomGroupElement
+import ..permgroup: APermGp, sizeOfGroup, memberOfGroup, randomGroupElement
 
-export SimsGp, stabChain, cube
+export ASimsGp, SimsGp, stabChain, cube
 export Link, sift, schreier_sims, base, strong_gens
 export backtrack, subgp_gens
 
@@ -150,12 +150,25 @@ The strong generating set of the stabilizer chain `chain`.
 strong_gens(chain) = unique(vcat([link.gens for link in chain]...))
 
 """
+    ASimsGp
+
+Abstract supertype for permutation groups with a stabilizer chain.  A subtype
+has a method for `stabChain(G)`; then `sizeOfGroup`, `memberOfGroup`,
+`randomGroupElement` and `∩` use the chain.
+"""
+abstract type ASimsGp <: APermGp end
+
+sizeOfGroup(G::ASimsGp) = sizeOfGroup(stabChain(G))
+memberOfGroup(G::ASimsGp, g::Perm) = memberOfGroup(stabChain(G), g)
+randomGroupElement(G::ASimsGp) = randomGroupElement(stabChain(G), G.one)
+
+"""
     SimsGp(gens, one)
 
 A permutation group, given by generators `gens` and the identity `one`,
 together with a stabilizer chain, which is computed when first needed.
 """
-mutable struct SimsGp
+mutable struct SimsGp <: ASimsGp
     gens::Vector{Perm}
     one::Perm
     chain::Union{Nothing, Vector{Link}}
@@ -171,10 +184,6 @@ function stabChain(G::SimsGp)
     isnothing(G.chain) && (G.chain = schreier_sims(G.gens, G.one))
     return G.chain
 end
-
-size(G::SimsGp) = sizeOfGroup(stabChain(G))
-in(g::Perm, G::SimsGp) = memberOfGroup(stabChain(G), g)
-rand(G::SimsGp) = randomGroupElement(stabChain(G), G.one)
 
 """
     backtrack(chain, id, accept, prune = (g, i) -> true)
@@ -244,7 +253,7 @@ function subgp_gens(chain, accept, prune = (g, i) -> true)
 end
 
 """
-    intersect(G::SimsGp, H::SimsGp)
+    intersect(G::ASimsGp, H::ASimsGp)
     G ∩ H
 
 The intersection of `G` and `H`, as a `SimsGp` with generators found by
@@ -268,7 +277,7 @@ julia> size(K)
 2
 ```
 """
-function intersect(G::SimsGp, H::SimsGp)
+function intersect(G::ASimsGp, H::ASimsGp)
     chG = stabChain(G)
     chH = schreier_sims(H.gens, H.one; base = base(chG))
     prune(h, i) = sift(chH[1:i], h)[2] > i

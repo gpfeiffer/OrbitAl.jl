@@ -27,12 +27,12 @@ OrbitAl.jl is a Julia package for computational group theory and orbit algorithm
 - `orbits.jl` — The core BFS orbit engine with ~10 variants: `orbit`, `orbitl`, `orbit_with_words`, `orbit_with_tree`, `orbit_with_transversal`, `orbit_with_stabilizer`, `orbit_with_images`, `orbit_with_edges`. Standard actions (`onPoints`, `onRight`, `onSets`, `onPairs`, `onWords`) live here.
 
 **Group layer** (depends on permutation + orbits)
-- `permgroup.jl` — `PermGp` struct: closure, conjugacy classes, subgroups, membership, random elements. Also `isPrimePower`, `zuppos`, and `intersect` (extending `Base.intersect`/`∩`) for orbit-stabilizer group intersection. Built on top of orbit algorithms.
-- `simsgroup.jl` — the code of Part 5 of the notebooks: `Link`, `sift`, `schreier_sims` (stabilizer chains with a strong generating set), `backtrack` and `subgp_gens` (backtrack search), and `SimsGp`, a group with a stabilizer chain computed on first use (`stabChain`), extending `size`, `in`, `rand` and `intersect`. Also the Rubik's cube group `cube`. On-demand: `using OrbitAl.simsgroup`.
+- `permgroup.jl` — `APermGp`, the abstract type: subtypes provide `sizeOfGroup`, `memberOfGroup`, `randomGroupElement`, and get `size`/`in`/`rand` and the generic algorithms (elements, closure, conjugacy classes, subgroups). `PermGp` struct: those three by the recursive orbit-stabilizer method of Part 1. Also `isPrimePower`, `zuppos`, and `intersect` (extending `Base.intersect`/`∩`) for orbit-stabilizer group intersection. Built on top of orbit algorithms.
+- `simsgroup.jl` — the code of Part 5 of the notebooks: `Link`, `sift`, `schreier_sims` (stabilizer chains with a strong generating set), `backtrack` and `subgp_gens` (backtrack search), `ASimsGp <: APermGp`, the abstract type of groups with a stabilizer chain (`stabChain`), on which `sizeOfGroup`, `memberOfGroup`, `randomGroupElement` and `intersect` use the chain, and `SimsGp`, a group whose chain is computed on first use. Included before `coxeter.jl`. Also the Rubik's cube group `cube`. On-demand: `using OrbitAl.simsgroup`.
 - `bfsdfs.jl` — `Node` struct, generic BFS/DFS tree traversal utilities.
 
 **Algebraic structures** (depend on group layer)
-- `coxeter.jl` — `CoxeterGp` from a Coxeter matrix or graph. Reflection matrices, root systems, conjugacy classes, lengths, parabolic subgroups.
+- `coxeter.jl` — `CoxeterGp` from a Coxeter matrix or graph; `ACoxeterGp <: ASimsGp`, with the stabilizer chain kept in `W.data[:chain]`. Reflection matrices, root systems, conjugacy classes, lengths, parabolic subgroups.
 - `involution.jl` — Actions on involutions; conjugacy class enumeration relative to Coxeter groups.
 - `shifts.jl` — Cyclic shift enumeration with edge tracking.
 - `syt.jl` — Standard Young tableaux: partitions, Newton polynomials, composition↔subset conversions, tableau paths.

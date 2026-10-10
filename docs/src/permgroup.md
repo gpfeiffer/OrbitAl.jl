@@ -1,14 +1,18 @@
 # Permutation Groups
 
 This module provides lightweight permutation groups built on top of the orbit algorithms.
-A group is defined by a list of generators and an identity element; all group-theoretic
-operations (size, membership, conjugacy classes) are derived from orbit computations.
+A group is defined by a list of generators and an identity element.  The abstract type
+`APermGp` asks its subtypes for `sizeOfGroup`, `memberOfGroup` and `randomGroupElement`,
+and builds the generic algorithms (elements, conjugacy classes, subgroups, intersections)
+on them.  `PermGp` computes these three by orbit computations, as in Part 1 of the
+notebooks; `SimsGp` and `CoxeterGp` use a stabilizer chain instead.
 
 ---
 
 ## Types
 
 ```@docs
+OrbitAl.permgroup.APermGp
 OrbitAl.permgroup.PermGp
 ```
 
