@@ -7,9 +7,10 @@
 ##
 ##  Zn{n} holds a residue in [0, n).  For a prime n, this is the field F_n;
 ##  otherwise the ring Z/nZ, whose units are the residues coprime to n.
-##  Products go through Int128, so n up to 2^62 is safe; n is a type
-##  parameter, so a ring over Zn{n} carries its modulus in its type and no
-##  operation has to be told the mode.
+##  Products of residues below 2^31 are exact in Int64; above that they go
+##  through Int128, so n up to 2^62 is safe.  n is a type parameter, so a ring
+##  over Zn{n} carries its modulus in its type, no operation has to be told
+##  the mode, and the test on n is resolved at compile time.
 ##
 module modn
 
@@ -50,7 +51,10 @@ Base.hash(x::Zn{n}, h::UInt) where n = hash(x.val, hash(n, h))
 Base.:+(x::Zn{n}, y::Zn{n}) where n = Zn{n}(x.val + y.val)
 Base.:-(x::Zn{n}) where n = Zn{n}(-x.val)
 Base.:-(x::Zn{n}, y::Zn{n}) where n = Zn{n}(x.val - y.val)
-Base.:*(x::Zn{n}, y::Zn{n}) where n = Zn{n}(mod(widemul(x.val, y.val), n))
+# residues below 2^31 have products below 2^62, so the Int64 multiply is
+# exact; the Int128 of the wide case costs a library division
+Base.:*(x::Zn{n}, y::Zn{n}) where n =
+    n < (1 << 31) ? Zn{n}(x.val * y.val) : Zn{n}(mod(widemul(x.val, y.val), n))
 
 # by the extended Euclidean algorithm: a DomainError if x is no unit
 function Base.inv(x::Zn{n}) where n

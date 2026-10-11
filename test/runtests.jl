@@ -433,6 +433,14 @@ using OrbitAl.modn
     @test find(parent, f(2)) == 2 * f(1)                           # e_2 = -5^-1 2 e_1 = 2 e_1
     @test Zn{2^61 - 1}(2^60) * Zn{2^61 - 1}(4) == Zn{2^61 - 1}(2)  # 2^62 = 2 * 2^61, via Int128
 
+    # both branches of the multiply, at the widest modulus each takes: below
+    # 2^31 in Int64, above it in Int128
+    W = Zn{2^31 - 1}
+    @test W(2^31 - 2) * W(2^31 - 2) == W(1)                        # (-1)^2, the product near 2^62
+    @test W(2^20) * W(2^20) == W(mod(2^40, 2^31 - 1))
+    V = Zn{2^31}
+    @test V(2^31 - 1) * V(2^31 - 1) == V(1)                        # the first modulus taking Int128
+
     # coefficients of sparse vectors, linear Union-Find, spinning
     e(i) = unitVec(F, i)
     parent = Dict{Int, SparseVec{F}}()
