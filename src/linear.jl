@@ -3,14 +3,17 @@
 #A  linear.jl                                                         OrbitAl
 #B    by Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>
 ##
-#C  Linear orbit algorithms: spinning, and spinning with images
+#C  Linear orbit algorithms: spinning, and spinning with images,
+#C  and Norton's irreducibility test (the MeatAxe)
 ##
 module linear
 
 using ..sparsevec
 using ..unionfind
+import ..orbits: onRight
+import ..modn: modulus
 
-export spinning, spinning_with_images
+export spinning, spinning_with_images, left_nullspace, norton
 
 """
     spinning(aaa, x, under)
@@ -84,6 +87,77 @@ function spinning_with_images(aaa, x, under)
         push!(images[k], coordinates!(under(y, a)))
     end
     return (list = list, images = images)
+end
+
+"""
+    left_nullspace(A)
+
+A basis of the left null space `{d : d A = 0}` of the matrix `A`, as a list
+of row vectors.
+
+The rows of `A` are entered one by one into linear Union-Find, as relations,
+and `coeffs` records each relation as a combination of the rows, as in
+`spinning_with_images`.  A row that reduces to `0` gives a null vector
+`d = e_k - c`; its last nonzero entry is at position `k`, so the null vectors
+are linearly independent.
+"""
+function left_nullspace(A)
+    n = size(A, 1)
+    T = eltype(A)
+
+    # the rows of A, as relations, and the relations as combinations of the rows
+    parent = Dict{Int, SparseVec{T}}()
+    coeffs = Dict{Int, SparseVec{T}}()
+
+    nulls = Matrix{T}[]
+    for k in 1:n
+        v = SparseVec(A[k, :])
+        v, c = find_with_coeffs(parent, coeffs, v, zero(v))    # v = (e_k - c) A
+        if length(v) == 0
+            d = unitVec(T, k) - c                                # d A = 0
+            push!(nulls, permutedims([d[i] for i in 1:n]))
+        else
+            i, g = v.poss[end], v.vals[end]        # a new relation, as in unite!
+            parent[i] = unitVec(T, i) - v / g
+            coeffs[i] = (unitVec(T, k) - c) / g
+        end
+    end
+    return nulls
+end
+
+"""
+    norton(gens; tries = 50)
+
+Norton's irreducibility test, the core of the MeatAxe, for the module over a
+prime field `Zn{p}` given by the matrices `gens`, acting on row vectors.  A
+random element θ of the algebra, with a null space of dimension 1 spanned by
+`v`, decides: the module is irreducible if and only if `v` spins to the
+whole space, and a vector in the null space of θ^T spins to the whole space
+under the transposed matrices.
+
+Returns `(irreducible = false, submodule = U)` or `(irreducible = false,
+dual_submodule = W)` with a basis of a proper submodule, `(irreducible = true,)`,
+or `(irreducible = missing,)` if no suitable θ was found in `tries` attempts.
+"""
+function norton(gens; tries = 50)
+    n = size(gens[1], 1)
+    F = eltype(gens[1])
+    field = F.(0:modulus(F)-1)
+    for _ in 1:tries
+        words = [prod(rand(gens, rand(1:4))) for _ in 1:3]
+        θ0 = sum(rand(field) * w for w in words)
+        for λ in field
+            θ = θ0 - λ * one(θ0)
+            N = left_nullspace(θ)
+            length(N) == 1 || continue
+            U = spinning(gens, N[1], onRight)
+            length(U) < n && return (irreducible = false, submodule = U)
+            W = spinning(transpose.(gens), left_nullspace(transpose(θ))[1], onRight)
+            length(W) < n && return (irreducible = false, dual_submodule = W)
+            return (irreducible = true,)
+        end
+    end
+    return (irreducible = missing,)
 end
 
 end # module

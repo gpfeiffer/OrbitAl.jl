@@ -477,6 +477,29 @@ using OrbitAl.modn
     @test length(w) == 3 && unite!(parent, SparseVec(G.([1 1 1 1])), zero(SparseVec{G})) == 0
 end
 
+@testset "MeatAxe" begin
+    # left null spaces: d A = 0, one vector for each row that is not new,
+    # and rank A = rank A^T
+    for _ in 1:20
+        m, n = rand(1:6), rand(1:6)
+        A = Rational{Int}.(rand(-1:1, m, n) .* rand(0:1, m, n))
+        N, M = left_nullspace(A), left_nullspace(permutedims(A))
+        @test all(iszero(d * A) for d in N) && all(iszero(d * permutedims(A)) for d in M)
+        @test m - length(N) == n - length(M)
+        @test allunique(findlast(!iszero, vec(d)) for d in N)     # independent
+    end
+    F = Zn{7}
+    @test length(left_nullspace(F.([1 2; 2 4; 3 6]))) == 2
+
+    # the permutation module of S_4 is reducible, its reflection module irreducible
+    one4 = [Int(i == j) for i in 1:4, j in 1:4]
+    pm = [F.(one4[Perm(g).list, :]) for g in [[2,1,3,4], [1,3,2,4], [1,2,4,3]]]
+    @test norton(pm).irreducible == false
+    C = [2 -1 0; -1 2 -1; 0 -1 2]
+    refl = [begin m = [Int(i == j) for i in 1:3, j in 1:3]; m[:, s] = m[s, :] - C[s, :]; F.(m) end for s in 1:3]
+    @test norton(refl).irreducible == true
+end
+
 using OrbitAl.simsgroup, OrbitAl.permgroups
 
 @testset "Schreier-Sims" begin
