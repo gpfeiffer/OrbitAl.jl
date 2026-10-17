@@ -4,7 +4,7 @@
 #B    by Götz Pfeiffer <goetz.pfeiffer@universityofgalway.ie>
 ##
 #C  Linear orbit algorithms: spinning, and spinning with images,
-#C  and Norton's irreducibility test (the MeatAxe)
+#C  and the MeatAxe: Norton's irreducibility test
 ##
 module linear
 
@@ -13,7 +13,7 @@ using ..unionfind
 import ..orbits: onRight
 import ..modn: modulus
 
-export spinning, spinning_with_images, left_nullspace, norton
+export spinning, spinning_with_images, left_nullspace, meataxe
 
 """
     spinning(aaa, x, under)
@@ -126,9 +126,9 @@ function left_nullspace(A)
 end
 
 """
-    norton(gens; tries = 50)
+    meataxe(gens; tries = 50)
 
-Norton's irreducibility test, the core of the MeatAxe, for the module over a
+Parker's MeatAxe, with Norton's irreducibility test, for the module over a
 prime field `Zn{p}` given by the matrices `gens`, acting on row vectors.  A
 random element θ of the algebra, with a null space of dimension 1 spanned by
 `v`, decides: the module is irreducible if and only if `v` spins to the
@@ -139,7 +139,7 @@ Returns `(irreducible = false, submodule = U)` or `(irreducible = false,
 dual_submodule = W)` with a basis of a proper submodule, `(irreducible = true,)`,
 or `(irreducible = missing,)` if no suitable θ was found in `tries` attempts.
 """
-function norton(gens; tries = 50)
+function meataxe(gens; tries = 50)
     n = size(gens[1], 1)
     F = eltype(gens[1])
     field = F.(0:modulus(F)-1)

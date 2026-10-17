@@ -494,10 +494,10 @@ end
     # the permutation module of S_4 is reducible, its reflection module irreducible
     one4 = [Int(i == j) for i in 1:4, j in 1:4]
     pm = [F.(one4[Perm(g).list, :]) for g in [[2,1,3,4], [1,3,2,4], [1,2,4,3]]]
-    @test norton(pm).irreducible == false
+    @test meataxe(pm).irreducible == false
     C = [2 -1 0; -1 2 -1; 0 -1 2]
     refl = [begin m = [Int(i == j) for i in 1:3, j in 1:3]; m[:, s] = m[s, :] - C[s, :]; F.(m) end for s in 1:3]
-    @test norton(refl).irreducible == true
+    @test meataxe(refl).irreducible == true
 end
 
 using OrbitAl.simsgroup, OrbitAl.permgroups
