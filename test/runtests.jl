@@ -149,6 +149,26 @@ using OrbitAl.enumerator
     @test T.active == 29 && length(T.parent) == 123415
 end
 
+@testset "Reidemeister-Schreier" begin
+    for (name, counts) in [(:A3, (4, 6, 18)), (:G333, (9, 16, 57))]
+        G = getfield(presentations, name)
+        rs = reidemeister_schreier(G, G.sbgp)
+        @test (rs.index, length(rs.edges), length(rs.rels)) == counts
+        # the relators hold for the Schreier generators, in the regular representation
+        Q = perms(coset_table(G, Vector{Int}[]))
+        t(x) = prod(Q[rs.word[x]]; init = one(Q[1]))
+        val = [t(x) * Q[s] / t(x^rs.perms[s]) for (x, s) in rs.edges]
+        ev(w) = prod((k > 0 ? val[k] : inv(val[-k]) for k in w); init = one(Q[1]))
+        @test all(isidentity(ev(w)) for w in rs.rels)
+    end
+    # Nielsen-Schreier: a subgroup of index n in F_2 is free of rank n + 1
+    F2 = (gens = [1, 2, 3, 4], invr = [3, 4, 1, 2], rels = Vector{Vector{Int}}[])
+    for H in [[[1, 1], [2], [1, 2, 3]], [[1, 1, 1], [2], [1, 2, 3], [1, 1, 2, 3, 3]]]
+        rs = reidemeister_schreier(F2, H)
+        @test length(rs.edges) == rs.index + 1 && isempty(rs.rels)
+    end
+end
+
 using OrbitAl.sparsevec
 
 @testset "Sparse Vectors" begin
