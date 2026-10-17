@@ -14,8 +14,8 @@ module simsgroup
 
 import Base: intersect
 
-using ..orbits: orbit, onPoints
-import ..permutation: Perm, isidentity, last_moved
+import ..permutation: Perm, isidentity, last_moved, domain
+import ..unionfind: find, unite!
 import ..permgroup: APermGp, sizeOfGroup, memberOfGroup, randomGroupElement
 
 export ASimsGp, SimsGp, stabChain
@@ -242,12 +242,25 @@ skip a node with an element of ``K`` below it.
 function subgp_gens(link, accept, prune = (g, i) -> true, i = 1)
     isnothing(link) && return Perm[]
     gens = subgp_gens(link.next, accept, prune, i + 1)     # generators of K^(i+1)
+
+    # the orbits of the generators found so far, by Union-Find
+    parent = collect(domain(link.reps[link.point]))
+    function adjoin!(g)
+        for p in eachindex(parent)
+            unite!(parent, p, p^g)
+        end
+    end
+    foreach(adjoin!, gens)
+
     for y in link.orbit
-        y in orbit(gens, link.point, onPoints) && continue
+        find(parent, y) == find(parent, link.point) && continue
         t = link.reps[y]
         prune(t, i) || continue
         g = first_leaf(link.next, t, i + 1, accept, prune)
-        isnothing(g) || push!(gens, g)
+        isnothing(g) || begin
+            push!(gens, g)
+            adjoin!(g)
+        end
     end
     return gens
 end

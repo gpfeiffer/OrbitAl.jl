@@ -36,6 +36,8 @@ write_d3_col_edges(args...) = error("write_d3_col_edges needs JSON: `using JSON`
 export plot_edges, write_d3_edges, write_d3_col_edges
 
 # on-demand modules: load with e.g. `using OrbitAl.syt`
+include("sparsevec.jl")
+include("unionfind.jl")
 include("simsgroup.jl")
 include("coxeter.jl")
 include("syt.jl")
@@ -43,8 +45,6 @@ include("shifts.jl")
 include("involution.jl")
 include("coset.jl")
 include("variants.jl")
-include("sparsevec.jl")
-include("unionfind.jl")
 include("modn.jl")
 include("hecke.jl")
 include("linear.jl")
