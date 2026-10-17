@@ -9,7 +9,7 @@ module unionfind
 
 using ..sparsevec
 
-export find, unite!, isunit
+export find, find_with_coeffs, unite!, isunit
 
 #############################################################################
 ##
@@ -82,6 +82,27 @@ function find(parent::Dict, v::SparseVec)
         v = drop(v, i) + c * parent[i]             # replace e_i by parent[i]
     end
     return v
+end
+
+"""
+    find_with_coeffs(parent::Dict, coeffs::Dict, v::SparseVec, c::SparseVec)
+
+`find`, collecting coefficients: reduce `v` as `find` does, and add to `c` the
+same multiples of the `coeffs` as `find` subtracts of the relations
+`e_i - parent[i]`.  Returns the reduced `v` and the new `c`.
+
+If `coeffs[i]` expresses the relation `e_i - parent[i]` as a combination of
+some vectors `b_l`, then `v + sum of c[l] b_l` does not change: extended
+Gaussian elimination, as in [`spinning_with_images`](@ref
+OrbitAl.linear.spinning_with_images).
+"""
+function find_with_coeffs(parent::Dict, coeffs::Dict, v::SparseVec, c::SparseVec)
+    while (k = lastDead(parent, v)) > 0
+        i, a = v.poss[k], v.vals[k]
+        v = drop(v, i) + a * parent[i]             # replace e_i by parent[i] ...
+        c += a * coeffs[i]                         # ... and collect its coefficients
+    end
+    return v, c
 end
 
 """

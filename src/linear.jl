@@ -9,7 +9,6 @@ module linear
 
 using ..sparsevec
 using ..unionfind
-import ..unionfind: lastDead
 
 export spinning, spinning_with_images
 
@@ -68,12 +67,7 @@ function spinning_with_images(aaa, x, under)
     # the coordinates of z in terms of list, after adding z to list if it is new
     function coordinates!(z)
         v = SparseVec(z)
-        c = zero(v)
-        while (k = lastDead(parent, v)) > 0        # find, collecting coefficients
-            i, a = v.poss[k], v.vals[k]
-            v -= a * (unitVec(T, i) - parent[i])
-            c += a * coeffs[i]
-        end
+        v, c = find_with_coeffs(parent, coeffs, v, zero(v))
         length(v) > 0 || return c                  # z = sum of c[l] list[l]
         push!(list, z)
         m = length(list)
