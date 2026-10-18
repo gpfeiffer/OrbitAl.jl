@@ -16,33 +16,33 @@ gcd(a, b) = b == 0 ? a : gcd(b, a % b)
 ##  the extended Euclidean algorithm: (x, y) with gcd(a, b) = a x + b y.
 ##  recursive, like gcd: if d = b x + (a mod b) y, then d = a y + b (x - (a ÷ b) y)
 function gcdex(a, b)
-  b == 0 && return (1, 0)
-  q, r = divrem(a, b)
-  x, y = gcdex(b, r)
-  return (y, x - q * y)
+    b == 0 && return (1, 0)
+    q, r = divrem(a, b)
+    x, y = gcdex(b, r)
+    return (y, x - q * y)
 end
 
 ##  a tree type
 struct Node
-  id
-  next::Array{Node}
+    id
+    next::Array{Node}
 end
 
 ##  BFS
 function BFS(x, visit)
-  Q = [x]
-  for y in Q
-    visit(y)
-    append!(Q, y.next)
-  end
+    Q = [x]
+    for y in Q
+        visit(y)
+        append!(Q, y.next)
+    end
 end
 
 ##  DFS
 function DFS(x, visit)
-  visit(x)
-  for z in x.next
-    DFS(z, visit)
-  end
+    visit(x)
+    for z in x.next
+        DFS(z, visit)
+    end
 end
 
 ##  print as a tree
