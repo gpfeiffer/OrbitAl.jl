@@ -7,11 +7,20 @@
 ##
 module bfsdfs
 
-export gcd
+export gcd, gcdex
 export Node, BFS, DFS, tree_print
 
 ##  Euclid's algorithm as a one-liner
 gcd(a, b) = b == 0 ? a : gcd(b, a % b)
+
+##  the extended Euclidean algorithm: (x, y) with gcd(a, b) = a x + b y.
+##  recursive, like gcd: if d = b x + (a mod b) y, then d = a y + b (x - (a ÷ b) y)
+function gcdex(a, b)
+  b == 0 && return (1, 0)
+  q, r = divrem(a, b)
+  x, y = gcdex(b, r)
+  return (y, x - q * y)
+end
 
 ##  a tree type
 struct Node

@@ -42,6 +42,20 @@ OrbitAl.coxeter.prefixes_with_edges
 
 ---
 
+## Poincaré Polynomials
+
+Polynomials are lists of coefficients, constant term first.
+
+```@docs
+OrbitAl.coxeter.qint
+OrbitAl.coxeter.conv
+OrbitAl.coxeter.lengthPoly
+OrbitAl.coxeter.poincareByChain
+OrbitAl.coxeter.coxeterNumber
+```
+
+---
+
 ## Shapes and Conjugacy
 
 ```@docs

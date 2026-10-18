@@ -20,7 +20,7 @@ export Item, orbit_with_data
 include("permgroup.jl")
 using .permgroup
 export PermGp, elements, conjClasses, closure, subgroups, subgpClasses
-export sizeOfGroup, randomGroupElement, memberOfGroup
+export sizeOfGroup, randomGroupElement, memberOfGroup, wordOfElement
 export isPrimePower, zuppos
 
 include("bfsdfs.jl")

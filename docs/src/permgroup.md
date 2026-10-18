@@ -32,6 +32,7 @@ OrbitAl.permgroup.subgroups
 ```@docs
 OrbitAl.permgroup.sizeOfGroup
 OrbitAl.permgroup.memberOfGroup
+OrbitAl.permgroup.wordOfElement
 OrbitAl.permgroup.randomGroupElement
 ```
 

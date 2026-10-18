@@ -62,6 +62,13 @@ BFS(root, pr)
 println()
 tree_print(root)
 
+@testset "Extended gcd" begin
+    for (a, b) in [(240, 46), (46, 240), (17, 5), (12, 0), (2^40 + 15, 3^20)]
+        x, y = gcdex(a, b)
+        @test a * x + b * y == Base.gcd(a, b)
+    end
+end
+
 using OrbitAl.permutation
 
 a = Perm([3, 8, 7, 2, 1, 4, 6, 9, 5])
@@ -88,6 +95,11 @@ set, composition = [4, 5, 7], [1,1,1,3,2,1]
 @assert subsetComposition(9, composition) == set
 
 @assert length(partitions(6)) == 11
+
+@testset "Hook Length Formula" begin
+    @test all(hookFormula(lambda) == length(standardYTs(lambda)) for n in 1:7 for lambda in partitions(n))
+    @test sum(hookFormula(lambda)^2 for lambda in partitions(8)) == factorial(8)
+end
 
 
 using OrbitAl.orbits
@@ -365,6 +377,19 @@ end
     @test coxeterMat("B", 2) == [1 4; 4 1] && coxeterMat("F", 4)[3, 4] == 4
 end
 
+@testset "Poincaré Polynomials" begin
+    for (series, n, degrees) in [("A", 4, [2, 3, 4, 5]), ("B", 4, [2, 4, 6, 8]), ("D", 4, [2, 4, 4, 6]),
+                                 ("F", 4, [2, 6, 8, 12]), ("E", 6, [2, 5, 6, 8, 9, 12])]
+        W = CoxeterGp(cartanMat(series, n))
+        P = poincareByChain(W)
+        @test P == foldl(conv, qint.(degrees))
+        @test sum(P) == sizeOfGroup(W) && P == reverse(P)
+        @test coxeterNumber(W) == maximum(degrees)
+        J = 1:n-1
+        @test conv(poincareByChain(CoxeterGp(cartanMat(series, n)[J, J])), lengthPoly(W, parabolicTransversal(W, J))) == P
+    end
+end
+
 using OrbitAl.vectorenum
 
 @testset "Vector Enumeration" begin
@@ -537,4 +562,16 @@ using OrbitAl.simsgroup, OrbitAl.permgroups
     @test rand(W) in W && !(Perm(240, [[1, 2]]) in W)
     W = CoxeterGp(cartanMat("A", 3))
     @test size(W ∩ SimsGp(W.gens[1:2], W.one)) == 6
+end
+
+@testset "Words for Elements" begin
+    evaluate(G, w) = prod((k > 0 ? G.gens[k] : inv(G.gens[-k]) for k in w); init = G.one)
+    S5 = PermGp(transpositions(5), Perm(5))
+    @test all(evaluate(S5, wordOfElement(S5, a)) == a for a in elements(S5))
+    D10 = PermGp([Perm([2, 3, 4, 5, 1]), Perm([1, 5, 4, 3, 2])], Perm(5))
+    @test all(isnothing(wordOfElement(D10, a)) == !(a in D10) for a in elements(S5))
+    M24 = PermGp(permgroups.m24, Perm(24))
+    a = randomGroupElement(M24)
+    @test evaluate(M24, wordOfElement(M24, a)) == a
+    @test isnothing(wordOfElement(M24, Perm(24, [[1, 2]])))
 end

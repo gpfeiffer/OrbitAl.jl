@@ -46,5 +46,6 @@ OrbitAl.syt.partitions
 
 ```@docs
 OrbitAl.syt.standardYTs
+OrbitAl.syt.hookFormula
 OrbitAl.syt.tableau_path
 ```

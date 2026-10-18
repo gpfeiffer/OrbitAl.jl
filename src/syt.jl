@@ -11,7 +11,7 @@ using ..orbits
 
 export newtonDif, newtonSum, newtonDifR, newtonSumR
 export compositionSubset, subsetComposition
-export takeAway, subsets, partitions, standardYTs, tableau_path
+export takeAway, subsets, partitions, standardYTs, hookFormula, tableau_path
 
 #############################################################################
 ##
@@ -352,6 +352,32 @@ julia> length(standardYTs([3, 2, 1]))
 function standardYTs(lambda)
     next = youngLattice(lambda).next
     return pathfinder(1, next, Any[nothing for x in next])
+end
+
+"""
+    hookFormula(lambda)
+
+Return the number ``f^\\lambda`` of standard Young tableaux of shape `lambda`,
+by the hook length formula ``f^\\lambda = n! / \\prod_{(i,j)} h(i,j)``, where the
+hook length ``h(i, j)`` of the box ``(i, j)`` counts the boxes to its right,
+the boxes below it, and the box itself.  This is also the dimension of the
+Specht module of `lambda`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl, OrbitAl.syt
+
+julia> hookFormula([2, 2, 1])
+5
+
+julia> all(hookFormula(lambda) == length(standardYTs(lambda)) for lambda in partitions(6))
+true
+```
+"""
+function hookFormula(lambda)
+    cols = [count(>=(j), lambda) for j in 1:lambda[1]]     # the column lengths
+    hooks = prod(lambda[i] - j + cols[j] - i + 1 for i in eachindex(lambda) for j in 1:lambda[i])
+    return Int(factorial(big(sum(lambda))) ÷ hooks)
 end
 
 """

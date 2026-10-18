@@ -15,7 +15,7 @@ import ..permutation: isidentity, last_moved
 
 export APermGp, PermGp
 export elements, conjClasses, closure, subgroups, subgpClasses
-export sizeOfGroup, randomGroupElement, memberOfGroup
+export sizeOfGroup, randomGroupElement, memberOfGroup, wordOfElement
 export isPrimePower, zuppos
 
 """
@@ -187,6 +187,69 @@ function memberOfGroup(group::PermGp, perm::Perm)
     return memberOfGroup(stab, perm / orb.reps[l])
 end
 in(a::Perm, group::APermGp) = memberOfGroup(group, a)
+
+##  a word w in the generators, with -k for the inverse of generator k
+inverseWord(w) = -reverse(w)
+
+##  orbit_with_stabilizer, with words: for the transversal, and for the
+##  distinct Schreier generators, in the letters of `words`
+function orbit_with_stabilizer_words(aaa, words, x)
+    list = [x]
+    index = Dict(x => 1)
+    reps = [aaa[1]^0]
+    reps_words = [Int[]]
+    stab = Dict{Perm, Vector{Int}}()    # the Schreier generators, with their words
+    for (i, y) in enumerate(list)
+        for (k, a) in enumerate(aaa)
+            z = y^a
+            t = reps[i] * a
+            w = [reps_words[i]; words[k]]
+            l = get!(index, z) do
+                push!(list, z)
+                push!(reps, t)
+                push!(reps_words, w)
+                length(list)
+            end
+            t == reps[l] || get!(stab, t / reps[l], [w; inverseWord(reps_words[l])])
+        end
+    end
+    return (list = list, index = index, reps = reps, words = reps_words, stab = stab)
+end
+
+"""
+    wordOfElement(group, a)
+
+Return a word for `a` in the generators of `group`, as a list of indices, with
+`-k` for the inverse of generator `k`, or `nothing` if `a` is not in `group`.
+Like `memberOfGroup`, this works along the stabilizer chain, with a word for
+each transversal element and each Schreier generator.  The words can be long.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> G = PermGp(transpositions(4), Perm(4));
+
+julia> w = wordOfElement(G, Perm([4, 3, 2, 1]));
+
+julia> prod(k > 0 ? G.gens[k] : inv(G.gens[-k]) for k in w) == Perm([4, 3, 2, 1]), length(w)
+(true, 6)
+
+julia> isnothing(wordOfElement(PermGp([Perm([2, 3, 1])], Perm(3)), Perm([2, 1, 3])))
+true
+```
+"""
+function wordOfElement(group::PermGp, a::Perm, words = [[k] for k in eachindex(group.gens)])
+    is_trivial(group) && return a == group.one ? Int[] : nothing
+    x = last_moved(group)
+    orb = orbit_with_stabilizer_words(group.gens, words, x)
+    l = get(orb.index, x^a, 0)
+    l == 0 && return nothing
+    stab = PermGp(collect(keys(orb.stab)), group.one)
+    w = wordOfElement(stab, a / orb.reps[l], collect(values(orb.stab)))
+    isnothing(w) && return nothing
+    return [w; orb.words[l]]
+end
 
 """
     isPrimePower(n)
