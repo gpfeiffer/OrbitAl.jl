@@ -269,10 +269,19 @@ Compute the Schreier tree of the orbit of `x` under the generators `aaa`
 using the action function `under`.
 
 Returns a named tuple:
-- `list`: a list of orbit elements
-- `tree`: a `Dict` mapping each non-root node `z` to `(k => y)`, where:
+- `list`: a list of orbit elements, in the order they are found
+- `tree`: a `Dict` mapping each node `z` to `(k => y)`, where:
     - `k` is the generator index used to reach `z`
     - `y` is the parent node so that `z = under(y, aaa[k])`
+
+  The root `x` maps to `0 => x`: generator indices start at 1, so `k == 0`
+  says "no generator", and `tree` is a total map on the orbit.  Its keys are
+  then the orbit, which is how membership is tested as the orbit grows.
+
+The generators are tried **in the order `aaa` gives them**, so the orbit is
+the same for any order and the tree is not: reordering `aaa` is how a caller
+asks for a different spanning tree.  The orbit elements have to be hashable,
+since `tree` is keyed by them.
 
 # Examples
 ```jldoctest
@@ -281,6 +290,9 @@ julia> using OrbitAl
 julia> s = Perm([2,1,3]); t = Perm([1,3,2]);
 
 julia> o = orbit_with_tree([s, t], 1, onPoints);
+
+julia> o.tree[1]
+0 => 1
 
 julia> o.tree[2]
 1 => 1
@@ -291,11 +303,11 @@ julia> o.tree[3]
 """
 function orbit_with_tree(aaa, x, under::Function)
     list = [x]
-    tree = Dict()
+    tree = Dict(x => (0 => x))    # its keys are the points found
     for (i, y) in enumerate(list)
         for (k, a) in enumerate(aaa)
             z = under(y, a)
-            z in list || begin
+            haskey(tree, z) || begin
                 push!(list, z)
                 tree[z] = k => y  # combined label and parent
             end

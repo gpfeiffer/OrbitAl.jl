@@ -112,6 +112,33 @@ using OrbitAl.orbits
     @test length(o) == 6
 end
 
+@testset "Schreier Tree" begin
+    aaa = transpositions(4)
+    r = orbit_with_tree(aaa, 1, ^)
+
+    # a spanning tree of the orbit: one edge per non-root point, and every
+    # edge is an application of the generator it names
+    @test sort(r.list) == 1:4
+    @test length(r.tree) == length(r.list)
+    @test r.tree[r.list[1]] == (0 => r.list[1])        # the root: no generator
+    @test all(z == r.tree[z].second^aaa[r.tree[z].first] for z in r.list[2:end])
+
+    # the generators are tried in the order given, so the orbit does not
+    # depend on that order and the tree does
+    big = [Perm([mod(i, 50) + 1 for i in 1:50]), Perm(50, [[1, 2]])]
+    f = orbit_with_tree(big, 1, ^)
+    g = orbit_with_tree(reverse(big), 1, ^)
+    @test Set(f.list) == Set(g.list) == Set(1:50)
+    @test f.tree != g.tree
+
+    # membership is the tree's own keys, so the cost is linear in the orbit:
+    # a quadratic scan does not finish this in the time a test may take
+    deg = 40
+    gens = [Perm(deg, [[1, 2]]), Perm([mod(i, deg) + 1 for i in 1:deg])]
+    h = orbit_with_tree(gens, Perm(deg, [[1, 2, 3]]), (p, a) -> p^a)
+    @test length(h.list) == 19760 && length(h.tree) == 19760
+end
+
 @testset "Schreier Generators" begin
     # the version of Part 4 of the notebooks, as a reference
     function reference(aaa, x, under)
