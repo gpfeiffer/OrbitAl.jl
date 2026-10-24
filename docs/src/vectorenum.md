@@ -19,7 +19,11 @@ basis vectors.
 - **Coincidences** are linear relations between the cosets, handled by linear
   [Union-Find](@ref).  A relation is solved for a coset with a unit
   coefficient; a relation without one waits until further reductions provide
-  one.
+  one.  When nothing else makes progress and several are waiting, they are
+  reduced against each other by
+  [`echelon!`](@ref OrbitAl.unionfind.echelon!), which surfaces a unit that
+  only a combination of them has.  That step needs commuting coefficients,
+  so it is skipped when they are `HElt`s.
 
 New cosets are defined in breadth-first order, and each relator is applied at
 each coset, giving deductions where only one entry is unknown.  For Coxeter

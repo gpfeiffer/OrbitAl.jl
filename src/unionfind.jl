@@ -9,7 +9,7 @@ module unionfind
 
 using ..sparsevec
 
-export find, find_with_coeffs, unite!, isunit
+export find, find_with_coeffs, unite!, isunit, commutes, echelon!
 
 #############################################################################
 ##
@@ -103,6 +103,60 @@ function find_with_coeffs(parent::Dict, coeffs::Dict, v::SparseVec, c::SparseVec
         c += a * coeffs[i]                         # ... and collect its coefficients
     end
     return v, c
+end
+
+"""
+    commutes(c)
+
+Whether coefficients of this kind commute, which [`echelon!`](@ref) needs.
+True for a `Number`, false otherwise; a commutative coefficient type that is
+not a `Number` adds its own method.
+"""
+commutes(::Number) = true
+commutes(::Any) = false
+
+"""
+    echelon!(parent::Dict, rels)
+
+One fraction-free pass over `rels`, the relations that [`unite!`](@ref) could
+not solve: for each position in turn a pivot relation is locked and that
+position is cleared from every other one, REPLACING rather than appending.
+Relations that collapse to zero are dropped.  Returns how many were changed.
+
+A unit coefficient that exists only in a COMBINATION of the relations
+surfaces here as a coefficient of one of them, which `unite!` can then solve.
+Without this step, relations that together determine a position wait for
+ever, each on its own having no unit coefficient.
+
+Replacing rather than appending is what keeps this bounded: adding each
+pairwise combination instead lets `n` relations beget `O(n^2)` more.
+
+Clearing position `c` from `r` against the pivot `p` forms
+`p[c] * r - r[c] * p`, whose entry at `c` is the commutator of the two
+coefficients.  So the coefficients have to commute, which is what
+[`commutes`](@ref) asks; the caller checks it.
+"""
+function echelon!(parent::Dict, rels::Vector)
+    for k in eachindex(rels)
+        rels[k] = find(parent, rels[k])
+    end
+    ispivot = falses(length(rels))
+    changed = 0
+    for c in sort(unique(i for r in rels for i in r.poss))
+        piv = findfirst(k -> !ispivot[k] && !iszero(rels[k][c]), eachindex(rels))
+        isnothing(piv) && continue
+        ispivot[piv] = true
+        alpha = rels[piv][c]
+        for k in eachindex(rels)
+            ispivot[k] && continue
+            gamma = rels[k][c]
+            iszero(gamma) && continue
+            rels[k] = alpha * rels[k] - gamma * rels[piv]
+            changed += 1
+        end
+    end
+    filter!(!iszero, rels)
+    return changed
 end
 
 """

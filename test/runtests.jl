@@ -701,6 +701,37 @@ function testcyclic(params::Vector{T}) where T
     end
 end
 
+@testset "Linear Union-Find: echelon!" begin
+    Z = Zn{12}                     # a composite modulus, so there are non-units
+    parent = Dict()
+
+    ##  neither relation has a unit coefficient -- 2 and 3 both share a factor
+    ##  with 12 -- so unite! can solve neither on its own
+    r1 = SparseVec([1, 2], [Z(2), Z(3)])
+    r2 = SparseVec([1, 2], [Z(3), Z(2)])
+    @test unite!(parent, r1, zero(r1)) == -1
+    @test unite!(parent, r2, zero(r2)) == -1
+
+    ##  but a combination of them does: 2 r2 - 3 r1 = -5 e2, and -5 = 7 is a
+    ##  unit mod 12
+    rels = [r1, r2]
+    @test echelon!(parent, rels) == 1
+    @test rels[2] == SparseVec([2], [Z(7)])
+    @test unite!(parent, rels[2], zero(rels[2])) == 2
+    @test find(parent, rels[1]) == SparseVec([1], [Z(2)])
+
+    ##  a second pass over an echeloned system changes nothing, and relations
+    ##  that collapse are dropped
+    rels = [SparseVec([1, 2], [Z(2), Z(3)]), SparseVec([1, 2], [Z(4), Z(6)])]
+    @test echelon!(Dict(), rels) == 1
+    @test length(rels) == 1                       # the second was 2 x the first
+    @test echelon!(Dict(), rels) == 0
+
+    ##  the step needs commuting coefficients, and says so
+    @test commutes(Z(1)) && commutes(2//1)
+    @test !commutes("not a coefficient")
+end
+
 @testset "Prefix Algebras: the cyclic case" begin
     # over the rationals, and over F_p for a small prime and a large one
     for d in 1:5

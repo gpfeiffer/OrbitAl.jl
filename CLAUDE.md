@@ -43,6 +43,7 @@ OrbitAl.jl is a Julia package for computational group theory and orbit algorithm
 - `data/permgroups.jl` — module `permgroups`: generator lists of the Mathieu groups `m11` … `m24` (from GAP's `MathieuGroup`) and the Rubik's cube group `cube`.
 - `variants.jl` — Relation variant generation from presentations.
 - `enumerator.jl` — Todd-Coxeter-style modular coset enumerator.
+- `unionfind.jl` — Union-Find for equivalence relations, and **linear** Union-Find for relations between basis vectors: `parent[i]` is the vector replacing `e_i`, `find` reduces, `unite!` solves a relation for its last position with a unit coefficient (`isunit`) or returns `-1` to say it must wait.  `echelon!` is one fraction-free pass over the waiting relations, which surfaces a unit that only a combination of them has; it forms `p[c]*r - r[c]*p`, so the coefficients must commute (`commutes`), and the caller checks.
 - `coset.jl` — `Coset` struct; incomplete coset action implementation.
 
 **Visualization**

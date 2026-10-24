@@ -51,6 +51,44 @@ e1 + (2)e2
 The coset enumerator in [`OrbitAl.enumerator`](@ref Coset-Enumeration) adds
 methods for coset tables: Union-Find with consequences.
 
+## Relations that have to wait
+
+Over a ring with non-units, `unite!` can fail to solve a relation at all: it
+returns `-1`, and the caller holds the relation until further reductions give
+it a unit coefficient.  A set of such relations can be stuck even though
+*together* they determine a position — each one has no unit of its own, while
+a combination of them does.
+
+[`echelon!`](@ref OrbitAl.unionfind.echelon!) is one fraction-free pass over
+the waiting relations that brings such a unit to the surface.  It replaces
+rather than appends, so the number of relations never grows.  Clearing a
+position forms `p[c] * r - r[c] * p`, whose entry at that position is the
+commutator of the two coefficients, so the coefficients have to commute —
+[`commutes`](@ref OrbitAl.unionfind.commutes) is the test, and the caller
+makes it.
+
+```jldoctest
+julia> using OrbitAl.unionfind, OrbitAl.sparsevec, OrbitAl.modn
+
+julia> Z = Zn{12};                      # 2 and 3 are not units mod 12
+
+julia> r1 = SparseVec([1, 2], [Z(2), Z(3)]); r2 = SparseVec([1, 2], [Z(3), Z(2)]);
+
+julia> parent = Dict();
+
+julia> unite!(parent, r1, zero(r1)), unite!(parent, r2, zero(r2))
+(-1, -1)
+
+julia> rels = [r1, r2]; echelon!(parent, rels)
+1
+
+julia> rels[2]                          # 2 r2 - 3 r1 = -5 e2, and -5 is a unit
+(7)e2
+
+julia> unite!(parent, rels[2], zero(rels[2]))
+2
+```
+
 ---
 
 ## Find and Unite
@@ -59,4 +97,6 @@ methods for coset tables: Union-Find with consequences.
 OrbitAl.unionfind.find
 OrbitAl.unionfind.unite!
 OrbitAl.unionfind.isunit(::Any)
+OrbitAl.unionfind.commutes
+OrbitAl.unionfind.echelon!
 ```

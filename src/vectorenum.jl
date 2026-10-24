@@ -9,7 +9,7 @@
 module vectorenum
 
 using ..sparsevec
-import ..unionfind: find, unite!, isunit
+import ..unionfind: find, unite!, isunit, commutes, echelon!
 import ..enumerator: is_active, active_cosets
 
 export VectorTable, vector_enum, knownact, matrices, is_active, active_cosets
@@ -170,6 +170,15 @@ function close!(T::VectorTable)
         pending, T.pending = T.pending, empty(T.pending)
         for v in pending                       # retry, with what is known now
             relation!(T, v) == :relation && (changed = true)
+        end
+        ##  a unit that no waiting relation has on its own, but a combination
+        ##  of them does: reduce them against each other and retry once
+        if !changed && length(T.pending) > 1 && commutes(T.one) &&
+                echelon!(T.parent, T.pending) > 0
+            pending, T.pending = T.pending, empty(T.pending)
+            for v in pending
+                relation!(T, v) == :relation && (changed = true)
+            end
         end
     end
 end
