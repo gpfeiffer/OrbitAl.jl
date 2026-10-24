@@ -575,3 +575,233 @@ end
     @test evaluate(M24, wordOfElement(M24, a)) == a
     @test isnothing(wordOfElement(M24, Perm(24, [[1, 2]])))
 end
+
+using OrbitAl.palg
+using OrbitAl.modn
+
+##  the regular representation of a cyclic algebra: u acts on
+##  (1, u, .., u^(d-1)) by the companion matrix C of the minimal polynomial,
+##  so x y has coordinates xl * sum_i yl[i] C^(i-1).  A different computation
+##  from the one under test, not a rearrangement of it.
+function companion(params::Vector{T}) where T
+    d = length(params)
+    C = fill(zero(params[1]), d, d)
+    for i in 1:d-1; C[i, i+1] = one(params[1]); end
+    for m in 1:d; C[d, m] = params[m]; end
+    C
+end
+
+matmul(A::Matrix{T}, B::Matrix{T}) where T =
+    [sum(A[i, k] * B[k, j] for k in axes(A, 2)) for i in axes(A, 1), j in axes(B, 2)]
+
+function refmul(params::Vector{T}, xl::Vector{T}, yl::Vector{T}) where T
+    d = length(params)
+    C = companion(params)
+    P = [fill(zero(params[1]), d, d)]
+    for i in 1:d; P[1][i, i] = one(params[1]); end
+    for k in 2:d; push!(P, matmul(P[k-1], C)); end
+    A = P[1] * yl[1]
+    for i in 2:d; A = A + P[i] * yl[i]; end
+    [sum(xl[k] * A[k, j] for k in eachindex(xl)) for j in axes(A, 2)]
+end
+
+##  the group algebra of S3 on <s, t>: the basis is the six positive words
+##  closed under prefixes, and the two multiplication tables are read off the
+##  permutations, so the fixture needs no group machinery
+const S3WORDS = [Int[], [1], [2], [1, 2], [2, 1], [1, 2, 1]]
+const S3GENS = [[2, 1, 3], [1, 3, 2]]
+compose(p, q) = [q[p[i]] for i in eachindex(p)]
+s3perm(w) = foldl((g, l) -> compose(g, S3GENS[l]), w; init = [1, 2, 3])
+
+function s3alg(::Type{T}) where T
+    P = [s3perm(w) for w in S3WORDS]
+    at = Dict(p => x for (x, p) in enumerate(P))
+    o = one(zero(T) + one(T))
+    unit(x) = PElt{T}(Int32[x], T[o])
+    right = [[unit(at[compose(P[x], S3GENS[j])]) for x in 1:6] for j in 1:2]
+    left = [[unit(at[compose(S3GENS[j], P[x])]) for x in 1:6] for j in 1:2]
+    PAlg("F[S3]", [T[o, zero(o)], T[o, zero(o)]], S3WORDS, right, left)   # T_j^2 = 1
+end
+
+##  x y by convolution over the group
+function s3refmul(A::PAlg{T}, x::PElt{T}, y::PElt{T}) where T
+    P = [s3perm(w) for w in S3WORDS]
+    at = Dict(p => x for (x, p) in enumerate(P))
+    out = fill(zero(A.params[1][1]), 6)
+    for i in eachindex(x.idx), j in eachindex(y.idx)
+        out[at[compose(P[x.idx[i]], P[y.idx[j]])]] += x.val[i] * y.val[j]
+    end
+    fromcoeffs(A, out)
+end
+
+##  the cyclic algebra against the regular representation, over whatever
+##  ground ring the parameters come from
+function testcyclic(params::Vector{T}) where T
+    d = length(params)
+    A = cyclicAlg(params)
+    o, z = one(params[1]), zero(params[1])
+
+    @test A.d == d && iscyclic(A) && A.words == [fill(1, j) for j in 0:d-1]
+    @test coeffs(A, one(A)) == [i == 1 ? o : z for i in 1:d]
+    @test tau(A, one(A)) == o && iszero(zero(A))
+
+    # u^d = c_0 + c_1 u + .. + c_(d-1) u^(d-1), and u^k u^-k = 1
+    @test coeffs(A, upow(A, d)) == params
+    @test all(mul(A, upow(A, k), upow(A, -k)) == one(A) for k in -4:4)
+    @test mul(A, uinv(A), ugen(A)) == one(A) == mul(A, ugen(A), uinv(A))
+
+    ##  several coefficient vectors, sparse ones among them, so that the
+    ##  support shapes differ
+    for t in 1:6
+        xl = [iseven(t) && i > 1 ? z : params[i] * t + i for i in 1:d]
+        yl = [t == 3 && i < d ? z : params[i] * i - t for i in 1:d]
+        wl = [params[d + 1 - i] + t * i for i in 1:d]
+        x, y, w = fromcoeffs(A, xl), fromcoeffs(A, yl), fromcoeffs(A, wl)
+
+        @test coeffs(A, x) == xl
+        @test mul(A, one(A), x) == x == mul(A, x, one(A))
+        @test iszero(mul(A, zero(A), x))
+        @test x - x == zero(A)
+        @test mul(A, x, y) == mul(A, y, x)                      # cyclic: commutative
+        @test mul(A, mul(A, x, y), w) == mul(A, x, mul(A, y, w))
+        @test mul(A, x, y + w) == mul(A, x, y) + mul(A, x, w)
+
+        # against the regular representation
+        @test coeffs(A, mul(A, x, y)) == refmul(params, xl, yl)
+        # row i of the multiplication matrix is u^(i-1) x
+        @test all(multMatrix(A, x)[i, :] == refmul(params, coeffs(A, upow(A, i - 1)), xl)
+                  for i in 1:d)
+    end
+end
+
+@testset "Prefix Algebras: the cyclic case" begin
+    # over the rationals, and over F_p for a small prime and a large one
+    for d in 1:5
+        testcyclic([Rational{BigInt}(3 + 2k, 1 + (k % 3)) for k in 1:d])
+        testcyclic([Zn{65521}(7 + 13k + d) for k in 1:d])
+        testcyclic([Zn{(1 << 61) - 1}(11 + 17k + d) for k in 1:d])
+    end
+
+    # with c_0 != 1, where u^-1 needs the leading c_0^-1
+    Z = Zn{101}
+    A = cyclicAlg([Z(3), Z(5)])
+    @test coeffs(A, uinv(A)) == [-5 * inv(Z(3)), inv(Z(3))]
+    @test mul(A, uinv(A), ugen(A)) == one(A)
+
+    # params is [c_0, c_1], constant term first: u^2 = 7 + 5u
+    B = cyclicAlg([Z(7), Z(5)])
+    @test coeffs(B, mul(B, ugen(B), ugen(B))) == [Z(7), Z(5)]
+end
+
+@testset "Prefix Algebras: a non-commutative one" begin
+    Z = Zn{65521}
+    A = s3alg(Z)
+
+    @test A.d == 6 && A.ngens == 2 && !iscyclic(A)
+    @test A.parent == [0, 1, 1, 2, 3, 4]
+    @test A.letter == [0, 1, 2, 2, 1, 1]
+
+    # THE CONTROL: without it every test of a side below is consistent with a
+    # commutative algebra and says nothing
+    @test mul(A, basis(A, 2), basis(A, 3)) != mul(A, basis(A, 3), basis(A, 2))
+    @test mul(A, basis(A, 2), basis(A, 3)) == basis(A, 4)       # s t = st
+    @test mul(A, basis(A, 3), basis(A, 2)) == basis(A, 5)       # t s = ts
+    @test tau(A, basis(A, 1)) == 1 && iszero(tau(A, basis(A, 4)))
+
+    # the relations hold on every basis element, on both sides
+    for x in 1:6
+        b = basis(A, x)
+        @test all(mul(A, mul(A, b, element(A, [j])), element(A, [j])) == b for j in 1:2)
+        @test mul(A, b, element(A, [1, 2, 1])) == mul(A, b, element(A, [2, 1, 2]))
+        @test all(mul(A, element(A, [j]), mul(A, b, element(A, [k]))) ==
+                  mul(A, mul(A, element(A, [j]), b), element(A, [k])) for j in 1:2, k in 1:2)
+        @test mul(A, basis(A, x), basisInverse(A, x)) == one(A)
+        @test mul(A, basisInverse(A, x), basis(A, x)) == one(A)
+    end
+
+    # against convolution over the group, in support shapes that take both
+    # branches of mul's prefix/suffix choice
+    for n in 1:6
+        xl = [i <= n ? Z(3i + 1) : Z(0) for i in 1:6]
+        yl = [i >= n ? Z(7i + 2) : Z(0) for i in 1:6]
+        x, y = fromcoeffs(A, xl), fromcoeffs(A, yl)
+        @test mul(A, x, y) == s3refmul(A, x, y)
+        @test mul(A, mul(A, x, y), basis(A, 6)) == mul(A, x, mul(A, y, basis(A, 6)))
+    end
+end
+
+##  a product computed while a buffer is held must not corrupt it
+@testset "Prefix Algebras: the accumulator pool is reentrant" begin
+    Z = Zn{65521}
+    A = s3alg(Z)
+    held, inner = withAcc(A) do a
+        palg.addmul!(a, 1, one(Z(1)), one(Z(1)))
+        v = mul(A, basis(A, 2), basis(A, 3))
+        (palg.collect!(a, zero(Z(1))), v)
+    end
+    @test held == one(A)
+    @test inner == basis(A, 4)
+end
+
+@testset "Prefix Algebras: units" begin
+    Z = Zn{101}
+    A = s3alg(Z)                                   # T_j^2 = 1, so b^-1 = b
+    unitZ(c) = isunit(c)
+
+    for x in 1:A.d
+        y = findUnitInverse(A, basis(A, x), unitZ)
+        @test y !== nothing && mul(A, basis(A, x), y) == one(A)
+        @test findUnitInverse(A, Z(3) * basis(A, x), unitZ) == inv(Z(3)) * y
+    end
+
+    # a zero divisor: (1 + T_1)(1 - T_1) = 1 - T_1^2 = 0
+    z = one(A) + basis(A, 2)
+    @test iszero(mul(A, z, one(A) - basis(A, 2)))
+    @test findUnitInverse(A, z, unitZ) === nothing
+    @test findUnitInverse(A, zero(A), unitZ) === nothing
+
+    # generic parameters, where b_x^-1 b_y is not a single term
+    B = cyclicAlg([Z(3), Z(7)])
+    @test findUnitInverse(B, ugen(B), unitZ) == uinv(B)
+end
+
+@testset "Prefix Algebras: squareParams" begin
+    # m(x) = x^2 - 5x - 7 has roots with sum 5 and product -7, so u^2 has
+    # trace 25 + 14 and norm 49: y^2 - 39y + 49, which is [-49, 39]
+    @test squareParams([7, 5]) == [-49, 39]
+    @test squareParams([1, 0, 0, 0, 0]) == [1, 0, 0, 0, 0]     # u^5 = 1
+    @test squareParams([1, 0]) == [-1, 2]
+    @test squareParams([3]) == [9]
+
+    # m_sq(u^2) = 0 in the algebra, by Cayley-Hamilton
+    Z = Zn{65521}
+    for d in 1:6
+        c = [Z(3 + 7k + d) for k in 1:d]
+        A = cyclicAlg(c)
+        sq = mul(A, ugen(A), ugen(A))
+        pow(k) = foldl((h, _) -> mul(A, h, sq), 1:k; init = one(A))
+        m = squareParams(c)
+        @test iszero(pow(d) - sum(m[k+1] * pow(k) for k in 0:d-1))
+    end
+end
+
+@testset "Prefix Algebras: rejects" begin
+    Z = Zn{101}
+    @test_throws ArgumentError cyclicAlg(Z[])
+    @test_throws ArgumentError cyclicAlg([Z(0), Z(5)])          # c_0 = 0: u is no unit
+
+    A = cyclicAlg([Z(7), Z(5)])
+    @test_throws ArgumentError fromcoeffs(A, [Z(1)])
+
+    # the cyclic-only operations decline an algebra that is not cyclic
+    B = s3alg(Z)
+    @test_throws ArgumentError ugen(B)
+    @test_throws ArgumentError uinv(B)
+    @test_throws ArgumentError upow(B, 2)
+
+    # the basis must start at 1, be closed under prefixes, and be ordered
+    rows = [PElt{Zn{101}}(Int32[1], Zn{101}[one(Z(1))])]
+    @test_throws ArgumentError PAlg("bad", [[Z(1), Z(0)]], [[1]], [rows], [rows])
+    @test_throws ArgumentError PAlg("bad", [[Z(1), Z(0)]], [Int[], [1, 1]],
+                                    [rows, rows], [rows, rows])
+end
