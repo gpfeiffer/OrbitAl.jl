@@ -44,6 +44,18 @@ OrbitAl.orbits.orbit_with_images
 
 ---
 
+## Multivalued Actions
+
+An operator need not be a map: `kids(y, a)` may return several images at
+once. A graph is the case of a single operator, and an action the case where
+every list has one element.
+
+```@docs
+OrbitAl.orbits.orbit_with_kids
+```
+
+---
+
 ## Orbit with Full Data
 
 These compute the orbit together with words, coset representatives, and a

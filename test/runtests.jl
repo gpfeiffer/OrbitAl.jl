@@ -112,6 +112,41 @@ using OrbitAl.orbits
     @test length(o) == 6
 end
 
+@testset "Orbit with Kids" begin
+    ##  an operator with several images: take away one element at a time and
+    ##  the orbit of a set is its power set
+    down(x) = [setdiff(x, [s]) for s in x]
+    @test all(length(orbit_with_kids(collect(1:n), down)) == 2^n for n in 0:5)
+
+    ##  an action is the case where every list has one element
+    aaa = transpositions(3)
+    @test orbit_with_kids(aaa, 1, (y, a) -> [y^a]) == orbit(aaa, 1, ^)
+
+    ##  a graph is the case of a single operator whose kids are the
+    ##  neighbours of a vertex, and the orbit is the component of the start
+    adj = Dict(1 => [2, 3], 2 => [1, 4], 3 => [1], 4 => [2], 5 => [6], 6 => [5])
+    @test sort(orbit_with_kids(1, v -> adj[v])) == 1:4
+    @test sort(orbit_with_kids(5, v -> adj[v])) == 5:6
+
+    ##  Young's lattice: remove a corner box, and reach every partition
+    ##  contained in lambda
+    function corners(l)
+        out = Vector{Int}[]
+        for k in eachindex(l)
+            (k == length(l) || l[k] > l[k+1]) || continue
+            p = copy(l)
+            p[k] -= 1
+            isempty(p) || p[end] != 0 || pop!(p)
+            push!(out, p)
+        end
+        out
+    end
+    lambda = [3, 2, 1]
+    inside(mu) = length(mu) <= length(lambda) && all(mu[i] <= lambda[i] for i in eachindex(mu))
+    want = 1 + sum(count(inside, partitions(n)) for n in 1:sum(lambda))
+    @test length(orbit_with_kids(lambda, corners)) == want
+end
+
 @testset "Schreier Tree" begin
     aaa = transpositions(4)
     r = orbit_with_tree(aaa, 1, ^)

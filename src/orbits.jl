@@ -16,6 +16,7 @@ export orbit, onPoints, onRight, onWords, onPairs, onSets
 export orbit_with_words, orbit_with_transversal, orbit_with_stabilizer
 export orbit_with_schreier
 export orbit_with_dist, orbit_with_tree, orbit_with_edges, orbit_with_images
+export orbit_with_kids
 export orbitl, orbitx, orbitx_with_words, orbitx_with_dist, orbitx_with_edges
 export edges_from_images
 export orbit_and_more, orbit_and_data
@@ -546,6 +547,59 @@ function orbit_with_images(aaa, x, under::Function)
     end
     return (list = list, images = images)
 end
+
+## orbit with kids
+"""
+    orbit_with_kids(aaa, x, kids)
+    orbit_with_kids(x, kids)
+
+Compute the orbit of `x` where an operator yields SEVERAL images: `kids(y, a)`
+returns a list of points rather than one. An action is the case where every
+list has one element, and a graph is the case of a single operator, whose
+`kids(y)` are the neighbours of a vertex, so this is the orbit algorithm and
+breadth first search in one function. With no operators given, `kids` is the
+only one: it takes the point alone, and the operator is the function itself.
+
+Returns the list of points reachable from `x`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl
+
+julia> down(x) = [setdiff(x, [s]) for s in x];
+
+julia> length(orbit_with_kids([1, 2, 3], down))      # the power set
+8
+
+julia> orbit_with_kids([1, 2], down)
+4-element Vector{Vector{Int64}}:
+ [1, 2]
+ [2]
+ [1]
+ []
+
+julia> adj = Dict(1 => [2, 3], 2 => [1], 3 => [1], 4 => [5], 5 => [4]);
+
+julia> sort(orbit_with_kids(1, v -> adj[v]))         # the component of 1
+3-element Vector{Int64}:
+ 1
+ 2
+ 3
+```
+"""
+function orbit_with_kids(aaa, x, kids::Function)
+    list = [x]
+    index = Dict(x => 1)
+    for y in list, a in aaa, z in kids(y, a)
+        get!(index, z) do
+            push!(list, z)
+            length(list)
+        end
+    end
+    return list
+end
+
+orbit_with_kids(x, kids::Function) = orbit_with_kids([kids], x, (y, a) -> a(y))
 
 ## edges from images
 """
