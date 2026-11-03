@@ -452,6 +452,27 @@ end
     end
 end
 
+using OrbitAl.streets
+
+@testset "Streets and Descent Algebras" begin
+    # numbers of streets as in [Pf09, Table 1], and arrows of the quiver of
+    # Sigma(W) as in [Pf09, Figure 6 and Tables 2-4] for A_3, A_5, B_6, D_6
+    for (series, n, nrs, xi, sigma) in [("A", 3, 27, 8, 2), ("A", 5, 536, 36, 9),
+                                        ("B", 4, 136, 30, 4), ("B", 6, 3720, 318, 28),
+                                        ("D", 4, 123, 33, 5), ("D", 6, 3417, 418, 30),
+                                        ("F", 4, 136, 28, 4), ("E", 6, 3347, 141, 19)]
+        X = StreetSystem(CoxeterGp(cartanMat(series, n)))
+        @test nrAlleys(X) == factorial(n) * sum(2^l // factorial(l) for l in 0:n)
+        @test nrStreets(X) == nrs
+        q = xiQuiver(X)
+        @test q.ispath && sum(values(q.arrows)) == xi      # [Pf09, Conjecture 6.14]
+        s = descentQuiver(X)
+        @test s.dimrad == 2^n - nrShapes(X) && sum(values(s.arrows)) == sigma
+    end
+    X = StreetSystem(CoxeterGp(cartanMat("A", 3)))
+    @test sort(length.(shapeReps(X))) == [0, 1, 2, 2, 3]
+end
+
 using OrbitAl.vectorenum
 
 @testset "Vector Enumeration" begin

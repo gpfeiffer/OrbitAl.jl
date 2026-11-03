@@ -17,7 +17,7 @@ using OrbitAl.vectorenum
 makedocs(
     sitename = "OrbitAl.jl",
     modules = [OrbitAl, OrbitAl.coxeter, OrbitAl.simsgroup, OrbitAl.syt, OrbitAl.coset, OrbitAl.involution,
-               OrbitAl.modn, OrbitAl.sparsevec, OrbitAl.unionfind, OrbitAl.hecke, OrbitAl.palg, OrbitAl.linear, OrbitAl.enumerator, OrbitAl.vectorenum],
+               OrbitAl.modn, OrbitAl.sparsevec, OrbitAl.unionfind, OrbitAl.hecke, OrbitAl.streets, OrbitAl.palg, OrbitAl.linear, OrbitAl.enumerator, OrbitAl.vectorenum],
     checkdocs = :none,
     doctest = true,
     format = Documenter.HTML(),
@@ -37,6 +37,7 @@ makedocs(
             "Sparse Vectors" => "sparsevec.md",
             "Union-Find" => "unionfind.md",
             "Hecke Algebras" => "hecke.md",
+            "Streets and Descent Algebras" => "streets.md",
             "Prefix Algebras" => "palg.md",
             "Linear Orbit Algorithms" => "linear.md",
             "Coset Enumeration" => "enumerator.md",
