@@ -471,6 +471,26 @@ using OrbitAl.streets
     end
     X = StreetSystem(CoxeterGp(cartanMat("A", 3)))
     @test sort(length.(shapeReps(X))) == [0, 1, 2, 2, 3]
+
+    # presentations: the numbers of relations [Pf09, Section 10], and the
+    # dimension 2^n = #shapes + #paths - #relations
+    for (series, n, nrel) in [("A", 4, 0), ("A", 5, 1), ("B", 5, 0), ("B", 6, 1),
+                              ("D", 5, 0), ("D", 6, 3)]
+        X = StreetSystem(CoxeterGp(cartanMat(series, n)))
+        for mode in (:orthogonal, :streets)
+            R = descentPresentation(X; arrows = mode)
+            @test length(R.arrows) == sum(values(descentQuiver(X).arrows))
+            @test sum(length, values(R.relations); init = 0) == nrel
+            @test nrShapes(X) + sum(length, values(R.paths)) -
+                  sum(values(R.allrelations); init = 0) == 2^n
+            @test all(!isnothing, c for rs in values(R.relations) for r in rs for c in values(r))
+        end
+    end
+    # the canonical arrows give the relations of [Pf09, Table 4] with
+    # coefficients +-1
+    R = descentPresentation(StreetSystem(CoxeterGp(cartanMat("D", 6))))
+    @test all(abs(c) == 1 for rs in values(R.relations) for r in rs for c in values(r))
+    @test_throws ArgumentError descentPresentation(X; arrows = :other)
 end
 
 using OrbitAl.vectorenum
