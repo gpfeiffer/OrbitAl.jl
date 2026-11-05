@@ -435,6 +435,7 @@ end
         G = OrbitAl.coxeter.coxeterPresentation(series, n)
         @test coset_table(G, Vector{Int}[]).active == sizeOfGroup(CoxeterGp(cartanMat(series, n)))
         @test coxeterMat(series, n) == transpose(coxeterMat(series, n))
+        @test CoxeterGp(series, n).gens == CoxeterGp(cartanMat(series, n)).gens
     end
     @test coxeterMat("B", 2) == [1 4; 4 1] && coxeterMat("F", 4)[3, 4] == 4
 end

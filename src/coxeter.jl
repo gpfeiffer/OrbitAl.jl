@@ -164,6 +164,22 @@ function CoxeterGp(C::Matrix{Int})
 end
 
 """
+    CoxeterGp(series, rank)
+
+The Coxeter group of the given `series` ("A", "B", "C", "D", "E", "F", ...)
+and `rank`: a shortcut for `CoxeterGp(cartanMat(series, rank))`.
+
+# Examples
+```jldoctest
+julia> using OrbitAl, OrbitAl.coxeter
+
+julia> sizeOfGroup(CoxeterGp("B", 3))
+48
+```
+"""
+CoxeterGp(series::String, rank::Int) = CoxeterGp(cartanMat(series, rank))
+
+"""
     stabChain(W::CoxeterGp)
 
 The stabilizer chain of `W`, computed by `schreier_sims` on first use, and

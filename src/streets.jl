@@ -344,7 +344,8 @@ number of arrows `arrows[(lam, mu)]` from shape `lam` to shape `mu` (in the
 direction of the streets, from source to target), the Cartan invariants
 `cartan[(lam, mu)]`, and `ispath`, which says whether ``\\Xi`` is the path
 algebra of this quiver, i.e., whether the Cartan invariants count its paths.
-(It always is: ``\\Xi`` is hereditary.)
+(It is in all cases computed so far; that it always is, i.e., that ``\\Xi``
+is hereditary, is [Pf09, Conjecture 6.14].)
 
 # Examples
 ```jldoctest
